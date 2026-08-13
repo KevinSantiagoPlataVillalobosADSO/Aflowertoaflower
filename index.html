@@ -3,314 +3,305 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Un tulipán para ti</title>
+<title>Lirios</title>
 <style>
-  /* ─────────────────────────────────────────────
+  /* ═════════════════════════════════════════════
      TOKENS
-     ───────────────────────────────────────────── */
+     ═════════════════════════════════════════════ */
   :root{
-    --noche-1:#0a0714;
-    --noche-2:#120c22;
-    --noche-3:#05030c;
+    --fondo-1:#1a1426;
+    --fondo-2:#101b19;
+    --fondo-3:#05090a;
 
-    /* Tonalidad activa: la cambia el JS */
-    --rosa:#ffd9e8;
-    --rosa-glow:#ff8ec0;
+    /* color secundario (centro de la flor) — lo cambia el JS */
+    --rosa:#f4508e;
+    --rosa-suave:#f98cb4;
+    --rosa-claro:#ffd8e6;
+    --puntos:#b31240;
+    --glow:#ff6fae;
 
-    --trazo:1.7;
-    --ui:#e8dcf0;
-    --ui-suave:rgba(232,220,240,.45);
+    /* color primario */
+    --blanco:#ffffff;
+    --garganta:#eaf7c4;
 
-    --font-ui:"Segoe UI",system-ui,-apple-system,sans-serif;
-    --font-msg:Georgia,"Times New Roman",serif;
+    /* verdes */
+    --hoja:#1e5a3c;         /* hojas de atrás — color plano   */
+    --hoja-frente:#123a27;  /* la hoja que cruza por delante  */
+    --tallo:#2f7049;
+
+    --tinta:#f7efe6;
+    --tinta-suave:rgba(247,239,230,.5);
+    --serif:Georgia,"Times New Roman",serif;
+
+    --t-petalo:1.15s;
+    --t-paso:.085s;
+    --t-corona:.95s;
+    --d-corona:1.05s;
+    --d-mensaje:1.6s;
+  }
+
+  .veloz{
+    --t-petalo:.68s;
+    --t-paso:.045s;
+    --t-corona:.5s;
+    --d-corona:.58s;
+    --d-mensaje:.85s;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
-
   html,body{height:100%}
 
   body{
-    font-family:var(--font-ui);
-    color:var(--ui);
+    font-family:var(--serif);
+    color:var(--tinta);
     background:
-      radial-gradient(120% 80% at 50% 0%,   #1b1032 0%, transparent 55%),
-      radial-gradient(90%  70% at 50% 100%, rgba(255,142,192,.10) 0%, transparent 60%),
-      linear-gradient(180deg, var(--noche-2) 0%, var(--noche-1) 45%, var(--noche-3) 100%);
+      radial-gradient(80% 55% at 50% 32%, rgba(255,214,232,.09) 0%, transparent 70%),
+      linear-gradient(178deg, var(--fondo-1) 0%, var(--fondo-2) 52%, var(--fondo-3) 100%);
     background-attachment:fixed;
-    display:grid;
-    place-items:center;
-    overflow:hidden;
-    position:relative;
+    display:grid;place-items:center;
+    overflow:hidden;position:relative;
   }
 
-  /* ─────────────────────────────────────────────
-     CIELO — estrellas y brillitos (generados en JS)
-     ───────────────────────────────────────────── */
-  #cielo{position:fixed;inset:0;pointer-events:none;z-index:0}
-
-  .estrella{
-    position:absolute;
-    border-radius:50%;
-    background:#fff;
-    animation:titila var(--dur,3s) ease-in-out var(--del,0s) infinite;
-  }
-  @keyframes titila{
-    0%,100%{opacity:.12; transform:scale(.7)}
-    50%    {opacity:var(--max,.9); transform:scale(1)}
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:radial-gradient(115% 85% at 50% 45%, transparent 45%, rgba(0,0,0,.55) 100%);
   }
 
-  /* brillito de 4 puntas */
-  .brillo{
-    position:absolute;
-    width:var(--s,16px);
-    height:var(--s,16px);
-    animation:destella var(--dur,5s) ease-in-out var(--del,0s) infinite;
+  .haz{
+    position:fixed;top:-25%;height:160vh;width:42vw;
+    pointer-events:none;z-index:0;filter:blur(22px);
+    background:linear-gradient(180deg, rgba(255,241,222,.06), transparent 72%);
   }
-  .brillo::before,
-  .brillo::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(90deg,transparent,#fff 48%,#fff 52%,transparent);
+  .haz--a{left:-10vw;transform:rotate(13deg)}
+  .haz--b{left:56vw;transform:rotate(9deg);opacity:.55}
+
+  /* ═════════════════════════════════════════════
+     POLEN
+     ═════════════════════════════════════════════ */
+  #aire{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+  .polen{
+    position:absolute;bottom:-12px;border-radius:50%;
+    background:rgba(255,238,218,.75);
+    animation:flota var(--dur,20s) ease-in-out var(--del,0s) infinite;
   }
-  .brillo::before{clip-path:polygon(0 50%,50% 46%,100% 50%,50% 54%)}
-  .brillo::after {clip-path:polygon(50% 0,54% 50%,50% 100%,46% 50%)}
-  @keyframes destella{
-    0%,100%{opacity:0;   transform:scale(.4) rotate(0deg)}
-    45%    {opacity:.85; transform:scale(1)  rotate(15deg)}
-    60%    {opacity:.35; transform:scale(.9) rotate(20deg)}
+  @keyframes flota{
+    0%  {transform:translate(0,0);opacity:0}
+    12% {opacity:var(--max,.4)}
+    50% {transform:translate(calc(var(--dx) * -1), -55vh)}
+    88% {opacity:var(--max,.4)}
+    100%{transform:translate(var(--dx), -112vh);opacity:0}
   }
 
-  /* ─────────────────────────────────────────────
+  /* ═════════════════════════════════════════════
      ESCENA
-     ───────────────────────────────────────────── */
+     ═════════════════════════════════════════════ */
   .escena{
+    position:relative;z-index:2;
+    display:flex;flex-direction:column;align-items:center;
+    padding:18px;text-align:center;
+    width:min(94vw,430px);
+  }
+
+  .rotulo{
+    display:flex;align-items:center;gap:12px;
+    font-size:12px;font-style:italic;letter-spacing:.12em;
+    color:var(--tinta-suave);transition:color 1s ease;
+  }
+  .rotulo::before,.rotulo::after{
+    content:"";height:1px;width:clamp(24px,9vw,52px);
+    background:linear-gradient(90deg,transparent,currentColor,transparent);
+  }
+  .abierto .rotulo{color:var(--rosa-claro)}
+
+  /* ── Jardín ─────────────────────────────────── */
+  #jardin{
     position:relative;
-    z-index:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:clamp(10px,2.5vh,22px);
-    padding:24px;
-    text-align:center;
+    width:min(84vw, 42vh, 370px);
+    aspect-ratio:1/1;
+    /* aire suficiente entre el follaje y la tarjeta */
+    margin:clamp(6px,1.4vh,14px) 0 clamp(30px,5.5vh,52px);
+    z-index:3;
   }
 
-  .kicker{
-    font-size:11px;
-    letter-spacing:.34em;
-    text-transform:uppercase;
-    color:var(--ui-suave);
-    transition:color .8s ease;
+  .follaje{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  #follaje{z-index:0}
+  #follajeFrente{z-index:4;pointer-events:none}
+
+  .brote{
+    opacity:0;transform:translateY(7px);
+    transition:opacity .9s ease   calc(var(--rt,0s) + var(--base,0s)),
+               transform 1.1s cubic-bezier(.2,.8,.3,1) calc(var(--rt,0s) + var(--base,0s));
   }
+  .abierto .brote{opacity:1;transform:translateY(0)}
 
-  /* ── Tulipán en trazo ───────────────────────── */
-  .maceta{position:relative}
+  .lirio{position:absolute;overflow:visible;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55))}
+  .lirio--frente{left:15%;top:19%;width:70%;z-index:3}
+  .lirio--izq{left:-2%;top:1%;width:46%;z-index:2;--base:.3s;
+    transform:rotate(-14deg);filter:blur(.9px) drop-shadow(0 4px 14px rgba(0,0,0,.5));opacity:.9}
+  .lirio--der{left:57%;top:47%;width:45%;z-index:2;--base:.5s;
+    transform:rotate(19deg);filter:blur(.9px) drop-shadow(0 4px 14px rgba(0,0,0,.5));opacity:.88}
+  .veloz .lirio--izq{--base:.16s}
+  .veloz .lirio--der{--base:.28s}
 
-  #tulipan{
-    width:clamp(150px,32vh,235px);
-    height:auto;
-    display:block;
-    overflow:visible;
-    filter:drop-shadow(0 0 0 transparent);
-    transition:filter 1.4s ease;
-  }
-  #tulipan path{
-    fill:none;
-    stroke:var(--rosa);
-    stroke-width:var(--trazo);
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    stroke-dasharray:1;
-    stroke-dashoffset:1;
-    transition:
-      stroke-dashoffset var(--t,1s) cubic-bezier(.45,.05,.35,1) var(--d,0s),
-      stroke 1.6s ease,
-      opacity .6s ease;
-  }
-  /* tallo y hojas en un verde-rosado tenue para que el rosa sea de la flor */
-  #tulipan .follaje{stroke:color-mix(in srgb, var(--rosa) 45%, #7fd7b0)}
-  /* detalles interiores: trazo más fino y delicado */
-  #tulipan .detalle{stroke-width:calc(var(--trazo) * .62); opacity:.75}
-
-  /* estado florecido */
-  .florecido #tulipan path{stroke-dashoffset:0}
-  .florecido #tulipan{filter:drop-shadow(0 0 14px var(--rosa-glow)) drop-shadow(0 0 34px rgba(255,142,192,.35))}
-  .florecido .kicker{color:var(--rosa)}
-
-  /* halo detrás de la flor */
-  .halo{
-    position:absolute;
-    left:50%; top:22%;
-    width:190px; height:190px;
-    margin:-95px 0 0 -95px;
+  .aura{
+    position:absolute;left:50%;top:50%;
+    width:80%;aspect-ratio:1;transform:translate(-50%,-50%);
     border-radius:50%;
-    background:radial-gradient(circle, var(--rosa-glow) 0%, transparent 68%);
-    opacity:0;
-    transition:opacity 1.6s ease 1.2s, background 1.6s ease;
-    pointer-events:none;
+    background:radial-gradient(circle, var(--glow) 0%, transparent 65%);
+    opacity:0;transition:opacity 1.4s ease .6s, background 1.4s ease;
+    pointer-events:none;z-index:1;
   }
-  .florecido .halo{opacity:.20}
+  .abierto .aura{opacity:.2}
 
-  /* suelo luminoso */
-  .suelo{
-    width:clamp(150px,32vh,235px);
-    height:1px;
-    margin-top:-6px;
-    background:linear-gradient(90deg,transparent,var(--rosa-glow),transparent);
-    opacity:0;
-    transition:opacity 1.2s ease .3s, background 1.6s ease;
+  /* ── Apertura ───────────────────────────────── */
+  .petalo{
+    transform-box:view-box;transform-origin:100px 100px;
+    transform:scale(.14) rotate(-22deg);opacity:0;
+    transition:
+      transform var(--t-petalo) cubic-bezier(.18,.86,.24,1) calc(var(--i,0) * var(--t-paso) + var(--base,0s)),
+      opacity   calc(var(--t-petalo) * .5) ease            calc(var(--i,0) * var(--t-paso) + var(--base,0s));
   }
-  .florecido .suelo{opacity:.5}
+  .abierto .petalo{transform:scale(1) rotate(0);opacity:1}
 
-  /* ── Mensaje ────────────────────────────────── */
+  .corona{
+    transform-box:view-box;transform-origin:100px 100px;
+    transform:scale(.3);opacity:0;
+    transition:transform var(--t-corona) cubic-bezier(.2,.9,.3,1) calc(var(--d-corona) + var(--base,0s)),
+               opacity   var(--t-corona) ease                      calc(var(--d-corona) + var(--base,0s));
+  }
+  .abierto .corona{transform:scale(1);opacity:1}
+
+  .cerrando .petalo,.cerrando .corona,.cerrando .brote{
+    transition-duration:.28s;transition-delay:0s;
+  }
+
+  .lirio stop{transition:stop-color 1.5s ease}
+  .contorno{fill:none;stroke:rgba(255,255,255,.6);stroke-width:.9}
+  .nervio{fill:none;stroke:var(--rosa);stroke-width:1.1;opacity:.32;stroke-linecap:round;
+          transition:stroke 1.5s ease}
+  .mota{transition:fill 1.5s ease}
+
+  /* ── Tarjeta del mensaje ────────────────────── */
+  .tarjeta{
+    position:relative;z-index:2;width:100%;
+    padding:clamp(20px,3.6vh,28px) clamp(18px,6vw,30px) clamp(15px,2.6vh,21px);
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:20px;
+    background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    box-shadow:0 18px 40px -28px rgba(0,0,0,.9);
+    display:flex;flex-direction:column;align-items:center;
+    gap:clamp(10px,1.8vh,16px);
+    opacity:0;transform:translateY(12px);
+    transition:opacity .9s ease, transform .9s ease, border-color 1.2s ease;
+  }
+  .abierto .tarjeta{
+    opacity:1;transform:translateY(0);
+    transition-delay:var(--d-mensaje);
+    border-color:color-mix(in srgb, var(--rosa-claro) 26%, transparent);
+  }
+
+  .tarjeta::before{
+    content:"";position:absolute;top:-5px;left:50%;
+    width:9px;height:9px;margin-left:-4.5px;
+    background:var(--rosa-claro);transform:rotate(45deg);
+    box-shadow:0 0 12px var(--glow);
+    transition:background 1.2s ease, box-shadow 1.2s ease;
+  }
+
   #mensaje{
-    font-family:var(--font-msg);
-    font-size:clamp(15px,2.1vh,20px);
-    line-height:1.55;
-    max-width:32ch;
-    min-height:3.1em;
-    color:#fff2f8;
-    opacity:0;
-    transform:translateY(10px);
-    transition:opacity 1.1s ease, transform 1.1s ease;
-    text-wrap:balance;
+    font-size:clamp(15.5px,2.1vh,19px);
+    font-style:italic;line-height:1.6;
+    max-width:28ch;min-height:3.2em;
+    color:var(--tinta);text-wrap:balance;
   }
-  .florecido #mensaje{opacity:.95;transform:translateY(0);transition-delay:3.4s}
 
-  #tono{
-    display: none;
-    font-size:10px;
-    letter-spacing:.22em;
-    text-transform:uppercase;
-    color:var(--rosa);
-    opacity:0;
-    transition:opacity .9s ease 3.9s, color 1.6s ease;
+  .firma{
+    font-size:11px;letter-spacing:.22em;text-transform:lowercase;
+    font-variant:small-caps;color:var(--rosa-claro);opacity:.75;
+    transition:color 1.2s ease;
   }
-  .florecido #tono{opacity:.6}
 
   /* ── Botón ──────────────────────────────────── */
   #btnFlorecer{
-    margin-top:6px;
-    font:inherit;
-    font-size:13px;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--rosa);
-    background:transparent;
-    border:1px solid color-mix(in srgb, var(--rosa) 55%, transparent);
-    border-radius:999px;
-    padding:11px 26px;
-    cursor:pointer;
-    position:relative;
-    overflow:hidden;
-    transition:color .5s ease, border-color .5s ease, box-shadow .5s ease, transform .18s ease, background-color .5s ease;
+    margin-top:clamp(10px,1.8vh,16px);
+    font:inherit;font-size:13px;letter-spacing:.2em;
+    font-variant:small-caps;text-transform:lowercase;
+    color:var(--rosa-claro);
+    background:none;border:0;padding:6px 2px;cursor:pointer;
+    position:relative;transition:color .5s ease,opacity .3s ease;
   }
-  #btnFlorecer:hover:not(:disabled){
-    background:color-mix(in srgb, var(--rosa) 12%, transparent);
-    border-color:var(--rosa);
-    box-shadow:0 0 22px -4px var(--rosa-glow);
+  #btnFlorecer::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+    background:currentColor;transform:scaleX(.35);transform-origin:center;
+    opacity:.55;transition:transform .45s cubic-bezier(.2,.8,.3,1),opacity .45s ease;
   }
-  #btnFlorecer:active:not(:disabled){transform:scale(.97)}
-  #btnFlorecer:focus-visible{outline:2px solid var(--rosa);outline-offset:3px}
-  #btnFlorecer:disabled{opacity:.4;cursor:default}
+  #btnFlorecer:hover:not(:disabled)::after,
+  #btnFlorecer:focus-visible::after{transform:scaleX(1);opacity:1}
+  #btnFlorecer:focus-visible{outline:none;color:var(--blanco)}
+  #btnFlorecer:disabled{opacity:.35;cursor:default}
 
-  /* ── Chispas del florecimiento ──────────────── */
-  .chispa{
-    position:absolute;
-    left:50%; top:24%;
-    width:5px; height:5px;
-    border-radius:50%;
-    background:#fff;
-    box-shadow:0 0 8px 2px var(--rosa-glow);
-    pointer-events:none;
-    animation:chispea 1500ms ease-out forwards;
+  /* ── Destellos ──────────────────────────────── */
+  .destello{
+    position:absolute;z-index:4;pointer-events:none;
+    width:var(--s,4px);height:var(--s,4px);border-radius:50%;
+    background:radial-gradient(circle,#fff 0%, rgba(255,255,255,.55) 38%, transparent 72%);
+    opacity:0;animation:respira var(--dur,2.6s) ease-in-out var(--del,0s) forwards;
   }
-  @keyframes chispea{
-    0%  {opacity:0; transform:translate(-50%,-50%) scale(.2)}
-    18% {opacity:1}
-    100%{opacity:0; transform:translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(.35)}
+  @keyframes respira{
+    0%  {opacity:0;transform:translate(-50%,-50%) scale(.35)}
+    38% {opacity:var(--max,.5);transform:translate(-50%,-50%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(.55)}
   }
 
-  /* ── Accesibilidad: menos movimiento ────────── */
   @media (prefers-reduced-motion: reduce){
-    .estrella,.brillo,.chispa{animation:none;opacity:.6}
-    #tulipan path{transition-duration:.01s;transition-delay:0s}
-    #mensaje,#tono{transition-delay:.1s}
+    .polen,.destello{animation:none;opacity:.35}
+    .petalo,.corona,.brote{transition-duration:.01s;transition-delay:0s}
+    .tarjeta{transition-delay:.1s}
+    .lirio--izq,.lirio--der{filter:none}
   }
 
-  @media (max-height:560px){
-    .kicker{display:none}
-    #mensaje{min-height:2.4em}
+  @media (max-height:620px){
+    .rotulo{display:none}
+    #mensaje{min-height:2.5em}
+    #jardin{width:min(74vw,36vh);margin-bottom:clamp(22px,4vh,34px)}
   }
 </style>
 </head>
 <body>
 
-<div id="cielo" aria-hidden="true"></div>
+<div class="haz haz--a" aria-hidden="true"></div>
+<div class="haz haz--b" aria-hidden="true"></div>
+<div id="aire" aria-hidden="true"></div>
 
 <main class="escena" id="escena">
 
-  <p class="kicker">Un tulipán para ti</p>
+  <p class="rotulo">del jardín de la noche</p>
 
-  <div class="maceta">
-    <div class="halo" aria-hidden="true"></div>
+  <div id="jardin">
+    <div class="aura" aria-hidden="true"></div>
 
-    <!-- Tulipán: line art. Cada trazo se dibuja con stroke-dashoffset.
-         pathLength="1" normaliza la longitud para no tener que medirla en JS. -->
-    <svg id="tulipan" viewBox="0 0 200 312" role="img"
-         aria-label="Ilustración de un tulipán dibujado a línea">
-
-      <!-- tallo -->
-      <path class="follaje" pathLength="1" style="--d:0s;--t:1.05s"
-            d="M100 180 C 103 214, 97 254, 100 306"/>
-
-      <!-- hoja izquierda -->
-      <path class="follaje" pathLength="1" style="--d:.55s;--t:1s"
-            d="M98 258 C 76 250, 58 226, 50 194
-               C 46 180, 56 177, 64 190
-               C 78 210, 92 234, 98 258 Z"/>
-
-      <!-- hoja derecha -->
-      <path class="follaje" pathLength="1" style="--d:.8s;--t:1s"
-            d="M102 240 C 124 233, 142 212, 150 182
-               C 154 168, 144 165, 136 178
-               C 122 198, 108 218, 102 240 Z"/>
-
-      <!-- corola: copa redondeada, tres pétalos de punta suave -->
-      <path pathLength="1" style="--d:1.35s;--t:1.7s"
-            d="M100 182
-               C 76 180, 62 160, 62 130
-               C 62 106, 66 86,  76 74
-               C 82 72,  89 80,  91 88
-               C 92 78,  95 66, 100 58
-               C 105 66, 108 78, 109 88
-               C 111 80, 118 72, 124 74
-               C 134 86, 138 106, 138 130
-               C 138 160, 124 180, 100 182 Z"/>
-
-      <!-- separación de pétalos -->
-      <path class="detalle" pathLength="1" style="--d:2.75s;--t:.75s"
-            d="M91 88 C 87 114, 87 150, 96 179"/>
-      <path class="detalle" pathLength="1" style="--d:2.9s;--t:.75s"
-            d="M109 88 C 113 114, 113 150, 104 179"/>
-
-      <!-- nervadura central del pétalo frontal -->
-      <path class="detalle" pathLength="1" style="--d:3.1s;--t:.65s"
-            d="M100 74 C 98 100, 99 128, 100 150"/>
-
-      <!-- curva baja de la copa: da volumen sin recargar -->
-      <path class="detalle" pathLength="1" style="--d:3.25s;--t:.6s"
-            d="M74 150 C 84 168, 116 168, 126 150"/>
-
+    <!-- follaje de atrás -->
+    <svg id="follaje" class="follaje" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <linearGradient id="gCapullo" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0"   stop-color="#2c6b45"/>
+          <stop offset=".5"  stop-color="#b6d99a"/>
+          <stop offset="1"   style="stop-color:var(--rosa-claro)"/>
+        </linearGradient>
+      </defs>
     </svg>
 
-    <div class="suelo" aria-hidden="true"></div>
+    <!-- una hoja por delante, para dar profundidad -->
+    <svg id="follajeFrente" class="follaje" viewBox="0 0 200 200" aria-hidden="true"></svg>
   </div>
 
-  <p id="mensaje" aria-live="polite"></p>
-  <p id="tono" aria-hidden="true"></p>
+  <section class="tarjeta">
+    <p id="mensaje" aria-live="polite"></p>
+    <p class="firma" id="firma"></p>
+  </section>
 
-  <button id="btnFlorecer" type="button">Florecer</button>
+  <button id="btnFlorecer" type="button">florecer</button>
 
 </main>
 
@@ -319,160 +310,376 @@
    1. PERSONALIZABLE — edita este bloque y nada más
    ═══════════════════════════════════════════════════════════════ */
 
-// Cada vez que el tulipán florece se muestra el siguiente mensaje.
 const MENSAJES = [
-  "Dicen que los tulipanes buscan la luz. Este simplemente encontró a quién acompañar.",
-
-  "Hay flores bonitas, y luego están las que uno termina escogiendo sin saber muy bien por qué.",
-
-  "El tulipán habla de cariño sincero. Me pareció una forma bonita de decir algo sin tener que decir demasiado.",
-
-  "Hay días que necesitan flores. Este me pareció un buen día para una.",
-
-  "Quizá las flores no necesitan una razón para alegrar el día. A veces basta con que lleguen en el momento justo.",
-
-  "Que tengas días bonitos, de esos que llegan sin avisar y terminan dejando una sonrisa."
+  "El lirio significa admiración. Por algo terminé haciéndote estos.",
+  "Hay días que se ponen mejores solo porque me escribiste.",
+  "Gracias por ser de esas personas con las que hablar es fácil.",
+  "Ojalá tu semana sea tan bonita como tú haces ver todo lo demás.",
+  "Si el día viene pesado, acuérdate de que por acá alguien te echa porras.",
+  "No hacía falta ocasión especial: hoy me acordé de ti y ya.",
+  "Que alguien te cuide hoy como tú cuidas a todo el mundo.",
+  "Me alegra un montón que existas. Así de simple.",
+  "Estos lirios son chiquitos, pero el cariño con el que los hice no.",
+  "Cuando algo bueno me pasa, tú eres de las primeras a quien quiero contarle."
 ];
 
-// Tonalidades de rosado por las que va pasando la flor.
+const FIRMA  = "para ti";
+const ROTULO = "del jardín de la noche";
+
 const TONOS = [
-  { nombre: "Rosa lienzo",   trazo: "#ffd9e8", brillo: "#ff8ec0" },
-  { nombre: "Rosa cuarzo",   trazo: "#ffb3d4", brillo: "#ff6fae" },
-  { nombre: "Rosa fucsia",   trazo: "#ff86b8", brillo: "#ff4d94" },
-  { nombre: "Rosa carmín",   trazo: "#f45b96", brillo: "#ff2e7e" },
-  { nombre: "Rosa magenta",  trazo: "#d63f80", brillo: "#ff4f9c" }
+  { rosa:"#f4508e", suave:"#f98cb4", claro:"#ffd8e6", puntos:"#b31240", glow:"#ff6fae" },
+  { rosa:"#f76173", suave:"#fb96a2", claro:"#ffdedd", puntos:"#b0203a", glow:"#ff7d8e" },
+  { rosa:"#e63aa0", suave:"#f47ec6", claro:"#ffd9ef", puntos:"#9c1470", glow:"#ff5ec0" },
+  { rosa:"#d92e6a", suave:"#ef7396", claro:"#ffd6e2", puntos:"#8f0f38", glow:"#ff4f86" }
 ];
 
 const CONFIG = {
-  estrellas: 140,        // cantidad de puntos de luz
-  brillitos: 7,          // destellos de 4 puntas
-  msTono: 2600,          // cada cuánto cambia de tonalidad
-  msFlorecer: 4300       // duración total de la floración
+  polen:26,
+  msTono:3000,
+  msFlorecer:2400,
+  msReflorecer:1500,
+  motasPorPetalo:14,
+  destellos:11,
+  destellosAmbiente:2
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   2. CIELO
+   2. AIRE
    ═══════════════════════════════════════════════════════════════ */
 
-const azar = (min, max) => Math.random() * (max - min) + min;
+const azar = (a,b) => Math.random()*(b-a)+a;
 
-function pintarCielo(){
-  const cielo = document.getElementById("cielo");
-  const frag  = document.createDocumentFragment();
-
-  for (let i = 0; i < CONFIG.estrellas; i++){
-    const s = azar(0.8, 2.4);
-    const e = document.createElement("div");
-    e.className = "estrella";
-    e.style.cssText =
-      `left:${azar(0,100)}%;top:${azar(0,100)}%;` +
-      `width:${s}px;height:${s}px;` +
-      `--dur:${azar(2.2,6.5).toFixed(2)}s;` +
-      `--del:${azar(0,6).toFixed(2)}s;` +
-      `--max:${azar(0.45,1).toFixed(2)};` +
-      `box-shadow:0 0 ${(s*2.5).toFixed(1)}px rgba(255,255,255,.75)`;
-    frag.appendChild(e);
+function llenarAire(){
+  const aire = document.getElementById("aire");
+  const frag = document.createDocumentFragment();
+  for (let i=0;i<CONFIG.polen;i++){
+    const s = azar(1.6,3.6);
+    const p = document.createElement("div");
+    p.className = "polen";
+    p.style.cssText =
+      `left:${azar(0,100)}%;width:${s.toFixed(1)}px;height:${s.toFixed(1)}px;` +
+      `--dur:${azar(16,30).toFixed(1)}s;--del:${azar(-24,0).toFixed(1)}s;` +
+      `--dx:${azar(-9,9).toFixed(1)}vw;--max:${azar(.18,.45).toFixed(2)};` +
+      `box-shadow:0 0 ${(s*2).toFixed(1)}px rgba(255,236,210,.5)`;
+    frag.appendChild(p);
   }
-
-  for (let i = 0; i < CONFIG.brillitos; i++){
-    const b = document.createElement("div");
-    b.className = "brillo";
-    b.style.cssText =
-      `left:${azar(6,94)}%;top:${azar(6,86)}%;` +
-      `--s:${azar(12,26).toFixed(0)}px;` +
-      `--dur:${azar(4,9).toFixed(2)}s;` +
-      `--del:${azar(0,7).toFixed(2)}s`;
-    frag.appendChild(b);
-  }
-
-  cielo.appendChild(frag);
+  aire.appendChild(frag);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   3. FLORACIÓN
+   3. FOLLAJE
+   Las hojas NO se colocan a ojo: cada una se ancla a un tallo real.
+   Se dice de qué tallo nace (0 a 1 a lo largo del tallo) y de qué
+   lado; el ángulo se calcula desde la tangente del tallo, así ninguna
+   queda torcida respecto a su rama.
+   ═══════════════════════════════════════════════════════════════ */
+
+// hoja lanceolada apuntando hacia arriba desde el origen, con curva de hoz
+function pathHoja(L, W, curva){
+  const c = curva;
+  return `M0 0
+    C ${-W*.95} ${-L*.26}, ${(-W*.85 + c*.5).toFixed(1)} ${-L*.64}, ${c} ${-L}
+    C ${(W*.7 + c*.5).toFixed(1)} ${-L*.64}, ${W*.62} ${-L*.26}, 0 0 Z`;
+}
+
+// dirección del tallo en un punto: 0 = hacia arriba, + = hacia la derecha
+function anguloTallo(tallo, d){
+  const total = tallo.getTotalLength();
+  const a = tallo.getPointAtLength(Math.max(0, d - 2.5));
+  const b = tallo.getPointAtLength(Math.min(total, d + 2.5));
+  return Math.atan2(b.x - a.x, -(b.y - a.y)) * 180 / Math.PI;
+}
+
+// t = posición sobre el tallo (0 = base, 1 = punta) · lado = -1 izquierda, 1 derecha
+function hojaEnTallo(tallo, t, lado, L, W, color, apertura = 42){
+  const d = tallo.getTotalLength() * t;
+  const p = tallo.getPointAtLength(d);
+  // se abre respecto a la rama, pero nunca por debajo de la horizontal
+  let ang = anguloTallo(tallo, d) + lado * apertura;
+  ang = Math.max(-82, Math.min(82, ang));
+  const curva = lado * L * .16;
+  return `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})">
+    <path d="${pathHoja(L, W, curva)}" fill="${color}"/>
+  </g>`;
+}
+
+// el capullo se planta en la punta de su pedúnculo, siguiendo su dirección
+function capulloEnTallo(tallo, L){
+  const d = tallo.getTotalLength();
+  const p = tallo.getPointAtLength(d);
+  const ang = anguloTallo(tallo, d);
+  const w = L * .23;
+  return `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})">
+    <path d="M0 0 C ${-w} ${-L*.22}, ${-w*1.15} ${-L*.62}, 0 ${-L}
+             C ${w*1.15} ${-L*.62}, ${w} ${-L*.22}, 0 0 Z" fill="url(#gCapullo)"/>
+    <ellipse cx="0" cy="-1" rx="${(w*.8).toFixed(1)}" ry="2.4" fill="#2c6b45"/>
+  </g>`;
+}
+
+function construirFollaje(){
+  const atras  = document.getElementById("follaje");
+  const frente = document.getElementById("follajeFrente");
+
+  /* ── tallos ──────────────────────────────────────────────
+     principal: sube del borde inferior hasta la flor del frente
+     izquierdo: bordea la flor grande por fuera hasta la flor de arriba
+     derecho:   sale de un nodo bajo y llega a la flor de la derecha
+     pedúnculo: sostiene el capullo                              */
+  atras.insertAdjacentHTML("beforeend", `
+    <g class="brote" style="--rt:0s" fill="none" stroke="var(--tallo)" stroke-linecap="round">
+      <path id="tMain" d="M99 208 C 97 190, 99 152, 100 114" stroke-width="3.4"/>
+      <path id="tIzq"  d="M97 184 C 76 180, 44 166, 30 132 C 22 110, 26 78, 40 58" stroke-width="2.6"/>
+      <path id="tDer"  d="M102 192 C 124 196, 150 188, 162 170" stroke-width="2.4"/>
+      <path id="tCap"  d="M103 193 C 114 189, 124 185, 132 181" stroke-width="1.7"/>
+    </g>`);
+
+  const tMain = document.getElementById("tMain");
+  const tIzq  = document.getElementById("tIzq");
+  const tDer  = document.getElementById("tDer");
+  const tCap  = document.getElementById("tCap");
+
+  const verde = "var(--hoja)";
+
+  /* ── hojas: pocas, colgadas de su propio tallo ───────────
+     hojaEnTallo(tallo, posición 0-1, lado, largo, ancho)     */
+  atras.insertAdjacentHTML("beforeend", `
+    <g class="brote" style="--rt:.14s">
+      ${hojaEnTallo(tMain, .10, -1, 66, 12, verde)}
+      ${hojaEnTallo(tMain, .24,  1, 56, 11, verde)}
+      ${hojaEnTallo(tIzq,  .34, -1, 46, 10, verde)}
+      ${hojaEnTallo(tDer,  .45, -1, 44, 10, verde)}
+    </g>`);
+
+  atras.insertAdjacentHTML("beforeend", `
+    <g class="brote" style="--rt:.26s">${capulloEnTallo(tCap, 28)}</g>`);
+
+  /* ── una hoja por delante: cruza la flor y da profundidad ── */
+  frente.insertAdjacentHTML("beforeend", `
+    <g class="brote" style="--rt:.32s">
+      ${hojaEnTallo(tMain, .04, -1, 62, 12, "var(--hoja-frente)", 34)}
+    </g>`);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   4. CONSTRUCCIÓN DEL LIRIO
+   ═══════════════════════════════════════════════════════════════ */
+
+function pathPetalo(largo, ancho){
+  const w = ancho/2, y = t => (100 - largo*t).toFixed(1);
+  const xi = k => (100 - w*k).toFixed(1);
+  const xd = k => (100 + w*k).toFixed(1);
+  return `M100 100
+    C ${xi(.72)} ${y(.16)}, ${xi(1)} ${y(.44)}, ${xi(.84)} ${y(.72)}
+    C ${xi(.62)} ${y(.90)}, ${xi(.24)} ${y(.98)}, 100 ${y(1)}
+    C ${xd(.24)} ${y(.98)}, ${xd(.62)} ${y(.90)}, ${xd(.84)} ${y(.72)}
+    C ${xd(1)} ${y(.44)}, ${xd(.72)} ${y(.16)}, 100 100 Z`;
+}
+
+function motas(largo, ancho){
+  let s = "";
+  for (let i=0;i<CONFIG.motasPorPetalo;i++){
+    const t  = azar(.08,.45);
+    const hw = (ancho/2) * Math.sin(Math.PI*t) * .78;
+    const x  = 100 + azar(-hw,hw);
+    const yy = 100 - largo*t;
+    const r  = azar(.9,2.1);
+    s += `<ellipse class="mota" cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}"
+            rx="${r.toFixed(1)}" ry="${(r*.8).toFixed(1)}"
+            fill="var(--puntos)" opacity="${azar(.35,.7).toFixed(2)}"/>`;
+  }
+  return s;
+}
+
+function estambres(){
+  let s = "";
+  const angs = [-58,-35,-12,12,35,58];
+  angs.forEach((a,i) => {
+    const L   = [40,46,43,43,46,40][i];
+    const rad = a*Math.PI/180;
+    const x   = 100 + L*Math.sin(rad);
+    const yy  = 100 - L*Math.cos(rad);
+    const cx  = 100 + L*.55*Math.sin(rad) + Math.sin(rad)*7;
+    const cy  = 100 - L*.62*Math.cos(rad);
+    s += `<path d="M100 100 Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${yy.toFixed(1)}"
+            fill="none" stroke="#e9f4cd" stroke-width="1.5" stroke-linecap="round" opacity=".92"/>`;
+    s += `<ellipse cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}" rx="6.6" ry="2.9" fill="#c22a1e"
+            transform="rotate(${(a+62).toFixed(0)} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
+    s += `<ellipse cx="${(x-1).toFixed(1)}" cy="${(yy-1).toFixed(1)}" rx="3.4" ry="1.2"
+            fill="#f26a4b" opacity=".7"
+            transform="rotate(${(a+62).toFixed(0)} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
+  });
+  s += `<path d="M100 100 Q 96 74 94 54" fill="none" stroke="#dceeb2"
+          stroke-width="2.1" stroke-linecap="round"/>`;
+  s += `<ellipse cx="94" cy="52" rx="4.2" ry="3.2" fill="#cfe79a"/>`;
+  return s;
+}
+
+let uid = 0;
+function crearLirio(clase, giro){
+  const id = "f" + (uid++);
+  const externo = { largo:88, ancho:40 };
+  const interno = { largo:84, ancho:49 };
+
+  const grad = (sufijo, ancho) => `
+    <linearGradient id="len${id}${sufijo}" gradientUnits="userSpaceOnUse"
+                    x1="100" y1="100" x2="100" y2="12">
+      <stop offset="0"   style="stop-color:var(--garganta)"/>
+      <stop offset=".07" style="stop-color:var(--rosa-claro)"/>
+      <stop offset=".20" style="stop-color:var(--rosa)"/>
+      <stop offset=".37" style="stop-color:var(--rosa-suave)"/>
+      <stop offset=".55" style="stop-color:var(--blanco)"/>
+      <stop offset="1"   style="stop-color:var(--blanco)"/>
+    </linearGradient>
+    <linearGradient id="bor${id}${sufijo}" gradientUnits="userSpaceOnUse"
+                    x1="${100-ancho/2}" y1="0" x2="${100+ancho/2}" y2="0">
+      <stop offset="0"   style="stop-color:var(--blanco)" stop-opacity=".97"/>
+      <stop offset=".24" style="stop-color:var(--blanco)" stop-opacity="0"/>
+      <stop offset=".76" style="stop-color:var(--blanco)" stop-opacity="0"/>
+      <stop offset="1"   style="stop-color:var(--blanco)" stop-opacity=".97"/>
+    </linearGradient>`;
+
+  const petalo = (cfg, sufijo, ang, i) => {
+    const d = pathPetalo(cfg.largo, cfg.ancho);
+    return `
+      <g transform="rotate(${ang} 100 100)">
+        <g class="petalo" style="--i:${i}">
+          <path d="${d}" fill="url(#len${id}${sufijo})"/>
+          <path d="${d}" fill="url(#bor${id}${sufijo})"/>
+          <path class="nervio" d="M100 97 C 99 ${100-cfg.largo*.22}, 100 ${100-cfg.largo*.40}, 100 ${100-cfg.largo*.56}"/>
+          ${motas(cfg.largo, cfg.ancho)}
+          <path class="contorno" d="${d}"/>
+        </g>
+      </g>`;
+  };
+
+  let cuerpo = "";
+  [0,120,240].forEach((a,i) => cuerpo += petalo(externo,"a", a+30+giro, i));
+  [60,180,300].forEach((a,i) => cuerpo += petalo(interno,"b", a+30+giro, i+3));
+
+  return `
+    <svg class="lirio ${clase}" viewBox="0 0 200 200" role="img"
+         aria-label="Ilustración de un lirio blanco con el centro rosado">
+      <defs>
+        ${grad("a", externo.ancho)}
+        ${grad("b", interno.ancho)}
+        <radialGradient id="cen${id}">
+          <stop offset="0"   style="stop-color:var(--garganta)" stop-opacity=".95"/>
+          <stop offset=".55" style="stop-color:var(--garganta)" stop-opacity=".35"/>
+          <stop offset="1"   style="stop-color:var(--garganta)" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      ${cuerpo}
+      <circle class="corona" cx="100" cy="100" r="30" fill="url(#cen${id})"/>
+      <g class="corona">${estambres()}</g>
+    </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. FLORACIÓN
    ═══════════════════════════════════════════════════════════════ */
 
 const escena  = document.getElementById("escena");
+const jardin  = document.getElementById("jardin");
 const boton   = document.getElementById("btnFlorecer");
 const mensaje = document.getElementById("mensaje");
-const etTono  = document.getElementById("tono");
-const maceta  = document.querySelector(".maceta");
 
-let iMensaje = -1;
-let iTono    = -1;
-let abierta  = false;
-let cicloTono = null;
+document.getElementById("firma").textContent  = FIRMA;
+document.querySelector(".rotulo").textContent = ROTULO;
+
+construirFollaje();
+
+// las flores van entre el follaje de atrás y el de adelante
+document.getElementById("follajeFrente").insertAdjacentHTML("beforebegin",
+  crearLirio("lirio--izq",   -8) +
+  crearLirio("lirio--der",    16) +
+  crearLirio("lirio--frente",  4));
+
+let ultimo = -1, iTono = -1, abierta = false;
+let cicloTono = null, cicloDestellos = null;
 
 function aplicarTono(indice){
   iTono = (indice + TONOS.length) % TONOS.length;
-  const t = TONOS[iTono];
-  document.documentElement.style.setProperty("--rosa", t.trazo);
-  document.documentElement.style.setProperty("--rosa-glow", t.brillo);
-  etTono.textContent = t.nombre;
+  const t = TONOS[iTono], r = document.documentElement.style;
+  r.setProperty("--rosa", t.rosa);
+  r.setProperty("--rosa-suave", t.suave);
+  r.setProperty("--rosa-claro", t.claro);
+  r.setProperty("--puntos", t.puntos);
+  r.setProperty("--glow", t.glow);
+}
+const siguienteTono = () => aplicarTono(iTono + 1);
+
+function mensajeAlAzar(){
+  if (MENSAJES.length === 1) return MENSAJES[0];
+  let i;
+  do { i = Math.floor(Math.random()*MENSAJES.length); } while (i === ultimo);
+  ultimo = i;
+  return MENSAJES[i];
 }
 
-function siguienteTono(){ aplicarTono(iTono + 1); }
-
-function chispas(cantidad = 16){
-  for (let i = 0; i < cantidad; i++){
-    const ang  = azar(0, Math.PI * 2);
-    const dist = azar(55, 115);
-    const c = document.createElement("div");
-    c.className = "chispa";
-    c.style.setProperty("--x", `${Math.cos(ang) * dist}px`);
-    c.style.setProperty("--y", `${Math.sin(ang) * dist}px`);
-    c.style.animationDelay = `${azar(0, 320).toFixed(0)}ms`;
-    maceta.appendChild(c);
-    c.addEventListener("animationend", () => c.remove());
+function destellos(cantidad){
+  for (let i=0;i<cantidad;i++){
+    const ang  = azar(0, Math.PI*2);
+    const dist = azar(26, 52);
+    const d = document.createElement("div");
+    d.className = "destello";
+    d.style.cssText =
+      `left:${(50 + Math.cos(ang)*dist).toFixed(1)}%;` +
+      `top:${(50 + Math.sin(ang)*dist*.92).toFixed(1)}%;` +
+      `--s:${azar(3,6).toFixed(1)}px;--dur:${azar(2.2,3.6).toFixed(2)}s;` +
+      `--del:${azar(0,1.1).toFixed(2)}s;--max:${azar(.3,.6).toFixed(2)};` +
+      `box-shadow:0 0 7px 1px color-mix(in srgb, var(--glow) 55%, transparent)`;
+    jardin.appendChild(d);
+    d.addEventListener("animationend", () => d.remove());
   }
 }
 
-function florecer(){
-  iMensaje = (iMensaje + 1) % MENSAJES.length;
-  mensaje.textContent = MENSAJES[iMensaje];
+function florecer(veloz){
+  escena.classList.remove("cerrando");
+  escena.classList.toggle("veloz", !!veloz);
 
+  mensaje.textContent = mensajeAlAzar();
   siguienteTono();
-  escena.classList.add("florecido");
+  escena.classList.add("abierto");
   abierta = true;
 
   boton.disabled = true;
-  boton.textContent = "Floreciendo…";
+  const total = veloz ? CONFIG.msReflorecer : CONFIG.msFlorecer;
 
-  setTimeout(() => chispas(), 2800);
+  setTimeout(() => destellos(CONFIG.destellos), total * .45);
 
   setTimeout(() => {
     boton.disabled = false;
-    boton.textContent = "Florecer de nuevo";
-    // a partir de aquí la flor va cambiando de tonalidad sola
+    boton.textContent = "otro lirio";
     clearInterval(cicloTono);
-    cicloTono = setInterval(siguienteTono, CONFIG.msTono);
-  }, CONFIG.msFlorecer);
+    clearInterval(cicloDestellos);
+    cicloTono      = setInterval(siguienteTono, CONFIG.msTono);
+    cicloDestellos = setInterval(() => destellos(CONFIG.destellosAmbiente), 3200);
+  }, total);
 }
 
 function cerrar(){
   clearInterval(cicloTono);
-  escena.classList.remove("florecido");
+  clearInterval(cicloDestellos);
+  escena.classList.add("cerrando");
+  escena.classList.remove("abierto");
   abierta = false;
 }
 
 boton.addEventListener("click", () => {
-  if (!abierta){
-    florecer();
-  } else {
+  if (!abierta) { florecer(false); }
+  else {
     cerrar();
     boton.disabled = true;
-    setTimeout(florecer, 900);   // se recoge y vuelve a abrir
+    setTimeout(() => florecer(true), 300);
   }
 });
 
-// Tocar la flor adelanta la tonalidad manualmente
-document.getElementById("tulipan").addEventListener("click", () => {
-  if (abierta) siguienteTono();
+jardin.addEventListener("click", e => {
+  if (abierta && e.target.closest(".lirio")) siguienteTono();
 });
 
-/* ═══════════════════════════════════════════════════════════════ */
-
-pintarCielo();
+llenarAire();
 aplicarTono(0);
 </script>
 </body>
