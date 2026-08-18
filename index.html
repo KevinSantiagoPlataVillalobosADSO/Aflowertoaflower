@@ -3,49 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lirios</title>
+<title>Gerberas</title>
 <style>
   /* ═════════════════════════════════════════════
      TOKENS
      ═════════════════════════════════════════════ */
   :root{
-    --fondo-1:#1a1426;
-    --fondo-2:#101b19;
-    --fondo-3:#05090a;
+    /* atardecer en el campo de flores */
+    --fondo-1:#2a1620;
+    --fondo-2:#1b1218;
+    --fondo-3:#0b0709;
 
-    /* color secundario (centro de la flor) — lo cambia el JS */
-    --rosa:#f4508e;
-    --rosa-suave:#f98cb4;
-    --rosa-claro:#ffd8e6;
-    --puntos:#b31240;
-    --glow:#ff6fae;
+    --hoja:#2a5f3e;
+    --hoja-frente:#173d29;
+    --tallo:#3d7d51;
 
-    /* color primario */
-    --blanco:#ffffff;
-    --garganta:#eaf7c4;
-
-    /* verdes */
-    --hoja:#1e5a3c;         /* hojas de atrás — color plano   */
-    --hoja-frente:#123a27;  /* la hoja que cruza por delante  */
-    --tallo:#2f7049;
-
-    --tinta:#f7efe6;
-    --tinta-suave:rgba(247,239,230,.5);
+    --papel:#f7f0e2;
+    --papel-2:#eadfcc;
+    --tinta:#4a1526;
+    --tinta-suave:rgba(247,235,222,.55);
     --serif:Georgia,"Times New Roman",serif;
 
-    --t-petalo:1.15s;
-    --t-paso:.085s;
-    --t-corona:.95s;
-    --d-corona:1.05s;
-    --d-mensaje:1.6s;
+    --glow:#a31f42;
+
+    --t-petalo:1.25s;
+    --t-paso:.013s;
+    --d-centro:.95s;
+    --d-mensaje:1.7s;
   }
 
   .veloz{
-    --t-petalo:.68s;
-    --t-paso:.045s;
-    --t-corona:.5s;
-    --d-corona:.58s;
-    --d-mensaje:.85s;
+    --t-petalo:.72s;
+    --t-paso:.007s;
+    --d-centro:.5s;
+    --d-mensaje:.9s;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -53,43 +44,39 @@
 
   body{
     font-family:var(--serif);
-    color:var(--tinta);
+    color:var(--tinta-suave);
     background:
-      radial-gradient(80% 55% at 50% 32%, rgba(255,214,232,.09) 0%, transparent 70%),
-      linear-gradient(178deg, var(--fondo-1) 0%, var(--fondo-2) 52%, var(--fondo-3) 100%);
+      radial-gradient(90% 50% at 50% 78%, rgba(255,196,150,.07) 0%, transparent 68%),
+      linear-gradient(176deg, var(--fondo-1) 0%, var(--fondo-2) 48%, var(--fondo-3) 100%);
     background-attachment:fixed;
     display:grid;place-items:center;
     overflow:hidden;position:relative;
   }
 
+  /* neblina baja, como el sembrado desenfocado del fondo */
+  body::before{
+    content:"";position:fixed;left:-10%;right:-10%;bottom:0;height:42vh;
+    pointer-events:none;z-index:0;
+    background:linear-gradient(0deg, rgba(46,24,20,.55) 0%, transparent 100%);
+  }
   body::after{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
-    background:radial-gradient(115% 85% at 50% 45%, transparent 45%, rgba(0,0,0,.55) 100%);
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:6;
+    background:radial-gradient(120% 88% at 50% 46%, transparent 42%, rgba(0,0,0,.6) 100%);
   }
-
-  .haz{
-    position:fixed;top:-25%;height:160vh;width:42vw;
-    pointer-events:none;z-index:0;filter:blur(22px);
-    background:linear-gradient(180deg, rgba(255,241,222,.06), transparent 72%);
-  }
-  .haz--a{left:-10vw;transform:rotate(13deg)}
-  .haz--b{left:56vw;transform:rotate(9deg);opacity:.55}
 
   /* ═════════════════════════════════════════════
-     POLEN
+     BOKEH — flores fuera de foco al fondo
      ═════════════════════════════════════════════ */
-  #aire{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
-  .polen{
-    position:absolute;bottom:-12px;border-radius:50%;
-    background:rgba(255,238,218,.75);
-    animation:flota var(--dur,20s) ease-in-out var(--del,0s) infinite;
+  #campo{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .bokeh{
+    position:absolute;border-radius:50%;
+    background:radial-gradient(circle at 42% 40%, var(--c) 0%, transparent 68%);
+    opacity:0;
+    animation:respiraBokeh var(--dur,26s) ease-in-out var(--del,0s) infinite;
   }
-  @keyframes flota{
-    0%  {transform:translate(0,0);opacity:0}
-    12% {opacity:var(--max,.4)}
-    50% {transform:translate(calc(var(--dx) * -1), -55vh)}
-    88% {opacity:var(--max,.4)}
-    100%{transform:translate(var(--dx), -112vh);opacity:0}
+  @keyframes respiraBokeh{
+    0%,100%{opacity:calc(var(--max,.2) * .45); transform:translate(0,0) scale(.94)}
+    50%    {opacity:var(--max,.2);              transform:translate(var(--dx,0), var(--dy,0)) scale(1.06)}
   }
 
   /* ═════════════════════════════════════════════
@@ -111,102 +98,134 @@
     content:"";height:1px;width:clamp(24px,9vw,52px);
     background:linear-gradient(90deg,transparent,currentColor,transparent);
   }
-  .abierto .rotulo{color:var(--rosa-claro)}
 
-  /* ── Jardín ─────────────────────────────────── */
   #jardin{
     position:relative;
-    width:min(84vw, 42vh, 370px);
-    aspect-ratio:1/1;
-    /* aire suficiente entre el follaje y la tarjeta */
-    margin:clamp(6px,1.4vh,14px) 0 clamp(30px,5.5vh,52px);
+    width:min(84vw, 40vh, 370px);
+    aspect-ratio:1/1.12;
+    margin:clamp(6px,1.4vh,14px) 0 clamp(24px,4.4vh,42px);
     z-index:3;
   }
 
-  .follaje{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-  #follaje{z-index:0}
-  #follajeFrente{z-index:4;pointer-events:none}
+  #follaje{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0}
 
   .brote{
-    opacity:0;transform:translateY(7px);
-    transition:opacity .9s ease   calc(var(--rt,0s) + var(--base,0s)),
-               transform 1.1s cubic-bezier(.2,.8,.3,1) calc(var(--rt,0s) + var(--base,0s));
+    opacity:0;transform:translateY(8px);
+    transition:opacity .9s ease calc(var(--rt,0s)),
+               transform 1.1s cubic-bezier(.2,.8,.3,1) calc(var(--rt,0s));
   }
   .abierto .brote{opacity:1;transform:translateY(0)}
 
-  .lirio{position:absolute;overflow:visible;filter:drop-shadow(0 6px 20px rgba(0,0,0,.55))}
-  .lirio--frente{left:15%;top:19%;width:70%;z-index:3}
-  .lirio--izq{left:-2%;top:1%;width:46%;z-index:2;--base:.3s;
-    transform:rotate(-14deg);filter:blur(.9px) drop-shadow(0 4px 14px rgba(0,0,0,.5));opacity:.9}
-  .lirio--der{left:57%;top:47%;width:45%;z-index:2;--base:.5s;
-    transform:rotate(19deg);filter:blur(.9px) drop-shadow(0 4px 14px rgba(0,0,0,.5));opacity:.88}
-  .veloz .lirio--izq{--base:.16s}
-  .veloz .lirio--der{--base:.28s}
+  .gerbera{position:absolute;overflow:visible}
+  .g--frente{left:16%;top:11%;width:68%;z-index:3;
+    filter:drop-shadow(0 10px 26px rgba(0,0,0,.6))}
+  .g--alta{left:44%;top:-7%;width:45%;z-index:2;--base:.22s;
+    filter:blur(1px) drop-shadow(0 6px 16px rgba(0,0,0,.55));opacity:.88}
+  .g--baja{left:-9%;top:29%;width:39%;z-index:2;--base:.4s;
+    filter:blur(1.2px) drop-shadow(0 6px 16px rgba(0,0,0,.55));opacity:.82}
 
   .aura{
-    position:absolute;left:50%;top:50%;
-    width:80%;aspect-ratio:1;transform:translate(-50%,-50%);
+    position:absolute;left:50%;top:44%;
+    width:88%;aspect-ratio:1;transform:translate(-50%,-50%);
     border-radius:50%;
-    background:radial-gradient(circle, var(--glow) 0%, transparent 65%);
+    background:radial-gradient(circle, var(--glow) 0%, transparent 62%);
     opacity:0;transition:opacity 1.4s ease .6s, background 1.4s ease;
     pointer-events:none;z-index:1;
   }
-  .abierto .aura{opacity:.2}
+  .abierto .aura{opacity:.26}
 
-  /* ── Apertura ───────────────────────────────── */
+  /* ── apertura ───────────────────────────────── */
   .petalo{
     transform-box:view-box;transform-origin:100px 100px;
-    transform:scale(.14) rotate(-22deg);opacity:0;
+    transform:scale(.08) rotate(-18deg);opacity:0;
     transition:
-      transform var(--t-petalo) cubic-bezier(.18,.86,.24,1) calc(var(--i,0) * var(--t-paso) + var(--base,0s)),
-      opacity   calc(var(--t-petalo) * .5) ease            calc(var(--i,0) * var(--t-paso) + var(--base,0s));
+      transform var(--t-petalo) cubic-bezier(.2,.85,.25,1) calc(var(--i,0) * var(--t-paso) + var(--base,0s)),
+      opacity   calc(var(--t-petalo) * .45) ease           calc(var(--i,0) * var(--t-paso) + var(--base,0s));
   }
   .abierto .petalo{transform:scale(1) rotate(0);opacity:1}
 
-  .corona{
+  .g--alta .anillo,.g--baja .anillo{
     transform-box:view-box;transform-origin:100px 100px;
-    transform:scale(.3);opacity:0;
-    transition:transform var(--t-corona) cubic-bezier(.2,.9,.3,1) calc(var(--d-corona) + var(--base,0s)),
-               opacity   var(--t-corona) ease                      calc(var(--d-corona) + var(--base,0s));
+    transform:scale(.1) rotate(-14deg);opacity:0;
+    transition:transform var(--t-petalo) cubic-bezier(.2,.85,.25,1) var(--base,0s),
+               opacity calc(var(--t-petalo) * .5) ease var(--base,0s);
   }
-  .abierto .corona{transform:scale(1);opacity:1}
+  .abierto .g--alta .anillo,.abierto .g--baja .anillo{transform:scale(1) rotate(0);opacity:1}
+  .g--alta .petalo,.g--baja .petalo{transform:none;opacity:1;transition:none}
 
-  .cerrando .petalo,.cerrando .corona,.cerrando .brote{
-    transition-duration:.28s;transition-delay:0s;
+  .centro{
+    transform-box:view-box;transform-origin:100px 100px;
+    transform:scale(.35);opacity:0;
+    transition:transform .9s cubic-bezier(.2,.9,.3,1) calc(var(--d-centro) + var(--base,0s)),
+               opacity .8s ease                        calc(var(--d-centro) + var(--base,0s));
+  }
+  .abierto .centro{transform:scale(1);opacity:1}
+
+  .cerrando .petalo,.cerrando .centro,.cerrando .anillo,.cerrando .brote{
+    transition-duration:.3s;transition-delay:0s;
   }
 
-  .lirio stop{transition:stop-color 1.5s ease}
-  .contorno{fill:none;stroke:rgba(255,255,255,.6);stroke-width:.9}
-  .nervio{fill:none;stroke:var(--rosa);stroke-width:1.1;opacity:.32;stroke-linecap:round;
-          transition:stroke 1.5s ease}
-  .mota{transition:fill 1.5s ease}
+  .cabeza{transform-box:view-box;transform-origin:100px 100px}
+  .abierto .cabeza{animation:vaiven var(--sway,8s) ease-in-out var(--swayDel,0s) infinite}
+  @keyframes vaiven{
+    0%,100%{transform:rotate(-1.1deg)}
+    50%    {transform:rotate(1.1deg)}
+  }
 
-  /* ── Tarjeta del mensaje ────────────────────── */
+  .gerbera stop{transition:stop-color 1.6s ease}
+  .vena{fill:none;stroke:var(--p-vena);opacity:.3;stroke-width:.5;stroke-linecap:round}
+
+  /* ═════════════════════════════════════════════
+     ZONA DEL MENSAJE
+     ═════════════════════════════════════════════ */
+  .zona{position:relative;width:100%}
+
+  /* mensajito de antes: se disuelve al florecer */
+  .intro{
+    position:absolute;inset:0;z-index:3;
+    display:grid;place-items:center;padding:0 10px;
+    font-size:clamp(16px,2.3vh,20px);font-style:italic;
+    color:#f2e2d6;text-wrap:balance;
+    text-shadow:0 2px 18px rgba(0,0,0,.6);
+    opacity:0;
+    animation:apareceIntro 1.6s ease .5s forwards;
+    transition:opacity 1s ease, transform 1.1s ease, filter 1.1s ease;
+  }
+  @keyframes apareceIntro{
+    from{opacity:0;transform:translateY(8px)}
+    to  {opacity:.92;transform:translateY(0)}
+  }
+  .abierto .intro,.yaFlorecio .intro{
+    opacity:0;transform:scale(.97) translateY(-10px);
+    filter:blur(4px);pointer-events:none;
+  }
+  .yaFlorecio .intro{visibility:hidden}
+
+  /* tarjeta de papel */
   .tarjeta{
     position:relative;z-index:2;width:100%;
-    padding:clamp(20px,3.6vh,28px) clamp(18px,6vw,30px) clamp(15px,2.6vh,21px);
-    border:1px solid rgba(255,255,255,.13);
-    border-radius:20px;
-    background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
-    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
-    box-shadow:0 18px 40px -28px rgba(0,0,0,.9);
+    padding:clamp(22px,3.8vh,30px) clamp(20px,6vw,32px) clamp(16px,2.6vh,22px);
+    border-radius:7px;
+    background:linear-gradient(158deg, var(--papel) 0%, var(--papel-2) 100%);
+    box-shadow:0 20px 38px -22px rgba(0,0,0,.85),
+               0 1px 0 rgba(255,255,255,.55) inset;
     display:flex;flex-direction:column;align-items:center;
-    gap:clamp(10px,1.8vh,16px);
-    opacity:0;transform:translateY(12px);
-    transition:opacity .9s ease, transform .9s ease, border-color 1.2s ease;
+    gap:clamp(9px,1.6vh,14px);
+    opacity:0;transform:rotate(-.7deg) translateY(14px);
+    transition:opacity .9s ease, transform .9s cubic-bezier(.2,.8,.3,1);
   }
   .abierto .tarjeta{
-    opacity:1;transform:translateY(0);
+    opacity:1;transform:rotate(-.7deg) translateY(0);
     transition-delay:var(--d-mensaje);
-    border-color:color-mix(in srgb, var(--rosa-claro) 26%, transparent);
   }
 
+  /* sello de lacre */
   .tarjeta::before{
-    content:"";position:absolute;top:-5px;left:50%;
-    width:9px;height:9px;margin-left:-4.5px;
-    background:var(--rosa-claro);transform:rotate(45deg);
-    box-shadow:0 0 12px var(--glow);
-    transition:background 1.2s ease, box-shadow 1.2s ease;
+    content:"";position:absolute;top:-11px;left:50%;margin-left:-11px;
+    width:22px;height:22px;border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, #b02348, var(--glow) 55%, #5c0a1e 100%);
+    box-shadow:0 3px 8px rgba(0,0,0,.5), 0 0 0 3px rgba(247,240,226,.9);
+    transition:background 1.4s ease;
   }
 
   #mensaje{
@@ -215,364 +234,490 @@
     max-width:28ch;min-height:3.2em;
     color:var(--tinta);text-wrap:balance;
   }
-
   .firma{
     font-size:11px;letter-spacing:.22em;text-transform:lowercase;
-    font-variant:small-caps;color:var(--rosa-claro);opacity:.75;
-    transition:color 1.2s ease;
+    font-variant:small-caps;color:var(--glow);opacity:.85;
+    transition:color 1.4s ease;
   }
 
-  /* ── Botón ──────────────────────────────────── */
+  /* ── botón de lacre ─────────────────────────── */
   #btnFlorecer{
-    margin-top:clamp(10px,1.8vh,16px);
-    font:inherit;font-size:13px;letter-spacing:.2em;
+    font:inherit;font-size:13.5px;letter-spacing:.2em;
     font-variant:small-caps;text-transform:lowercase;
-    color:var(--rosa-claro);
-    background:none;border:0;padding:6px 2px;cursor:pointer;
-    position:relative;transition:color .5s ease,opacity .3s ease;
+    color:#fbeadf;
+    background:linear-gradient(180deg, #93142f 0%, #5c0a1e 100%);
+    border:1px solid rgba(255,214,214,.22);
+    border-radius:999px;padding:12px 30px;cursor:pointer;
+    box-shadow:0 12px 26px -16px #93142f, 0 1px 0 rgba(255,255,255,.18) inset;
+    transition:transform .2s ease, box-shadow .45s ease, filter .45s ease, opacity .3s ease;
   }
-  #btnFlorecer::after{
-    content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
-    background:currentColor;transform:scaleX(.35);transform-origin:center;
-    opacity:.55;transition:transform .45s cubic-bezier(.2,.8,.3,1),opacity .45s ease;
+  #btnFlorecer:hover:not(:disabled){
+    filter:brightness(1.14);transform:translateY(-1px);
+    box-shadow:0 16px 32px -14px var(--glow), 0 1px 0 rgba(255,255,255,.25) inset;
   }
-  #btnFlorecer:hover:not(:disabled)::after,
-  #btnFlorecer:focus-visible::after{transform:scaleX(1);opacity:1}
-  #btnFlorecer:focus-visible{outline:none;color:var(--blanco)}
-  #btnFlorecer:disabled{opacity:.35;cursor:default}
+  #btnFlorecer:active:not(:disabled){transform:translateY(0) scale(.98)}
+  #btnFlorecer:focus-visible{outline:2px solid #f0c3ce;outline-offset:3px}
+  #btnFlorecer:disabled{opacity:.45;cursor:default}
 
-  /* ── Destellos ──────────────────────────────── */
+  /* ── botón secundario y modal de datos ──────── */
+  .acciones{
+    display:flex;flex-direction:column;align-items:center;
+    gap:clamp(6px,1.2vh,11px);margin-top:clamp(14px,2.2vh,20px);
+  }
+
+  #btnDatos{
+    font:inherit;font-size:12px;letter-spacing:.16em;
+    font-variant:small-caps;text-transform:lowercase;
+    color:var(--tinta-suave);background:none;border:0;
+    padding:6px 4px;cursor:pointer;position:relative;
+    display:inline-flex;align-items:center;gap:7px;
+    transition:color .4s ease;
+  }
+  #btnDatos::before{content:"✿";font-size:12px;opacity:.75}
+  #btnDatos::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+    background:currentColor;opacity:.3;transform:scaleX(.5);
+    transition:transform .4s cubic-bezier(.2,.8,.3,1),opacity .4s ease;
+  }
+  #btnDatos:hover{color:#f4ded1}
+  #btnDatos:hover::after,#btnDatos:focus-visible::after{transform:scaleX(1);opacity:.75}
+  #btnDatos:focus-visible{outline:none;color:#fff}
+
+  .modal{
+    position:fixed;inset:0;z-index:20;
+    display:grid;place-items:center;padding:24px;
+    opacity:0;visibility:hidden;
+    transition:opacity .35s ease, visibility .35s;
+  }
+  .modal.abre{opacity:1;visibility:visible}
+
+  .modal-fondo{
+    position:absolute;inset:0;background:rgba(12,6,9,.72);
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  }
+
+  .modal-caja{
+    position:relative;width:min(90vw,360px);
+    padding:clamp(28px,4.2vh,36px) clamp(20px,6vw,28px) clamp(12px,1.8vh,16px);
+    border-radius:10px;
+    background:linear-gradient(158deg, var(--papel) 0%, var(--papel-2) 100%);
+    box-shadow:0 26px 50px -24px rgba(0,0,0,.9),
+               0 1px 0 rgba(255,255,255,.55) inset;
+    transform:scale(.94) translateY(12px);
+    transition:transform .4s cubic-bezier(.2,.85,.3,1);
+    text-align:center;
+  }
+  .modal.abre .modal-caja{transform:scale(1) translateY(0)}
+
+  /* la cabecita de gerbera asomada en la esquina */
+  .g--mini{
+    top:-36px;left:-22px;width:94px;
+    transform:rotate(-14deg);
+    filter:drop-shadow(0 7px 15px rgba(0,0,0,.5));
+    pointer-events:none;
+  }
+
+  .modal-x{
+    position:absolute;top:7px;right:9px;
+    font:inherit;font-size:19px;line-height:1;
+    color:rgba(74,21,38,.42);background:none;border:0;cursor:pointer;
+    padding:5px 9px;border-radius:50%;
+    transition:color .3s ease,background .3s ease;
+  }
+  .modal-x:hover{color:var(--tinta);background:rgba(74,21,38,.08)}
+  .modal-x:focus-visible{outline:2px solid var(--glow);outline-offset:1px}
+
+  .modal-titulo{
+    font-size:11px;letter-spacing:.24em;
+    font-variant:small-caps;text-transform:lowercase;
+    color:var(--glow);opacity:.85;margin-bottom:12px;
+  }
+
+  .modal-dato{
+    font-size:clamp(14.5px,2vh,17px);font-style:italic;line-height:1.62;
+    color:var(--tinta);text-wrap:balance;
+    min-height:6.2em;display:grid;place-items:center;
+  }
+  .modal-dato.entra{animation:entraDato .45s ease}
+  @keyframes entraDato{
+    from{opacity:0;transform:translateY(7px)}
+    to  {opacity:1;transform:none}
+  }
+
+  .modal-pie{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-top:10px;padding-top:11px;
+    border-top:1px solid rgba(74,21,38,.14);
+  }
+  .nav{
+    font:inherit;font-size:19px;line-height:1;
+    width:38px;height:38px;border-radius:50%;
+    color:var(--glow);background:rgba(74,21,38,.06);
+    border:1px solid rgba(74,21,38,.14);cursor:pointer;
+    transition:background .3s ease, transform .2s ease;
+  }
+  .nav:hover{background:rgba(74,21,38,.13)}
+  .nav:active{transform:scale(.93)}
+  .nav:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+  .contador{
+    font-size:12px;letter-spacing:.14em;
+    color:rgba(74,21,38,.6);font-variant:tabular-nums;
+  }
+
+  /* ── destellos ──────────────────────────────── */
   .destello{
     position:absolute;z-index:4;pointer-events:none;
     width:var(--s,4px);height:var(--s,4px);border-radius:50%;
-    background:radial-gradient(circle,#fff 0%, rgba(255,255,255,.55) 38%, transparent 72%);
+    background:radial-gradient(circle,#fff 0%, rgba(255,236,220,.5) 38%, transparent 72%);
     opacity:0;animation:respira var(--dur,2.6s) ease-in-out var(--del,0s) forwards;
   }
   @keyframes respira{
     0%  {opacity:0;transform:translate(-50%,-50%) scale(.35)}
-    38% {opacity:var(--max,.5);transform:translate(-50%,-50%) scale(1)}
+    38% {opacity:var(--max,.45);transform:translate(-50%,-50%) scale(1)}
     100%{opacity:0;transform:translate(-50%,-50%) scale(.55)}
   }
 
   @media (prefers-reduced-motion: reduce){
-    .polen,.destello{animation:none;opacity:.35}
-    .petalo,.corona,.brote{transition-duration:.01s;transition-delay:0s}
+    .bokeh,.destello{animation:none;opacity:.18}
+    .abierto .cabeza{animation:none}
+    .petalo,.centro,.anillo,.brote{transition-duration:.01s;transition-delay:0s}
     .tarjeta{transition-delay:.1s}
-    .lirio--izq,.lirio--der{filter:none}
+    .intro{animation:none;opacity:.92}
+    .modal-caja{transition:none}
+    .modal-dato.entra{animation:none}
+    .g--alta,.g--baja{filter:none}
   }
 
   @media (max-height:620px){
     .rotulo{display:none}
     #mensaje{min-height:2.5em}
-    #jardin{width:min(74vw,36vh);margin-bottom:clamp(22px,4vh,34px)}
+    #jardin{width:min(74vw,34vh);margin-bottom:clamp(18px,3.6vh,30px)}
   }
 </style>
 </head>
 <body>
 
-<div class="haz haz--a" aria-hidden="true"></div>
-<div class="haz haz--b" aria-hidden="true"></div>
-<div id="aire" aria-hidden="true"></div>
+<div id="campo" aria-hidden="true"></div>
 
 <main class="escena" id="escena">
 
-  <p class="rotulo">del jardín de la noche</p>
+  <p class="rotulo">del campo de gerberas</p>
 
   <div id="jardin">
     <div class="aura" aria-hidden="true"></div>
-
-    <!-- follaje de atrás -->
-    <svg id="follaje" class="follaje" viewBox="0 0 200 200" aria-hidden="true">
-      <defs>
-        <linearGradient id="gCapullo" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0"   stop-color="#2c6b45"/>
-          <stop offset=".5"  stop-color="#b6d99a"/>
-          <stop offset="1"   style="stop-color:var(--rosa-claro)"/>
-        </linearGradient>
-      </defs>
-    </svg>
-
-    <!-- una hoja por delante, para dar profundidad -->
-    <svg id="follajeFrente" class="follaje" viewBox="0 0 200 200" aria-hidden="true"></svg>
+    <svg id="follaje" viewBox="0 0 200 224" aria-hidden="true"></svg>
   </div>
 
-  <section class="tarjeta">
-    <p id="mensaje" aria-live="polite"></p>
-    <p class="firma" id="firma"></p>
-  </section>
+  <div class="zona">
+    <p class="intro" id="intro"></p>
+    <section class="tarjeta">
+      <p id="mensaje" aria-live="polite"></p>
+      <p class="firma" id="firma"></p>
+    </section>
+  </div>
 
-  <button id="btnFlorecer" type="button">florecer</button>
+  <div class="acciones">
+    <button id="btnFlorecer" type="button">florecer</button>
+    <button id="btnDatos" type="button">datos curiosos</button>
+  </div>
 
 </main>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal-fondo" data-cerrar></div>
+  <div class="modal-caja">
+    <button class="modal-x" type="button" data-cerrar aria-label="Cerrar">&times;</button>
+    <p class="modal-titulo" id="modalTitulo">datos curiosos</p>
+    <p class="modal-dato" id="dato"></p>
+    <div class="modal-pie">
+      <button class="nav" id="antDato" type="button" aria-label="Dato anterior">&lsaquo;</button>
+      <span class="contador" id="contador"></span>
+      <button class="nav" id="sigDato" type="button" aria-label="Dato siguiente">&rsaquo;</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
    1. PERSONALIZABLE — edita este bloque y nada más
    ═══════════════════════════════════════════════════════════════ */
 
+const INTRO  = "Hice esto pensando en ti";   // se disuelve al florecer
+const FIRMA  = "para ti";
+const ROTULO = "del campo de gerberas";
+
 const MENSAJES = [
-  "El lirio significa admiración. Por algo terminé haciéndote estos.",
-  "Hay días que se ponen mejores solo porque me escribiste.",
-  "Gracias por ser de esas personas con las que hablar es fácil.",
-  "Ojalá tu semana sea tan bonita como tú haces ver todo lo demás.",
-  "Si el día viene pesado, acuérdate de que por acá alguien te echa porras.",
-  "No hacía falta ocasión especial: hoy me acordé de ti y ya.",
-  "Que alguien te cuide hoy como tú cuidas a todo el mundo.",
-  "Me alegra un montón que existas. Así de simple.",
-  "Estos lirios son chiquitos, pero el cariño con el que los hice no.",
-  "Cuando algo bueno me pasa, tú eres de las primeras a quien quiero contarle."
+  "Las gerberas tienen algo de sol en los pétalos. Me pareció una buena excusa para mandarte un poquito de eso.",
+  "Si pudiera empacar un buen día y mandártelo, probablemente vendría acompañado de estas flores.",
+  "Un poquito de color para hacerle competencia a cualquier día gris que se te atraviese.",
+  "Dicen que las flores alegran los espacios. Estas tienen una misión un poquito más importante.",
+  "No sé qué tenía planeado el día para ti, pero espero que estas flores lo mejoren un poquito.",
+  "Hay detalles que no necesitan explicación. Este es uno de esos.",
+  "Que estas flores hagan lo que mejor saben hacer: poner un poco más de color donde llegan.",
+  "Te dejo un pequeño exceso de color, porque nunca está de más tener un día bonito.",
+  "Si una sonrisa pudiera tener pétalos, probablemente se parecería bastante a una gerbera.",
+  "Una pequeña dosis de alegría, porque a veces el día simplemente la necesita."
 ];
 
-const FIRMA  = "para ti";
-const ROTULO = "del jardín de la noche";
+/* Datos del botón "datos curiosos". Puedes agregar o quitar los que quieras:
+   el contador (1 / 10) se ajusta solo.                                      */
+const DATOS = [
+  "Lo que parece una sola flor son en realidad cientos. Cada pétalo y cada granito del centro es una florecita independiente; el conjunto se llama capítulo.",
+  "Su nombre viene de Traugott Gerber, médico y botánico alemán del siglo XVIII. Fue Linneo quien bautizó así al género, en honor a su amigo.",
+  "La gerbera que conocemos viene de Sudáfrica. La especie más común se describió cerca de Barberton en 1889, y por eso también le dicen margarita del Transvaal.",
+  "Suele aparecer entre las cinco flores de corte más vendidas del mundo, junto a la rosa, el clavel, el crisantemo y el tulipán.",
+  "Ese anillo pálido y peludito que rodea el centro no es adorno: son flores intermedias, más cortas que los pétalos y distintas de las del disco.",
+  "Existe en casi todos los colores menos en azul de verdad. Las gerberas azules que se ven en floristería están teñidas.",
+  "La NASA la incluyó en su estudio de plantas de interior: resultó de las mejores filtrando compuestos como el benceno del aire de una habitación.",
+  "En el lenguaje de las flores representa la alegría y la inocencia. Es de las pocas que se pueden regalar sin segundas intenciones... o con todas.",
+  "Su tallo es hueco y se dobla con facilidad. Por eso se corta en diagonal y se pone en poca agua, bien limpia: se pudre más rápido que otras flores.",
+  "Colombia es uno de los mayores exportadores de flores del mundo, y la gerbera es una de las que sale de la sabana de Bogotá hacia medio planeta."
+];
 
 const TONOS = [
-  { rosa:"#f4508e", suave:"#f98cb4", claro:"#ffd8e6", puntos:"#b31240", glow:"#ff6fae" },
-  { rosa:"#f76173", suave:"#fb96a2", claro:"#ffdedd", puntos:"#b0203a", glow:"#ff7d8e" },
-  { rosa:"#e63aa0", suave:"#f47ec6", claro:"#ffd9ef", puntos:"#9c1470", glow:"#ff5ec0" },
-  { rosa:"#d92e6a", suave:"#ef7396", claro:"#ffd6e2", puntos:"#8f0f38", glow:"#ff4f86" }
+  { nombre:"Vino tinto", claro:"#e2a3ae", medio:"#8d0f2f", punta:"#a81c3e", vena:"#54081c", glow:"#a31f42" },
+  { nombre:"Borgoña",    claro:"#d69aa6", medio:"#6f0c26", punta:"#8b1636", vena:"#420715", glow:"#8a1836" },
+  { nombre:"Granate",    claro:"#e6a5a5", medio:"#9c1526", punta:"#b62436", vena:"#5c0a14", glow:"#ad2233" },
+  { nombre:"Malbec",     claro:"#d99cb4", medio:"#75123f", punta:"#901c52", vena:"#470a26", glow:"#8e1e4c" }
 ];
 
 const CONFIG = {
-  polen:26,
-  msTono:3000,
-  msFlorecer:2400,
-  msReflorecer:1500,
-  motasPorPetalo:14,
-  destellos:11,
-  destellosAmbiente:2
+  bokeh:16,           // flores desenfocadas del fondo
+  msTono:3400,
+  msFlorecer:2600,
+  msReflorecer:1600,
+  destellos:10,
+  destellosAmbiente:2,
+  // anatomía: coronas densas, sin huecos
+  petalosExternos:38,
+  petalosInternos:32,
+  anchoExterno:8.1,
+  anchoInterno:7.3,
+  flecos:62,
+  granos:110
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   2. AIRE
+   2. FONDO
    ═══════════════════════════════════════════════════════════════ */
 
 const azar = (a,b) => Math.random()*(b-a)+a;
 
-function llenarAire(){
-  const aire = document.getElementById("aire");
-  const frag = document.createDocumentFragment();
-  for (let i=0;i<CONFIG.polen;i++){
-    const s = azar(1.6,3.6);
-    const p = document.createElement("div");
-    p.className = "polen";
-    p.style.cssText =
-      `left:${azar(0,100)}%;width:${s.toFixed(1)}px;height:${s.toFixed(1)}px;` +
-      `--dur:${azar(16,30).toFixed(1)}s;--del:${azar(-24,0).toFixed(1)}s;` +
-      `--dx:${azar(-9,9).toFixed(1)}vw;--max:${azar(.18,.45).toFixed(2)};` +
-      `box-shadow:0 0 ${(s*2).toFixed(1)}px rgba(255,236,210,.5)`;
-    frag.appendChild(p);
+function llenarCampo(){
+  const campo = document.getElementById("campo");
+  const frag  = document.createDocumentFragment();
+  const colores = ["rgba(196,64,92,.9)","rgba(226,140,120,.85)","rgba(214,168,86,.8)",
+                   "rgba(150,44,72,.9)","rgba(238,190,170,.7)","rgba(120,90,60,.8)"];
+  for (let i=0;i<CONFIG.bokeh;i++){
+    const s = azar(46,160);
+    const b = document.createElement("div");
+    b.className = "bokeh";
+    b.style.cssText =
+      `left:${azar(-6,98).toFixed(1)}%;top:${azar(-4,96).toFixed(1)}%;` +
+      `width:${s.toFixed(0)}px;height:${s.toFixed(0)}px;` +
+      `--c:${colores[Math.floor(Math.random()*colores.length)]};` +
+      `--max:${azar(.10,.26).toFixed(2)};` +
+      `--dx:${azar(-16,16).toFixed(0)}px;--dy:${azar(-22,10).toFixed(0)}px;` +
+      `--dur:${azar(18,38).toFixed(1)}s;--del:${azar(-30,0).toFixed(1)}s`;
+    frag.appendChild(b);
   }
-  aire.appendChild(frag);
+  campo.appendChild(frag);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   3. FOLLAJE
-   Las hojas NO se colocan a ojo: cada una se ancla a un tallo real.
-   Se dice de qué tallo nace (0 a 1 a lo largo del tallo) y de qué
-   lado; el ángulo se calcula desde la tangente del tallo, así ninguna
-   queda torcida respecto a su rama.
+   3. LA GERBERA
    ═══════════════════════════════════════════════════════════════ */
 
-// hoja lanceolada apuntando hacia arriba desde el origen, con curva de hoz
-function pathHoja(L, W, curva){
-  const c = curva;
-  return `M0 0
-    C ${-W*.95} ${-L*.26}, ${(-W*.85 + c*.5).toFixed(1)} ${-L*.64}, ${c} ${-L}
-    C ${(W*.7 + c*.5).toFixed(1)} ${-L*.64}, ${W*.62} ${-L*.26}, 0 0 Z`;
+const C = 100;
+
+function pathPetalo(r0, r1, w){
+  const L = r1 - r0;
+  const y = k => (C - (r0 + L*k)).toFixed(1);
+  return `M${C} ${(C-r0).toFixed(1)}
+    C ${C-w*.78} ${y(.14)}, ${C-w} ${y(.42)}, ${C-w*.88} ${y(.76)}
+    C ${C-w*.62} ${y(.97)}, ${C+w*.62} ${y(.97)}, ${C+w*.88} ${y(.76)}
+    C ${C+w} ${y(.42)}, ${C+w*.78} ${y(.14)}, ${C} ${(C-r0).toFixed(1)} Z`;
 }
 
-// dirección del tallo en un punto: 0 = hacia arriba, + = hacia la derecha
-function anguloTallo(tallo, d){
-  const total = tallo.getTotalLength();
-  const a = tallo.getPointAtLength(Math.max(0, d - 2.5));
-  const b = tallo.getPointAtLength(Math.min(total, d + 2.5));
-  return Math.atan2(b.x - a.x, -(b.y - a.y)) * 180 / Math.PI;
-}
-
-// t = posición sobre el tallo (0 = base, 1 = punta) · lado = -1 izquierda, 1 derecha
-function hojaEnTallo(tallo, t, lado, L, W, color, apertura = 42){
-  const d = tallo.getTotalLength() * t;
-  const p = tallo.getPointAtLength(d);
-  // se abre respecto a la rama, pero nunca por debajo de la horizontal
-  let ang = anguloTallo(tallo, d) + lado * apertura;
-  ang = Math.max(-82, Math.min(82, ang));
-  const curva = lado * L * .16;
-  return `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})">
-    <path d="${pathHoja(L, W, curva)}" fill="${color}"/>
-  </g>`;
-}
-
-// el capullo se planta en la punta de su pedúnculo, siguiendo su dirección
-function capulloEnTallo(tallo, L){
-  const d = tallo.getTotalLength();
-  const p = tallo.getPointAtLength(d);
-  const ang = anguloTallo(tallo, d);
-  const w = L * .23;
-  return `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})">
-    <path d="M0 0 C ${-w} ${-L*.22}, ${-w*1.15} ${-L*.62}, 0 ${-L}
-             C ${w*1.15} ${-L*.62}, ${w} ${-L*.22}, 0 0 Z" fill="url(#gCapullo)"/>
-    <ellipse cx="0" cy="-1" rx="${(w*.8).toFixed(1)}" ry="2.4" fill="#2c6b45"/>
-  </g>`;
-}
-
-function construirFollaje(){
-  const atras  = document.getElementById("follaje");
-  const frente = document.getElementById("follajeFrente");
-
-  /* ── tallos ──────────────────────────────────────────────
-     principal: sube del borde inferior hasta la flor del frente
-     izquierdo: bordea la flor grande por fuera hasta la flor de arriba
-     derecho:   sale de un nodo bajo y llega a la flor de la derecha
-     pedúnculo: sostiene el capullo                              */
-  atras.insertAdjacentHTML("beforeend", `
-    <g class="brote" style="--rt:0s" fill="none" stroke="var(--tallo)" stroke-linecap="round">
-      <path id="tMain" d="M99 208 C 97 190, 99 152, 100 114" stroke-width="3.4"/>
-      <path id="tIzq"  d="M97 184 C 76 180, 44 166, 30 132 C 22 110, 26 78, 40 58" stroke-width="2.6"/>
-      <path id="tDer"  d="M102 192 C 124 196, 150 188, 162 170" stroke-width="2.4"/>
-      <path id="tCap"  d="M103 193 C 114 189, 124 185, 132 181" stroke-width="1.7"/>
-    </g>`);
-
-  const tMain = document.getElementById("tMain");
-  const tIzq  = document.getElementById("tIzq");
-  const tDer  = document.getElementById("tDer");
-  const tCap  = document.getElementById("tCap");
-
-  const verde = "var(--hoja)";
-
-  /* ── hojas: pocas, colgadas de su propio tallo ───────────
-     hojaEnTallo(tallo, posición 0-1, lado, largo, ancho)     */
-  atras.insertAdjacentHTML("beforeend", `
-    <g class="brote" style="--rt:.14s">
-      ${hojaEnTallo(tMain, .10, -1, 66, 12, verde)}
-      ${hojaEnTallo(tMain, .24,  1, 56, 11, verde)}
-      ${hojaEnTallo(tIzq,  .34, -1, 46, 10, verde)}
-      ${hojaEnTallo(tDer,  .45, -1, 44, 10, verde)}
-    </g>`);
-
-  atras.insertAdjacentHTML("beforeend", `
-    <g class="brote" style="--rt:.26s">${capulloEnTallo(tCap, 28)}</g>`);
-
-  /* ── una hoja por delante: cruza la flor y da profundidad ── */
-  frente.insertAdjacentHTML("beforeend", `
-    <g class="brote" style="--rt:.32s">
-      ${hojaEnTallo(tMain, .04, -1, 62, 12, "var(--hoja-frente)", 34)}
-    </g>`);
-}
-
-
-/* ═══════════════════════════════════════════════════════════════
-   4. CONSTRUCCIÓN DEL LIRIO
-   ═══════════════════════════════════════════════════════════════ */
-
-function pathPetalo(largo, ancho){
-  const w = ancho/2, y = t => (100 - largo*t).toFixed(1);
-  const xi = k => (100 - w*k).toFixed(1);
-  const xd = k => (100 + w*k).toFixed(1);
-  return `M100 100
-    C ${xi(.72)} ${y(.16)}, ${xi(1)} ${y(.44)}, ${xi(.84)} ${y(.72)}
-    C ${xi(.62)} ${y(.90)}, ${xi(.24)} ${y(.98)}, 100 ${y(1)}
-    C ${xd(.24)} ${y(.98)}, ${xd(.62)} ${y(.90)}, ${xd(.84)} ${y(.72)}
-    C ${xd(1)} ${y(.44)}, ${xd(.72)} ${y(.16)}, 100 100 Z`;
-}
-
-function motas(largo, ancho){
+function corona(id, n, r0, r1, w, desfase, iBase, detalle, cls = "petalo"){
   let s = "";
-  for (let i=0;i<CONFIG.motasPorPetalo;i++){
-    const t  = azar(.08,.45);
-    const hw = (ancho/2) * Math.sin(Math.PI*t) * .78;
-    const x  = 100 + azar(-hw,hw);
-    const yy = 100 - largo*t;
-    const r  = azar(.9,2.1);
-    s += `<ellipse class="mota" cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}"
-            rx="${r.toFixed(1)}" ry="${(r*.8).toFixed(1)}"
-            fill="var(--puntos)" opacity="${azar(.35,.7).toFixed(2)}"/>`;
+  for (let i=0;i<n;i++){
+    const ang = (360/n)*i + desfase + azar(-1.1,1.1);
+    const rr1 = r1 * azar(.965,1.035);
+    const ww  = w  * azar(.95,1.08);
+    const d   = pathPetalo(r0, rr1, ww);
+    s += `<g transform="rotate(${ang.toFixed(1)} ${C} ${C})">
+      <g class="${cls}" style="--i:${iBase + i}">
+        <path d="${d}" fill="url(#pet${id})"
+              stroke="var(--p-vena)" stroke-opacity=".28" stroke-width=".45"/>
+        ${detalle ? `<path d="${d}" fill="url(#sheen${id})"/>
+        <path class="vena" d="M${C} ${(C-r0-2).toFixed(1)} L ${C} ${(C-rr1+4).toFixed(1)}"/>` : ``}
+      </g>
+    </g>`;
   }
   return s;
 }
 
-function estambres(){
+function fleco(n, rIn, rOut){
   let s = "";
-  const angs = [-58,-35,-12,12,35,58];
-  angs.forEach((a,i) => {
-    const L   = [40,46,43,43,46,40][i];
-    const rad = a*Math.PI/180;
-    const x   = 100 + L*Math.sin(rad);
-    const yy  = 100 - L*Math.cos(rad);
-    const cx  = 100 + L*.55*Math.sin(rad) + Math.sin(rad)*7;
-    const cy  = 100 - L*.62*Math.cos(rad);
-    s += `<path d="M100 100 Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${yy.toFixed(1)}"
-            fill="none" stroke="#e9f4cd" stroke-width="1.5" stroke-linecap="round" opacity=".92"/>`;
-    s += `<ellipse cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}" rx="6.6" ry="2.9" fill="#c22a1e"
-            transform="rotate(${(a+62).toFixed(0)} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
-    s += `<ellipse cx="${(x-1).toFixed(1)}" cy="${(yy-1).toFixed(1)}" rx="3.4" ry="1.2"
-            fill="#f26a4b" opacity=".7"
-            transform="rotate(${(a+62).toFixed(0)} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
-  });
-  s += `<path d="M100 100 Q 96 74 94 54" fill="none" stroke="#dceeb2"
-          stroke-width="2.1" stroke-linecap="round"/>`;
-  s += `<ellipse cx="94" cy="52" rx="4.2" ry="3.2" fill="#cfe79a"/>`;
+  for (let i=0;i<n;i++){
+    const ang = (360/n)*i + azar(-2.2,2.2);
+    const r   = rOut * azar(.9,1.06);
+    s += `<g transform="rotate(${ang.toFixed(1)} ${C} ${C})">
+      <path d="M${C} ${C-rIn}
+               C ${C-1.3} ${(C-(rIn+r)/2).toFixed(1)}, ${C-1.1} ${(C-r+1).toFixed(1)}, ${C} ${(C-r).toFixed(1)}
+               C ${C+1.1} ${(C-r+1).toFixed(1)}, ${C+1.3} ${(C-(rIn+r)/2).toFixed(1)}, ${C} ${C-rIn} Z"
+            fill="#f5ded2" opacity="${azar(.6,.95).toFixed(2)}"/>
+      <circle cx="${C}" cy="${(C-r).toFixed(1)}" r="${azar(.85,1.45).toFixed(2)}"
+              fill="${Math.random()<.45 ? "#e3c076" : "#fbeee0"}" opacity=".9"/>
+    </g>`;
+  }
+  return s;
+}
+
+function disco(id, n, rMax){
+  let s = `<circle cx="${C}" cy="${C}" r="${rMax}" fill="url(#disc${id})"/>`;
+  for (let i=0;i<n;i++){
+    const a = azar(0, Math.PI*2);
+    const r = Math.sqrt(azar(.06,1)) * (rMax-1.5);
+    const x = C + Math.cos(a)*r, y = C + Math.sin(a)*r;
+    const t = r / rMax;
+    const col = t > .74 ? (Math.random()<.5 ? "#d9b062" : "#a8762c")
+              : t > .42 ? (Math.random()<.5 ? "#7a3f18" : "#5c2a12")
+              : "#2c0d0b";
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}"
+            r="${azar(.75,1.5).toFixed(2)}" fill="${col}" opacity="${azar(.55,.95).toFixed(2)}"/>`;
+  }
+  s += `<circle cx="${C}" cy="${C}" r="${(rMax*.38).toFixed(1)}" fill="url(#ojo${id})"/>`;
   return s;
 }
 
 let uid = 0;
-function crearLirio(clase, giro){
-  const id = "f" + (uid++);
-  const externo = { largo:88, ancho:40 };
-  const interno = { largo:84, ancho:49 };
+function crearGerbera(clase, tono, opciones = {}){
+  const id  = "g" + (uid++);
+  const det = opciones.detalle !== false;
+  const nExt = opciones.externos ?? CONFIG.petalosExternos;
+  const nInt = opciones.internos ?? CONFIG.petalosInternos;
 
-  const grad = (sufijo, ancho) => `
-    <linearGradient id="len${id}${sufijo}" gradientUnits="userSpaceOnUse"
-                    x1="100" y1="100" x2="100" y2="12">
-      <stop offset="0"   style="stop-color:var(--garganta)"/>
-      <stop offset=".07" style="stop-color:var(--rosa-claro)"/>
-      <stop offset=".20" style="stop-color:var(--rosa)"/>
-      <stop offset=".37" style="stop-color:var(--rosa-suave)"/>
-      <stop offset=".55" style="stop-color:var(--blanco)"/>
-      <stop offset="1"   style="stop-color:var(--blanco)"/>
-    </linearGradient>
-    <linearGradient id="bor${id}${sufijo}" gradientUnits="userSpaceOnUse"
-                    x1="${100-ancho/2}" y1="0" x2="${100+ancho/2}" y2="0">
-      <stop offset="0"   style="stop-color:var(--blanco)" stop-opacity=".97"/>
-      <stop offset=".24" style="stop-color:var(--blanco)" stop-opacity="0"/>
-      <stop offset=".76" style="stop-color:var(--blanco)" stop-opacity="0"/>
-      <stop offset="1"   style="stop-color:var(--blanco)" stop-opacity=".97"/>
-    </linearGradient>`;
+  /* la del modal es estática: no lleva las clases que animan la apertura */
+  const est    = !!opciones.estatica;
+  const cPet   = est ? "estatica" : "petalo";
+  const cAnillo= est ? "" : "anillo";
+  const cCentro= est ? "" : "centro";
+  const cCabeza= est ? "" : "cabeza";
 
-  const petalo = (cfg, sufijo, ang, i) => {
-    const d = pathPetalo(cfg.largo, cfg.ancho);
-    return `
-      <g transform="rotate(${ang} 100 100)">
-        <g class="petalo" style="--i:${i}">
-          <path d="${d}" fill="url(#len${id}${sufijo})"/>
-          <path d="${d}" fill="url(#bor${id}${sufijo})"/>
-          <path class="nervio" d="M100 97 C 99 ${100-cfg.largo*.22}, 100 ${100-cfg.largo*.40}, 100 ${100-cfg.largo*.56}"/>
-          ${motas(cfg.largo, cfg.ancho)}
-          <path class="contorno" d="${d}"/>
-        </g>
-      </g>`;
-  };
-
-  let cuerpo = "";
-  [0,120,240].forEach((a,i) => cuerpo += petalo(externo,"a", a+30+giro, i));
-  [60,180,300].forEach((a,i) => cuerpo += petalo(interno,"b", a+30+giro, i+3));
+  /* dos coronas apretadas: la interna llega hasta 76 para que no
+     quede fondo visible entre ella y la externa                */
+  const anillos =
+    corona(id, nExt, 26, 91, CONFIG.anchoExterno, 0,            0,    det, cPet) +
+    corona(id, nInt, 24, 76, CONFIG.anchoInterno, 360/(nExt*2), nExt, det, cPet);
 
   return `
-    <svg class="lirio ${clase}" viewBox="0 0 200 200" role="img"
-         aria-label="Ilustración de un lirio blanco con el centro rosado">
+    <svg class="gerbera ${clase}" viewBox="0 0 200 200" role="img"
+         style="--p-claro:${tono.claro};--p-medio:${tono.medio};
+                --p-punta:${tono.punta};--p-vena:${tono.vena};
+                --sway:${azar(7,10).toFixed(1)}s;--swayDel:${azar(0,2).toFixed(1)}s"
+         aria-label="Ilustración de una gerbera color vino tinto">
       <defs>
-        ${grad("a", externo.ancho)}
-        ${grad("b", interno.ancho)}
-        <radialGradient id="cen${id}">
-          <stop offset="0"   style="stop-color:var(--garganta)" stop-opacity=".95"/>
-          <stop offset=".55" style="stop-color:var(--garganta)" stop-opacity=".35"/>
-          <stop offset="1"   style="stop-color:var(--garganta)" stop-opacity="0"/>
+        <linearGradient id="pet${id}" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0"   style="stop-color:var(--p-claro)"/>
+          <stop offset=".16" style="stop-color:var(--p-claro)"/>
+          <stop offset=".46" style="stop-color:var(--p-medio)"/>
+          <stop offset=".84" style="stop-color:var(--p-medio)"/>
+          <stop offset="1"   style="stop-color:var(--p-punta)"/>
+        </linearGradient>
+        <linearGradient id="sheen${id}" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#fff" stop-opacity=".2"/>
+          <stop offset=".34" stop-color="#fff" stop-opacity="0"/>
+          <stop offset=".66" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="1"   stop-color="#fff" stop-opacity=".2"/>
+        </linearGradient>
+        <radialGradient id="disc${id}">
+          <stop offset="0"   stop-color="#3a1410"/>
+          <stop offset=".62" stop-color="#5c2c12"/>
+          <stop offset="1"   stop-color="#8a5a24"/>
+        </radialGradient>
+        <radialGradient id="ojo${id}">
+          <stop offset="0"   stop-color="#0d0305"/>
+          <stop offset=".7"  stop-color="#1d0708" stop-opacity=".95"/>
+          <stop offset="1"   stop-color="#2c0d0b" stop-opacity="0"/>
         </radialGradient>
       </defs>
-      ${cuerpo}
-      <circle class="corona" cx="100" cy="100" r="30" fill="url(#cen${id})"/>
-      <g class="corona">${estambres()}</g>
+
+      <g class="${cCabeza}">
+        <g class="${cAnillo}">${anillos}</g>
+        <g class="${cCentro}">
+          ${fleco(CONFIG.flecos, 20, 29)}
+          ${disco(id, det ? CONFIG.granos : Math.round(CONFIG.granos*.5), 20)}
+        </g>
+      </g>
     </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. TALLOS Y HOJAS BASALES
+   ═══════════════════════════════════════════════════════════════ */
+
+function anguloTallo(t, d){
+  const total = t.getTotalLength();
+  const a = t.getPointAtLength(Math.max(0, d-2.5));
+  const b = t.getPointAtLength(Math.min(total, d+2.5));
+  return Math.atan2(b.x - a.x, -(b.y - a.y)) * 180/Math.PI;
+}
+
+function pathHojaLobulada(L, W, lobulos){
+  const hw = t => W * Math.sin(Math.PI * Math.min(t*.92 + .08, .97));
+  let d = `M0 0`;
+  for (let i=1;i<=lobulos;i++){
+    const t0=(i-1)/lobulos, t1=i/lobulos;
+    const y0=-L*t0, y1=-L*t1;
+    const salida = hw(t0 + (t1-t0)*.5) * 1.32;
+    d += ` C ${salida.toFixed(1)} ${(y0-(L/lobulos)*.15).toFixed(1)},
+             ${(hw(t1)*1.2).toFixed(1)} ${(y1+(L/lobulos)*.45).toFixed(1)},
+             ${(hw(t1)*.5).toFixed(1)} ${y1.toFixed(1)}`;
+  }
+  d += ` L 0 ${(-L-2).toFixed(1)}`;
+  for (let i=lobulos;i>=1;i--){
+    const t0=i/lobulos, t1=(i-1)/lobulos;
+    const y0=-L*t0, y1=-L*t1;
+    const salida = hw(t1 + (t0-t1)*.5) * 1.32;
+    d += ` C ${(-hw(t0)*1.2).toFixed(1)} ${(y0+(L/lobulos)*.1).toFixed(1)},
+             ${(-salida).toFixed(1)} ${(y1-(L/lobulos)*.4).toFixed(1)},
+             ${(-hw(t1)*.5).toFixed(1)} ${y1.toFixed(1)}`;
+  }
+  return d + " Z";
+}
+
+function hojaEnTallo(tallo, t, lado, L, W, color, apertura = 46){
+  const d = tallo.getTotalLength() * t;
+  const p = tallo.getPointAtLength(d);
+  let ang = anguloTallo(tallo, d) + lado * apertura;
+  ang = Math.max(-86, Math.min(86, ang));
+  return `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang.toFixed(1)})">
+    <path d="${pathHojaLobulada(L, W, 4)}" fill="${color}"/>
+  </g>`;
+}
+
+function construirFollaje(){
+  const svg = document.getElementById("follaje");
+
+  svg.insertAdjacentHTML("beforeend", `
+    <g class="brote" style="--rt:0s" fill="none" stroke="var(--tallo)" stroke-linecap="round">
+      <path id="tA" d="M101 236 C 99 200, 100 150, 100 104" stroke-width="4"/>
+      <path id="tB" d="M116 238 C 124 196, 131 110, 132 48"  stroke-width="3.4"/>
+      <path id="tC" d="M86 240 C 72 208, 44 158, 28 116"     stroke-width="3"/>
+    </g>`);
+
+  const tA = document.getElementById("tA"),
+        tB = document.getElementById("tB"),
+        tC = document.getElementById("tC");
+
+  svg.insertAdjacentHTML("beforeend", `
+    <g class="brote" style="--rt:.16s">
+      ${hojaEnTallo(tA, .04, -1, 52, 17, "var(--hoja)")}
+      ${hojaEnTallo(tB, .03,  1, 46, 15, "var(--hoja)")}
+      ${hojaEnTallo(tC, .05, -1, 40, 14, "var(--hoja-frente)")}
+    </g>`);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -584,28 +729,32 @@ const jardin  = document.getElementById("jardin");
 const boton   = document.getElementById("btnFlorecer");
 const mensaje = document.getElementById("mensaje");
 
+document.getElementById("intro").textContent  = INTRO;
 document.getElementById("firma").textContent  = FIRMA;
 document.querySelector(".rotulo").textContent = ROTULO;
 
 construirFollaje();
 
-// las flores van entre el follaje de atrás y el de adelante
-document.getElementById("follajeFrente").insertAdjacentHTML("beforebegin",
-  crearLirio("lirio--izq",   -8) +
-  crearLirio("lirio--der",    16) +
-  crearLirio("lirio--frente",  4));
+jardin.insertAdjacentHTML("beforeend",
+  crearGerbera("g--alta",   TONOS[1], { detalle:false, externos:30, internos:24 }) +
+  crearGerbera("g--baja",   TONOS[2], { detalle:false, externos:28, internos:22 }) +
+  crearGerbera("g--frente", TONOS[0]));
+
+const flores = [...jardin.querySelectorAll(".gerbera")];
 
 let ultimo = -1, iTono = -1, abierta = false;
 let cicloTono = null, cicloDestellos = null;
 
 function aplicarTono(indice){
   iTono = (indice + TONOS.length) % TONOS.length;
-  const t = TONOS[iTono], r = document.documentElement.style;
-  r.setProperty("--rosa", t.rosa);
-  r.setProperty("--rosa-suave", t.suave);
-  r.setProperty("--rosa-claro", t.claro);
-  r.setProperty("--puntos", t.puntos);
-  r.setProperty("--glow", t.glow);
+  flores.forEach((f, k) => {
+    const t = TONOS[(iTono + k) % TONOS.length];
+    f.style.setProperty("--p-claro", t.claro);
+    f.style.setProperty("--p-medio", t.medio);
+    f.style.setProperty("--p-punta", t.punta);
+    f.style.setProperty("--p-vena",  t.vena);
+  });
+  document.documentElement.style.setProperty("--glow", TONOS[iTono].glow);
 }
 const siguienteTono = () => aplicarTono(iTono + 1);
 
@@ -619,15 +768,14 @@ function mensajeAlAzar(){
 
 function destellos(cantidad){
   for (let i=0;i<cantidad;i++){
-    const ang  = azar(0, Math.PI*2);
-    const dist = azar(26, 52);
+    const ang = azar(0, Math.PI*2), dist = azar(28, 54);
     const d = document.createElement("div");
     d.className = "destello";
     d.style.cssText =
       `left:${(50 + Math.cos(ang)*dist).toFixed(1)}%;` +
-      `top:${(50 + Math.sin(ang)*dist*.92).toFixed(1)}%;` +
-      `--s:${azar(3,6).toFixed(1)}px;--dur:${azar(2.2,3.6).toFixed(2)}s;` +
-      `--del:${azar(0,1.1).toFixed(2)}s;--max:${azar(.3,.6).toFixed(2)};` +
+      `top:${(46 + Math.sin(ang)*dist*.9).toFixed(1)}%;` +
+      `--s:${azar(3,5.5).toFixed(1)}px;--dur:${azar(2.2,3.6).toFixed(2)}s;` +
+      `--del:${azar(0,1.1).toFixed(2)}s;--max:${azar(.25,.5).toFixed(2)};` +
       `box-shadow:0 0 7px 1px color-mix(in srgb, var(--glow) 55%, transparent)`;
     jardin.appendChild(d);
     d.addEventListener("animationend", () => d.remove());
@@ -646,15 +794,16 @@ function florecer(veloz){
   boton.disabled = true;
   const total = veloz ? CONFIG.msReflorecer : CONFIG.msFlorecer;
 
-  setTimeout(() => destellos(CONFIG.destellos), total * .45);
+  setTimeout(() => destellos(CONFIG.destellos), total * .5);
 
   setTimeout(() => {
+    escena.classList.add("yaFlorecio");   // el mensajito inicial no vuelve
     boton.disabled = false;
-    boton.textContent = "otro lirio";
+    boton.textContent = "otra flor";
     clearInterval(cicloTono);
     clearInterval(cicloDestellos);
     cicloTono      = setInterval(siguienteTono, CONFIG.msTono);
-    cicloDestellos = setInterval(() => destellos(CONFIG.destellosAmbiente), 3200);
+    cicloDestellos = setInterval(() => destellos(CONFIG.destellosAmbiente), 3400);
   }, total);
 }
 
@@ -671,15 +820,74 @@ boton.addEventListener("click", () => {
   else {
     cerrar();
     boton.disabled = true;
-    setTimeout(() => florecer(true), 300);
+    setTimeout(() => florecer(true), 320);
   }
 });
 
 jardin.addEventListener("click", e => {
-  if (abierta && e.target.closest(".lirio")) siguienteTono();
+  if (abierta && e.target.closest(".gerbera")) siguienteTono();
 });
 
-llenarAire();
+/* ═══════════════════════════════════════════════════════════════
+   6. DATOS CURIOSOS
+   ═══════════════════════════════════════════════════════════════ */
+
+const modal   = document.getElementById("modal");
+const btnDatos= document.getElementById("btnDatos");
+const elDato  = document.getElementById("dato");
+const elCont  = document.getElementById("contador");
+let iDato = 0;
+
+// gerbera estática asomada en la esquina de la tarjeta
+document.querySelector(".modal-caja").insertAdjacentHTML("afterbegin",
+  crearGerbera("g--mini", TONOS[0], { estatica:true, detalle:false, externos:32, internos:26 }));
+flores.push(document.querySelector(".g--mini"));   // también cambia de tono
+
+function mostrarDato(i){
+  iDato = (i + DATOS.length) % DATOS.length;
+  elDato.textContent = DATOS[iDato];
+  elCont.textContent = `${iDato + 1} / ${DATOS.length}`;
+  elDato.classList.remove("entra");
+  void elDato.offsetWidth;            // reinicia la animación
+  elDato.classList.add("entra");
+}
+
+function abrirDatos(){
+  modal.classList.add("abre");
+  mostrarDato(iDato);
+  document.getElementById("sigDato").focus({ preventScroll:true });
+}
+function cerrarDatos(){
+  modal.classList.remove("abre");
+  btnDatos.focus({ preventScroll:true });
+}
+
+btnDatos.addEventListener("click", abrirDatos);
+document.getElementById("sigDato").addEventListener("click", () => mostrarDato(iDato + 1));
+document.getElementById("antDato").addEventListener("click", () => mostrarDato(iDato - 1));
+modal.querySelectorAll("[data-cerrar]").forEach(el => el.addEventListener("click", cerrarDatos));
+
+document.addEventListener("keydown", e => {
+  if (!modal.classList.contains("abre")) return;
+  if (e.key === "Escape")     cerrarDatos();
+  if (e.key === "ArrowRight") mostrarDato(iDato + 1);
+  if (e.key === "ArrowLeft")  mostrarDato(iDato - 1);
+});
+
+// deslizar con el dedo para pasar los datos
+let xIni = null;
+const caja = document.querySelector(".modal-caja");
+caja.addEventListener("touchstart", e => { xIni = e.touches[0].clientX; }, { passive:true });
+caja.addEventListener("touchend", e => {
+  if (xIni === null) return;
+  const dx = e.changedTouches[0].clientX - xIni;
+  if (Math.abs(dx) > 45) mostrarDato(iDato + (dx < 0 ? 1 : -1));
+  xIni = null;
+}, { passive:true });
+
+mostrarDato(0);
+
+llenarCampo();
 aplicarTono(0);
 </script>
 </body>
