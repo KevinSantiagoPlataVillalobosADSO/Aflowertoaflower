@@ -119,10 +119,20 @@
   .gerbera{position:absolute;overflow:visible}
   .g--frente{left:16%;top:11%;width:68%;z-index:3;
     filter:drop-shadow(0 10px 26px rgba(0,0,0,.6))}
+
+  /* segunda fila */
   .g--alta{left:44%;top:-7%;width:45%;z-index:2;--base:.22s;
     filter:blur(1px) drop-shadow(0 6px 16px rgba(0,0,0,.55));opacity:.88}
   .g--baja{left:-9%;top:29%;width:39%;z-index:2;--base:.4s;
     filter:blur(1.2px) drop-shadow(0 6px 16px rgba(0,0,0,.55));opacity:.82}
+
+  /* tercera fila: más chicas, más desenfocadas, casi sembrado de fondo */
+  .g--lej-a{left:-17%;top:2%;width:33%;z-index:1;--base:.3s;
+    filter:blur(1.9px) drop-shadow(0 5px 12px rgba(0,0,0,.5));opacity:.66}
+  .g--lej-b{left:70%;top:25%;width:35%;z-index:1;--base:.5s;
+    filter:blur(1.9px) drop-shadow(0 5px 12px rgba(0,0,0,.5));opacity:.64}
+  .g--lej-c{left:47%;top:62%;width:32%;z-index:1;--base:.6s;
+    filter:blur(2.3px) drop-shadow(0 5px 12px rgba(0,0,0,.5));opacity:.56}
 
   .aura{
     position:absolute;left:50%;top:44%;
@@ -144,14 +154,14 @@
   }
   .abierto .petalo{transform:scale(1) rotate(0);opacity:1}
 
-  .g--alta .anillo,.g--baja .anillo{
+  .g--fondo .anillo{
     transform-box:view-box;transform-origin:100px 100px;
     transform:scale(.1) rotate(-14deg);opacity:0;
     transition:transform var(--t-petalo) cubic-bezier(.2,.85,.25,1) var(--base,0s),
                opacity calc(var(--t-petalo) * .5) ease var(--base,0s);
   }
-  .abierto .g--alta .anillo,.abierto .g--baja .anillo{transform:scale(1) rotate(0);opacity:1}
-  .g--alta .petalo,.g--baja .petalo{transform:none;opacity:1;transition:none}
+  .abierto .g--fondo .anillo{transform:scale(1) rotate(0);opacity:1}
+  .g--fondo .petalo{transform:none;opacity:1;transition:none}
 
   .centro{
     transform-box:view-box;transform-origin:100px 100px;
@@ -385,7 +395,7 @@
     .intro{animation:none;opacity:.92}
     .modal-caja{transition:none}
     .modal-dato.entra{animation:none}
-    .g--alta,.g--baja{filter:none}
+    .g--fondo{filter:none}
   }
 
   @media (max-height:620px){
@@ -471,7 +481,8 @@ const DATOS = [
   "La NASA la incluyó en su estudio de plantas de interior: resultó de las mejores filtrando compuestos como el benceno del aire de una habitación.",
   "En el lenguaje de las flores representa la alegría y la inocencia. Es de las pocas que se pueden regalar sin segundas intenciones... o con todas.",
   "Su tallo es hueco y se dobla con facilidad. Por eso se corta en diagonal y se pone en poca agua, bien limpia: se pudre más rápido que otras flores.",
-  "Colombia es uno de los mayores exportadores de flores del mundo, y la gerbera es una de las que sale de la sabana de Bogotá hacia medio planeta."
+  "Colombia es uno de los mayores exportadores de flores del mundo, y la gerbera es una de las que sale de la sabana de Bogotá hacia medio planeta.",
+  "Y hasta la cantidad puede llevar un mensaje: cierta cantidad de gerberas suele asociarse con buenos deseos y afecto, mientras que otras cantidades pueden tener significados más románticos."
 ];
 
 const TONOS = [
@@ -647,8 +658,8 @@ function crearGerbera(clase, tono, opciones = {}){
       <g class="${cCabeza}">
         <g class="${cAnillo}">${anillos}</g>
         <g class="${cCentro}">
-          ${fleco(CONFIG.flecos, 20, 29)}
-          ${disco(id, det ? CONFIG.granos : Math.round(CONFIG.granos*.5), 20)}
+          ${fleco(opciones.flecos ?? (det ? CONFIG.flecos : Math.round(CONFIG.flecos*.6)), 20, 29)}
+          ${disco(id, opciones.granos ?? (det ? CONFIG.granos : Math.round(CONFIG.granos*.5)), 20)}
         </g>
       </g>
     </svg>`;
@@ -735,10 +746,14 @@ document.querySelector(".rotulo").textContent = ROTULO;
 
 construirFollaje();
 
+/* de atrás hacia adelante: las lejanas primero para que queden debajo */
 jardin.insertAdjacentHTML("beforeend",
-  crearGerbera("g--alta",   TONOS[1], { detalle:false, externos:30, internos:24 }) +
-  crearGerbera("g--baja",   TONOS[2], { detalle:false, externos:28, internos:22 }) +
-  crearGerbera("g--frente", TONOS[0]));
+  crearGerbera("g--fondo g--lej-a", TONOS[3], { detalle:false, externos:24, internos:19, flecos:26, granos:34 }) +
+  crearGerbera("g--fondo g--lej-b", TONOS[0], { detalle:false, externos:24, internos:19, flecos:26, granos:34 }) +
+  crearGerbera("g--fondo g--lej-c", TONOS[1], { detalle:false, externos:23, internos:18, flecos:24, granos:30 }) +
+  crearGerbera("g--fondo g--alta",  TONOS[1], { detalle:false, externos:30, internos:24 }) +
+  crearGerbera("g--fondo g--baja",  TONOS[2], { detalle:false, externos:28, internos:22 }) +
+  crearGerbera("g--frente",         TONOS[0]));
 
 const flores = [...jardin.querySelectorAll(".gerbera")];
 
