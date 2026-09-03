@@ -1,604 +1,405 @@
 <!DOCTYPE html>
-<html lang="es-CO">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tulipanes para ti</title>
+<title>Para ti</title>
 <style>
-  /* ═════════════════════════════════════════════
-     TOKENS
-     ═════════════════════════════════════════════ */
-  :root{
-    --cielo-1:#2a1b33;
-    --cielo-2:#1a1222;
-    --cielo-3:#0a0710;
+/* ═══════════════════════════════════════════════════
+   FLOR DELINEADA · HTML + CSS
+   Zona de personalización rápida: bloque :root
+   ═══════════════════════════════════════════════════ */
 
-    --papel:#f7f0e2;
-    --papel-2:#e9dcc8;
-    --tinta-suave:rgba(247,235,222,.58);
-    --serif:Georgia,"Times New Roman",serif;
+@property --hue { syntax:'<number>'; initial-value:318; inherits:true; }
 
-    --glow:#d2647e;
+:root{
+  --hue: 318;              /* color inicial (0 rojo · 120 verde · 260 violeta · 318 rosa) */
+  --ciclo: 24s;            /* velocidad del cambio de color */
+  --respiro: 7s;           /* velocidad del latido de la flor */
+  --vaiven: 6.5s;          /* velocidad del balanceo de pétalos */
+  --tam-flor: min(74vw, 330px);   /* tamaño de la flor */
+  --grosor: clamp(1.1px, 0.4vw, 1.9px); /* grosor del delineado */
+  --fondo-a:#08040f;
+  --fondo-b:#150a26;
+  --fondo-c:#20103a;
+  --tinta:#efe6ff;
+}
 
-    --t-abrir:1.5s;
-    --t-paso:.085s;
-  }
+*{ box-sizing:border-box; margin:0; padding:0; }
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
+body{
+  min-height:100vh;
+  min-height:100svh;
+  display:grid;
+  place-items:center;
+  padding: clamp(1.2rem,5vw,2.5rem) 1.1rem calc(clamp(1.2rem,5vw,2.5rem) + env(safe-area-inset-bottom));
+  background: radial-gradient(130% 85% at 50% 4%, var(--fondo-c) 0%, var(--fondo-b) 42%, var(--fondo-a) 100%);
+  color: var(--tinta);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  animation: ciclo-color var(--ciclo) linear infinite;
+}
 
-  body{
-    font-family:var(--serif);
-    color:var(--tinta-suave);
-    background:
-      radial-gradient(70% 42% at 50% 92%, rgba(255,196,150,.10) 0%, transparent 64%),
-      radial-gradient(80% 50% at 50% 4%, rgba(190,160,255,.08) 0%, transparent 62%),
-      linear-gradient(174deg, var(--cielo-1) 0%, var(--cielo-2) 48%, var(--cielo-3) 100%);
-    overflow:hidden;
-    position:relative;
-    -webkit-font-smoothing:antialiased;
-    -webkit-tap-highlight-color:transparent;
-  }
+@keyframes ciclo-color{ from{ --hue:318 } to{ --hue:678 } }
 
-  /* ═════════════════════════════════════════════
-     ATMÓSFERA
-     ═════════════════════════════════════════════ */
-  .polvo{
-    position:fixed;
-    width:var(--p);height:var(--p);
-    left:var(--x);bottom:-6vh;
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(255,226,196,.9), rgba(255,196,150,0) 68%);
-    opacity:0;
-    animation:subir var(--dur) linear infinite;
-    animation-delay:var(--del);
-    will-change:transform,opacity;
-    pointer-events:none;z-index:2;
-  }
-  @keyframes subir{
-    0%  {transform:translate3d(0,0,0);opacity:0}
-    14% {opacity:.55}
-    82% {opacity:.35}
-    100%{transform:translate3d(var(--dx),-108vh,0);opacity:0}
-  }
+/* ─── Atmósfera de fondo ─────────────────────────── */
+.fondo{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
 
-  /* suelo */
-  .suelo{
-    position:fixed;left:-6%;right:-6%;bottom:0;height:26vh;
-    z-index:3;pointer-events:none;
-    background:linear-gradient(0deg, rgba(22,14,10,.82) 0%, rgba(30,20,16,.28) 46%, transparent 100%);
-  }
+.aura{ position:absolute; border-radius:50%; will-change:transform; }
+.aura--uno{
+  width:90vmin; aspect-ratio:1; top:-18vmin; left:-14vmin;
+  background: radial-gradient(circle, hsl(var(--hue) 90% 55% / .20), transparent 66%);
+  animation: deriva-a 22s ease-in-out infinite;
+}
+.aura--dos{
+  width:78vmin; aspect-ratio:1; bottom:-22vmin; right:-16vmin;
+  background: radial-gradient(circle, hsl(calc(var(--hue) + 120) 90% 55% / .17), transparent 66%);
+  animation: deriva-b 27s ease-in-out infinite;
+}
+@keyframes deriva-a{ 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(6vmin,4vmin,0) scale(1.12)} }
+@keyframes deriva-b{ 0%,100%{transform:translate3d(0,0,0) scale(1.06)} 50%{transform:translate3d(-5vmin,-5vmin,0) scale(1)} }
 
-  /* ═════════════════════════════════════════════
-     LA PRADERA
-     ═════════════════════════════════════════════ */
-  .pradera{
-    position:fixed;left:0;right:0;bottom:0;
-    height:64vh;
-    z-index:4;
-  }
-  .fila{position:absolute;left:0;right:0;bottom:0;height:100%}
-  .fila--fondo{filter:brightness(.52) blur(1.1px);z-index:1}
-  .fila--frente{z-index:2}
+/* polvo flotante */
+.chispa{
+  position:absolute; bottom:-6vh;
+  width:3px; aspect-ratio:1; border-radius:50%;
+  left: calc(var(--i) * 9.5% + 3%);
+  background: hsl(calc(var(--hue) + var(--i) * 14) 100% 82%);
+  box-shadow: 0 0 8px hsl(calc(var(--hue) + var(--i) * 14) 100% 70% / .9);
+  opacity:0;
+  animation: subir 15s linear infinite;
+  animation-delay: calc(var(--i) * -1.6s);
+}
+@keyframes subir{
+  0%{ transform:translate3d(0,0,0) scale(.6); opacity:0 }
+  12%{ opacity:.85 }
+  70%{ opacity:.5 }
+  100%{ transform:translate3d(3vw,-108vh,0) scale(1); opacity:0 }
+}
 
-  .tulipan{
-    position:absolute;
-    bottom:var(--suelo);
-    left:var(--x);
-    height:var(--h);
-    translate:-50% 0;
-    transform-origin:50% 100%;
-    animation:mecer var(--sway) ease-in-out infinite alternate;
-    animation-delay:var(--del);
-    border:0;padding:0;background:none;
-    display:block;
-  }
-  .tulipan svg{height:100%;width:auto;display:block;overflow:visible}
-  @keyframes mecer{
-    from{transform:rotate(-1.4deg)}
-    to  {transform:rotate(1.4deg)}
-  }
+/* ─── Composición ────────────────────────────────── */
+.escena{
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center;
+  width:100%; max-width:480px;
+}
 
-  .fila--frente .tulipan{cursor:pointer;transition:filter .45s}
-  .fila--frente .tulipan:hover{filter:drop-shadow(0 0 26px rgba(210,100,126,.5))}
-  .fila--frente .tulipan:focus-visible{outline:none;filter:drop-shadow(0 0 26px rgba(210,100,126,.75))}
+.jardin{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center;
+}
 
-  /* ── el capullo se abre ── */
-  .tepalo{
-    transform-origin:50px 118px;
-    transform:rotate(var(--c)) scaleX(.42);
-    transition:transform var(--t-abrir) cubic-bezier(.24,.86,.32,1);
-    transition-delay:calc(var(--i) * var(--t-paso) + var(--retraso, 0s));
-  }
-  body.florecido .tepalo{transform:rotate(var(--a)) scaleX(1)}
+/* ─── Flor ───────────────────────────────────────── */
+.flor{
+  position:relative;
+  width: var(--tam-flor);
+  aspect-ratio:1;
+  display:grid; place-items:center;
+  animation: respirar var(--respiro) ease-in-out infinite;
+}
+@keyframes respirar{ 0%,100%{transform:scale(1) rotate(0deg)} 50%{transform:scale(1.035) rotate(1.4deg)} }
 
-  /* la hoja se despliega junto con la flor */
-  .hoja{
-    transform-origin:50px 200px;
-    transform:rotate(var(--hc)) scale(.72);
-    transition:transform calc(var(--t-abrir) * 1.1) cubic-bezier(.24,.86,.32,1);
-    transition-delay:var(--retraso, 0s);
-  }
-  body.florecido .hoja{transform:none}
+.anillo{
+  position:absolute; inset:2%;
+  border-radius:50%;
+  border: 1px dashed hsl(calc(var(--hue) + 60) 90% 75% / .28);
+  animation: girar 46s linear infinite;
+}
+.anillo--interno{
+  inset:16%;
+  border-style:solid;
+  border-color: hsl(var(--hue) 90% 78% / .14);
+  animation-direction:reverse;
+  animation-duration:34s;
+}
+@keyframes girar{ to{ transform:rotate(360deg) } }
 
-  /* ═════════════════════════════════════════════
-     TEXTO
-     ═════════════════════════════════════════════ */
-  .rotulo{
-    position:fixed;top:0;left:0;right:0;z-index:20;
-    padding:clamp(18px,4vh,34px) 20px 0;
-    text-align:center;
-    font-size:clamp(11px,1.5vw,13px);
-    letter-spacing:.34em;text-transform:lowercase;
-    color:rgba(247,240,226,.4);
-    pointer-events:none;
-  }
-  .rotulo span{position:relative;padding:0 clamp(14px,4vw,26px)}
-  .rotulo span::before,.rotulo span::after{
-    content:"";position:absolute;top:50%;width:clamp(16px,5vw,38px);height:1px;
-    background:linear-gradient(90deg,transparent,rgba(247,240,226,.34));
-  }
-  .rotulo span::before{right:100%}
-  .rotulo span::after{left:100%;transform:scaleX(-1)}
+.corola{ position:absolute; inset:0; --off:0deg; --dh:0; }
+.corola--interior{ --off:22.5deg; --dh:46; }
+.corola--halo{ --off:22.5deg; --dh:100; }
 
-  .zona{
-    position:fixed;left:50%;top:clamp(78px,15vh,132px);
-    transform:translateX(-50%);
-    z-index:20;
-    width:min(90vw,560px);
-    text-align:center;
-    pointer-events:none;
-  }
+.petalo{
+  position:absolute; left:50%; top:0;
+  transform-origin:50% 100%;
+  border: var(--grosor) solid hsl(calc(var(--hue) + var(--dh) + var(--i) * 7) 100% 76% / .92);
+  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
+  animation: vaiven var(--vaiven) ease-in-out infinite;
+  animation-delay: calc(var(--i) * -.38s);
+}
+@keyframes vaiven{
+  0%,100%{ transform: translateX(-50%) rotate(calc(var(--i) * 45deg + var(--off))) scaleY(1) }
+  50%    { transform: translateX(-50%) rotate(calc(var(--i) * 45deg + var(--off) + 3.2deg)) scaleY(1.035) }
+}
 
-  .intro{
-    font-size:clamp(20px,4.6vw,31px);
-    font-style:italic;
-    color:var(--papel);
-    line-height:1.45;
-    text-shadow:0 2px 26px rgba(0,0,0,.55);
-    /* backwards, no both: con `both` el valor rellenado por la
-       animación gana en la cascada y la frase nunca se disolvería */
-    animation:aparecer 1.9s ease .3s backwards;
-    transition:opacity .9s, transform .9s;
-  }
-  body.florecido .intro{opacity:0;transform:translateY(-16px)}
+/* corona exterior */
+.corola--exterior .petalo{
+  width:27%; height:50%;
+  background: linear-gradient(200deg,
+    hsl(calc(var(--hue) + var(--i) * 7) 95% 68% / .26) 0%,
+    hsl(calc(var(--hue) + 40) 95% 60% / .07) 55%,
+    transparent 100%);
+  box-shadow: 0 0 20px hsl(var(--hue) 100% 60% / .30),
+              inset 0 0 24px hsl(calc(var(--hue) + 20) 100% 72% / .18);
+}
+/* nervadura central */
+.corola--exterior .petalo::before{
+  content:''; position:absolute; left:50%; bottom:9%;
+  width:1px; height:58%;
+  transform:translateX(-50%);
+  background: linear-gradient(to top, hsl(calc(var(--hue) + 30) 100% 88% / .75), transparent);
+}
+/* contorno interior de detalle */
+.corola--exterior .petalo::after{
+  content:''; position:absolute; inset:14% 22% 8%;
+  border: 1px solid hsl(calc(var(--hue) + 50) 100% 85% / .30);
+  border-radius: inherit;
+}
 
-  .tarjeta{
-    position:absolute;left:0;right:0;top:0;
-    opacity:0;transform:translateY(18px);
-    transition:opacity .9s ease .5s, transform .9s ease .5s;
-  }
-  body.florecido .tarjeta{opacity:1;transform:none}
+/* corona interior */
+.corola--interior .petalo{
+  width:19%; height:34%;
+  background: linear-gradient(200deg,
+    hsl(calc(var(--hue) + 46 + var(--i) * 7) 100% 74% / .34) 0%,
+    transparent 85%);
+  box-shadow: 0 0 14px hsl(calc(var(--hue) + 46) 100% 65% / .35);
+  animation-duration: calc(var(--vaiven) * .82);
+}
+.corola--interior .petalo::before{
+  content:''; position:absolute; left:50%; bottom:12%;
+  width:1px; height:52%;
+  transform:translateX(-50%);
+  background: linear-gradient(to top, hsl(calc(var(--hue) + 70) 100% 90% / .7), transparent);
+}
 
-  #mensaje{
-    font-size:clamp(16px,3vw,21px);
-    font-style:italic;
-    line-height:1.65;
-    color:var(--papel);
-    text-shadow:0 2px 22px rgba(0,0,0,.6);
-    min-height:4.6em;
-    transition:opacity .5s;
-  }
-  #mensaje.cambiando{opacity:0}
+/* halo delineado (solo contorno) */
+.corola--halo .petalo{
+  width:31%; height:58%;
+  border-width:1px;
+  border-color: hsl(calc(var(--hue) + 100 + var(--i) * 7) 100% 82% / .30);
+  border-radius: 50% 50% 44% 44% / 66% 66% 34% 34%;
+  animation-duration: calc(var(--vaiven) * 1.45);
+  animation-direction: alternate-reverse;
+}
 
-  .firma{
-    margin-top:clamp(12px,2.6vh,20px);
-    font-size:clamp(12px,1.9vw,14.5px);
-    letter-spacing:.2em;
-    color:rgba(247,240,226,.5);
-  }
+/* ─── Centro ─────────────────────────────────────── */
+.centro{
+  position:relative; z-index:3;
+  width:23%; aspect-ratio:1;
+  border-radius:50%;
+  border: var(--grosor) solid hsl(calc(var(--hue) + 40) 100% 84% / .9);
+  background:
+    radial-gradient(circle at 36% 30%,
+      hsl(calc(var(--hue) + 55) 100% 88% / .95) 0%,
+      hsl(calc(var(--hue) + 25) 95% 62% / .45) 48%,
+      hsl(var(--hue) 90% 40% / .12) 72%);
+  box-shadow: 0 0 34px hsl(calc(var(--hue) + 30) 100% 62% / .55),
+              inset 0 0 14px hsl(calc(var(--hue) + 60) 100% 90% / .5);
+  animation: pulso-centro calc(var(--respiro) * .8) ease-in-out infinite;
+}
+@keyframes pulso-centro{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.09) } }
 
-  @keyframes aparecer{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.polen{
+  position:absolute; top:50%; left:50%;
+  width:13%; aspect-ratio:1; margin:-6.5% 0 0 -6.5%;
+  border-radius:50%;
+  background: hsl(calc(var(--hue) + 70) 100% 90%);
+  box-shadow: 0 0 9px hsl(calc(var(--hue) + 60) 100% 78% / .95);
+  transform: rotate(calc(var(--i) * 40deg)) translateY(-235%);
+  animation: titilar 3.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -.42s);
+}
+@keyframes titilar{ 0%,100%{ opacity:.35 } 50%{ opacity:1 } }
 
-  /* ═════════════════════════════════════════════
-     BOTONES
-     ═════════════════════════════════════════════ */
-  .acciones{
-    position:fixed;left:0;right:0;bottom:0;z-index:25;
-    padding:0 20px clamp(18px,4vh,34px);
-    display:flex;justify-content:center;align-items:center;
-    gap:clamp(10px,2.5vw,18px);flex-wrap:wrap;
-  }
-  .acciones button{
-    font-family:var(--serif);
-    font-size:clamp(11px,1.6vw,13px);
-    letter-spacing:.24em;text-transform:lowercase;
-    color:var(--papel-2);
-    padding:.82em 1.9em;
-    border-radius:999px;
-    border:1px solid rgba(247,240,226,.22);
-    background:rgba(30,16,26,.55);
-    backdrop-filter:blur(9px);
-    -webkit-backdrop-filter:blur(9px);
-    cursor:pointer;
-    transition:transform .3s, background .3s, border-color .3s, box-shadow .3s;
-  }
-  .acciones button:hover{
-    background:rgba(126,40,72,.5);
-    border-color:rgba(232,150,170,.5);
-    box-shadow:0 0 24px rgba(210,100,126,.3);
-  }
-  .acciones button:active{transform:scale(.95)}
-  .acciones button:focus-visible{outline:2px solid var(--glow);outline-offset:3px}
+/* ─── Tallo y hojas ──────────────────────────────── */
+.tallo{
+  position:relative;
+  width: clamp(3px, .9vw, 5px);
+  height: clamp(56px, 15vh, 104px);
+  margin-top:-3%;
+  border-radius:99px;
+  background: linear-gradient(to bottom, hsl(150 55% 52% / .85), hsl(158 50% 34% / .08));
+  box-shadow: 0 0 14px hsl(150 80% 50% / .22);
+  transform-origin: 50% 100%;
+  animation: mecer 8s ease-in-out infinite;
+}
+@keyframes mecer{ 0%,100%{ transform:rotate(-1.6deg) } 50%{ transform:rotate(1.6deg) } }
 
-  /* ═════════════════════════════════════════════
-     MODAL DE DATOS
-     ═════════════════════════════════════════════ */
-  .modal{
-    position:fixed;inset:0;z-index:40;
-    display:grid;place-items:center;
-    padding:clamp(16px,4vw,28px);
-    opacity:0;visibility:hidden;
-    transition:opacity .4s, visibility .4s;
-  }
-  .modal.visible{opacity:1;visibility:visible}
-  .modal__fondo{position:absolute;inset:0;background:rgba(7,5,10,.84);backdrop-filter:blur(6px)}
-  .modal__caja{
-    position:relative;
-    width:min(92vw,460px);
-    padding:clamp(28px,5vw,38px) clamp(22px,5vw,34px) clamp(18px,3.5vw,26px);
-    border-radius:18px;
-    border:1px solid rgba(247,240,226,.15);
-    background:linear-gradient(168deg, #2c182c, #100a12);
-    box-shadow:0 28px 70px rgba(0,0,0,.6);
-    text-align:center;
-    transform:translateY(16px);
-    transition:transform .45s cubic-bezier(.2,.8,.3,1);
-  }
-  .modal.visible .modal__caja{transform:none}
-  .modal__x{
-    position:absolute;top:8px;right:12px;
-    width:34px;height:34px;border:0;border-radius:50%;
-    background:transparent;color:rgba(247,240,226,.5);
-    font-family:var(--serif);font-size:24px;line-height:1;
-    cursor:pointer;transition:color .25s, background .25s;
-  }
-  .modal__x:hover{color:var(--papel);background:rgba(255,255,255,.07)}
-  .modal__titulo{
-    font-size:clamp(9.5px,1.4vw,11px);
-    letter-spacing:.34em;text-transform:uppercase;
-    color:rgba(232,150,170,.6);
-    margin-bottom:clamp(14px,3vw,20px);
-  }
-  .modal__dato{
-    font-size:clamp(14px,2.2vw,16.5px);
-    line-height:1.75;color:var(--papel-2);
-    min-height:8em;
-  }
-  .modal__pie{
-    display:flex;align-items:center;justify-content:center;
-    gap:18px;margin-top:clamp(14px,3vw,20px);
-    padding-top:clamp(12px,2.4vw,16px);
-    border-top:1px solid rgba(247,240,226,.1);
-  }
-  .modal__pie button{
-    width:36px;height:36px;border-radius:50%;
-    border:1px solid rgba(247,240,226,.18);
-    background:transparent;color:var(--papel-2);
-    font-family:var(--serif);font-size:19px;line-height:1;
-    cursor:pointer;transition:background .25s, transform .25s;
-  }
-  .modal__pie button:hover{background:rgba(255,255,255,.08)}
-  .modal__pie button:active{transform:scale(.9)}
-  .modal__cuenta{font-size:11px;letter-spacing:.2em;color:rgba(247,240,226,.4);min-width:64px}
+.hoja{
+  position:absolute;
+  width: clamp(34px, 11vw, 56px);
+  aspect-ratio: 2 / 1;
+  border: 1px solid hsl(150 65% 62% / .6);
+  background: linear-gradient(120deg, hsl(150 60% 50% / .18), transparent 70%);
+  transform-origin: 100% 50%;
+  animation: hoja-flota 6s ease-in-out infinite;
+}
+.hoja::before{
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(to right, transparent 8%, hsl(150 70% 78% / .45) 50%, transparent 92%);
+  height:1px; top:50%;
+}
+.hoja--izq{ right:52%; top:26%; border-radius:100% 0 100% 0; transform:rotate(-16deg); }
+.hoja--der{ left:52%; top:52%; border-radius:0 100% 0 100%; transform-origin:0 50%; transform:rotate(16deg); animation-delay:-2.4s; }
+@keyframes hoja-flota{ 0%,100%{ filter:brightness(1) } 50%{ filter:brightness(1.35) } }
 
-  /* ═════════════════════════════════════════════
-     RESPONSIVE
-     ═════════════════════════════════════════════ */
-  @media (max-width:620px){
-    .pradera{height:56vh}
-    .fila--fondo{filter:brightness(.52) blur(.7px)}
-    .rotulo{letter-spacing:.24em}
-    .acciones button{padding:.78em 1.5em}
-  }
-  @media (max-height:600px){
-    .zona{top:64px}
-    #mensaje{min-height:3.4em}
-    .pradera{height:52vh}
-  }
+/* ─── Mensaje ────────────────────────────────────── */
+.mensaje{
+  margin-top: clamp(1.4rem, 5vh, 2.4rem);
+  text-align:center;
+}
 
-  @media (prefers-reduced-motion:reduce){
-    .polvo,.tulipan{animation:none !important}
-    .tepalo,.hoja{transition-duration:.1s !important;transition-delay:0s !important}
+.etiqueta{
+  font-size:.66rem;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color: hsl(calc(var(--hue) + 50) 70% 84% / .6);
+  padding-left:.42em;
+}
+
+.dedicatoria{
+  margin:.75rem 0 .9rem;
+  font-family: "Iowan Old Style", Georgia, "Times New Roman", serif;
+  font-weight:400;
+  font-size: clamp(1.55rem, 7.4vw, 2.5rem);
+  line-height:1.24;
+  letter-spacing:-.01em;
+  background: linear-gradient(96deg,
+    hsl(var(--hue) 100% 86%) 0%,
+    hsl(calc(var(--hue) + 70) 100% 80%) 48%,
+    hsl(calc(var(--hue) + 145) 95% 88%) 100%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent;
+  text-shadow: 0 0 34px hsl(var(--hue) 100% 60% / .22);
+}
+.dedicatoria em{ font-style:italic; }
+
+.separador{
+  display:flex; align-items:center; justify-content:center; gap:.6rem;
+  margin:0 auto 1rem;
+  width:min(72%, 220px);
+}
+.separador::before, .separador::after{
+  content:''; height:1px; flex:1;
+  background: linear-gradient(to right, transparent, hsl(calc(var(--hue) + 60) 90% 80% / .45), transparent);
+}
+.separador i{
+  width:5px; aspect-ratio:1; border-radius:50%;
+  background: hsl(calc(var(--hue) + 60) 100% 84%);
+  box-shadow: 0 0 10px hsl(calc(var(--hue) + 60) 100% 70%);
+}
+
+.firma{
+  font-size: clamp(.78rem, 3.4vw, .92rem);
+  letter-spacing:.06em;
+  color: hsl(calc(var(--hue) + 30) 40% 88% / .62);
+}
+
+/* ─── Pantallas muy bajas ────────────────────────── */
+@media (max-height: 700px){
+  :root{ --tam-flor: min(58vw, 250px); }
+  .tallo{ height: clamp(40px, 9vh, 70px); }
+}
+
+/* ─── Accesibilidad: menos movimiento ────────────── */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
   }
+  .chispa{ opacity:.4 }
+}
 </style>
 </head>
 <body>
 
-<div class="suelo" aria-hidden="true"></div>
-
-<div class="pradera" aria-hidden="false">
-  <div class="fila fila--fondo" id="filaFondo" aria-hidden="true"></div>
-  <div class="fila fila--frente" id="filaFrente"></div>
-</div>
-
-<header class="rotulo"><span id="rotulo"></span></header>
-
-<div class="zona">
-  <p class="intro" id="intro"></p>
-  <div class="tarjeta">
-    <p id="mensaje" aria-live="polite"></p>
-    <p class="firma" id="firma"></p>
+  <!-- Atmósfera -->
+  <div class="fondo" aria-hidden="true">
+    <div class="aura aura--uno"></div>
+    <div class="aura aura--dos"></div>
+    <span class="chispa" style="--i:0"></span>
+    <span class="chispa" style="--i:1"></span>
+    <span class="chispa" style="--i:2"></span>
+    <span class="chispa" style="--i:3"></span>
+    <span class="chispa" style="--i:4"></span>
+    <span class="chispa" style="--i:5"></span>
+    <span class="chispa" style="--i:6"></span>
+    <span class="chispa" style="--i:7"></span>
+    <span class="chispa" style="--i:8"></span>
+    <span class="chispa" style="--i:9"></span>
   </div>
-</div>
 
-<div class="acciones">
-  <button id="btnFlorecer" type="button">florecer</button>
-  <button id="btnDatos" type="button">datos curiosos</button>
-</div>
+  <main class="escena">
 
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
-  <div class="modal__fondo" data-cerrar></div>
-  <div class="modal__caja">
-    <button class="modal__x" type="button" data-cerrar aria-label="Cerrar">&times;</button>
-    <p class="modal__titulo" id="modalTitulo">datos curiosos</p>
-    <p class="modal__dato" id="dato"></p>
-    <div class="modal__pie">
-      <button id="antDato" type="button" aria-label="Anterior">&lsaquo;</button>
-      <span class="modal__cuenta" id="contador"></span>
-      <button id="sigDato" type="button" aria-label="Siguiente">&rsaquo;</button>
+    <div class="jardin">
+      <div class="flor" aria-hidden="true">
+        <div class="anillo"></div>
+        <div class="anillo anillo--interno"></div>
+
+        <!-- halo de contornos -->
+        <div class="corola corola--halo">
+          <div class="petalo" style="--i:0"></div>
+          <div class="petalo" style="--i:1"></div>
+          <div class="petalo" style="--i:2"></div>
+          <div class="petalo" style="--i:3"></div>
+          <div class="petalo" style="--i:4"></div>
+          <div class="petalo" style="--i:5"></div>
+          <div class="petalo" style="--i:6"></div>
+          <div class="petalo" style="--i:7"></div>
+        </div>
+
+        <!-- pétalos exteriores -->
+        <div class="corola corola--exterior">
+          <div class="petalo" style="--i:0"></div>
+          <div class="petalo" style="--i:1"></div>
+          <div class="petalo" style="--i:2"></div>
+          <div class="petalo" style="--i:3"></div>
+          <div class="petalo" style="--i:4"></div>
+          <div class="petalo" style="--i:5"></div>
+          <div class="petalo" style="--i:6"></div>
+          <div class="petalo" style="--i:7"></div>
+        </div>
+
+        <!-- pétalos interiores -->
+        <div class="corola corola--interior">
+          <div class="petalo" style="--i:0"></div>
+          <div class="petalo" style="--i:1"></div>
+          <div class="petalo" style="--i:2"></div>
+          <div class="petalo" style="--i:3"></div>
+          <div class="petalo" style="--i:4"></div>
+          <div class="petalo" style="--i:5"></div>
+          <div class="petalo" style="--i:6"></div>
+          <div class="petalo" style="--i:7"></div>
+        </div>
+
+        <!-- centro -->
+        <div class="centro">
+          <span class="polen" style="--i:0"></span>
+          <span class="polen" style="--i:1"></span>
+          <span class="polen" style="--i:2"></span>
+          <span class="polen" style="--i:3"></span>
+          <span class="polen" style="--i:4"></span>
+          <span class="polen" style="--i:5"></span>
+          <span class="polen" style="--i:6"></span>
+          <span class="polen" style="--i:7"></span>
+          <span class="polen" style="--i:8"></span>
+        </div>
+      </div>
+
+      <div class="tallo" aria-hidden="true">
+        <i class="hoja hoja--izq"></i>
+        <i class="hoja hoja--der"></i>
+      </div>
     </div>
-  </div>
-</div>
 
-<script>
-/* ═══════════════════════════════════════════════════════════════
-   1. PERSONALIZABLE — edita este bloque y nada más
-   ═══════════════════════════════════════════════════════════════ */
+    <div class="mensaje">
+      <p class="etiqueta">Para ti</p>
+      <h1 class="dedicatoria">Espero que todo te salga bien hoy</em></h1>
+      <div class="separador"><i></i></div>
+      <p class="firma">Ánimos Isa!</p>
+    </div>
+  </main>
 
-const ROTULO = "un campo de tulipanes";
-const INTRO  = "Espero que todo te salga bien hoy";   // se disuelve al florecer
-const FIRMA  = "Ánimos Isa!";
-
-const MENSAJES = [
-  "Los tulipanes se abren cuando les da el sol y se cierran de noche. Nadie les reclama por descansar.",
-  "Aguantan el invierno bajo tierra sin que se les note. Después salen igual de bien. Tú también.",
-  "Que hoy te salga todo. Y si no, que mañana tengas ganas de intentarlo otra vez.",
-  "Estos siguen creciendo incluso después de cortados. Hay cosas que simplemente no se rinden.",
-  "No hace falta que sea un buen día entero. Con que haya un buen rato, ya vale.",
-  "Un tulipán no se apura en abrir. Espera a que sea el momento y entonces lo hace completo.",
-  "Si el día viene pesado, aquí quedan estos. No hacen mucho, pero están.",
-  "Que se te note lo bien que haces las cosas, aunque sea solo hoy.",
-  "Los mejores tulipanes salen de bulbos que pasaron meses en el frío. Cuenta como ventaja.",
-  "Ánimos. En serio. Va a estar bien."
-];
-
-const DATOS = [
-  "No son de Holanda. Los tulipanes son originarios de las estepas de Asia Central y llegaron a Europa en el siglo XVI a través del Imperio otomano.",
-  "Su nombre viene del persa y el turco: se creía que la flor parecía un turbante, tülbend, y de ahí derivó tulipán.",
-  "En 1637 los Países Bajos vivieron la tulipomanía, considerada la primera burbuja especulativa de la historia. Un solo bulbo llegó a costar lo que una casa junto a un canal.",
-  "Los tulipanes con llamas y vetas de colores que dispararon esa burbuja no eran una variedad rara: estaban enfermos. Un virus rompía el pigmento y creaba el dibujo.",
-  "Un tulipán cortado sigue creciendo dentro del jarrón. Puede estirarse dos o tres centímetros más después de haber sido cortado.",
-  "Son fototrópicos: se inclinan buscando la luz. Por eso un ramo junto a la ventana termina torcido hacia afuera en un par de días.",
-  "En el invierno del hambre de 1944, en los Países Bajos ocupados, mucha gente sobrevivió comiendo bulbos de tulipán.",
-  "No existe el tulipán negro de verdad. Los más oscuros, como la variedad Queen of Night, son un morado tan profundo que lo parece.",
-  "Hay unas 75 especies silvestres y varios miles de variedades cultivadas, en todos los colores menos el azul puro.",
-  "El jardín de Keukenhof planta alrededor de siete millones de bulbos cada año, y solo abre unas ocho semanas."
-];
-
-/* Paletas: hondo = base del pétalo, claro = punta */
-const TONOS = [
-  { nombre:"Rojo",     hondo:"#5c0a1a", medio:"#b5142f", claro:"#f2617a", luz:"#ff9aa8" },
-  { nombre:"Rosa",     hondo:"#6b1338", medio:"#c14a76", claro:"#f5a6c2", luz:"#ffd0e0" },
-  { nombre:"Amarillo", hondo:"#7a4a06", medio:"#d99a17", claro:"#f8dc78", luz:"#fff2b8" },
-  { nombre:"Morado",   hondo:"#33124f", medio:"#6c3095", claro:"#b483d8", luz:"#dcc0f0" },
-  { nombre:"Coral",    hondo:"#6b2410", medio:"#c85a2c", claro:"#f4a072", luz:"#ffcda6" },
-  { nombre:"Marfil",   hondo:"#6d5a44", medio:"#cbb79b", claro:"#f8efdd", luz:"#ffffff" }
-];
-
-const CONFIG = {
-  frente:5,        // tulipanes grandes
-  fondo:7,         // tulipanes pequeños detrás
-  frenteMovil:3,
-  fondoMovil:5,
-  polvo:14         // motas de luz que suben
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   2. EL TULIPÁN — de aquí para abajo no hace falta tocar nada
-   ═══════════════════════════════════════════════════════════════ */
-
-const azar = (a,b) => Math.random()*(b-a)+a;
-const eleg = a => a[Math.floor(Math.random()*a.length)];
-const movil = matchMedia("(max-width:620px)").matches;
-
-/* Un tépalo: base estrecha en el receptáculo, panza a media altura
-   y punta ligeramente afilada. Es la silueta de copa del tulipán. */
-function tepalo(bx, by, w, h, punta){
-  const y = k => (by - h*k).toFixed(2);
-  return `M${bx} ${by}
-    C${(bx-w*.48).toFixed(2)} ${y(.15)} ${(bx-w*1.00).toFixed(2)} ${y(.47)} ${(bx-w*.82).toFixed(2)} ${y(.77)}
-    C${(bx-w*.64).toFixed(2)} ${y(.94)} ${(bx-w*punta).toFixed(2)} ${y(1.01)} ${bx} ${y(1.04)}
-    C${(bx+w*punta).toFixed(2)} ${y(1.01)} ${(bx+w*.64).toFixed(2)} ${y(.94)} ${(bx+w*.82).toFixed(2)} ${y(.77)}
-    C${(bx+w*1.00).toFixed(2)} ${y(.47)} ${(bx+w*.48).toFixed(2)} ${y(.15)} ${bx} ${by} Z`;
-}
-
-/* Una hoja larga de tulipán, en forma de cimitarra */
-function hojaPath(lado){
-  const s = lado;                       // -1 izquierda, 1 derecha
-  const x = v => (50 + v*s).toFixed(1);
-  return `M50 201
-    C${x(-19)} 184 ${x(-40)} 148 ${x(-33)} 90
-    C${x(-20)} 130 ${x(-6)} 170 50 201 Z`;
-}
-
-/* viewBox 0 0 100 210 · receptáculo en (50,118) · suelo en y=205 */
-function tulipan(tono, retraso){
-  const id = "t" + Math.random().toString(36).slice(2,9);
-
-  /* [ancho, alto, punta, giro abierto, giro cerrado, capa, orden] */
-  const tepalos = [
-    [18,  62, .30, -30,  -8, "hondo"],
-    [18,  62, .30,  30,   8, "hondo"],
-    [19,  65, .32, -15,  -3, "medio"],
-    [19,  65, .32,  15,   3, "medio"],
-    [16.5,60, .36,   0,   0, "claro"]
-  ];
-
-  let flor = "";
-  tepalos.forEach((t,i) => {
-    flor += `<path class="tepalo" style="--a:${t[3]}deg;--c:${t[4]}deg;--i:${i};--retraso:${retraso}s"
-              d="${tepalo(50, 118, t[0], t[1], t[2])}" fill="url(#${t[5]}${id})"/>`;
-  });
-
-  return `
-  <svg viewBox="0 0 100 210">
-    <defs>
-      <linearGradient id="hondo${id}" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0"   stop-color="${tono.hondo}"/>
-        <stop offset=".62" stop-color="${tono.medio}"/>
-        <stop offset="1"   stop-color="${tono.medio}"/>
-      </linearGradient>
-      <linearGradient id="medio${id}" x1="0" y1="1" x2=".35" y2="0">
-        <stop offset="0"   stop-color="${tono.hondo}"/>
-        <stop offset=".5"  stop-color="${tono.medio}"/>
-        <stop offset="1"   stop-color="${tono.claro}"/>
-      </linearGradient>
-      <linearGradient id="claro${id}" x1="0" y1="1" x2=".3" y2="0">
-        <stop offset="0"   stop-color="${tono.medio}"/>
-        <stop offset=".45" stop-color="${tono.claro}"/>
-        <stop offset="1"   stop-color="${tono.luz}"/>
-      </linearGradient>
-      <linearGradient id="tallo${id}" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0"   stop-color="#1d3f24"/>
-        <stop offset=".45" stop-color="#3f7a45"/>
-        <stop offset="1"   stop-color="#204526"/>
-      </linearGradient>
-      <linearGradient id="hoja${id}" x1="0" y1="1" x2=".7" y2="0">
-        <stop offset="0"   stop-color="#16321c"/>
-        <stop offset=".55" stop-color="#356b3c"/>
-        <stop offset="1"   stop-color="#5a9a5c"/>
-      </linearGradient>
-    </defs>
-
-    <!-- sombra en el suelo -->
-    <ellipse cx="50" cy="203" rx="17" ry="4" fill="rgba(0,0,0,.45)"/>
-
-    <!-- hojas -->
-    <path class="hoja" style="--hc:-16deg;--retraso:${retraso}s" d="${hojaPath(-1)}"
-          fill="url(#hoja${id})" stroke="rgba(8,22,10,.4)" stroke-width=".6"/>
-    <path class="hoja" style="--hc:16deg;--retraso:${(retraso+.1).toFixed(2)}s" d="${hojaPath(1)}"
-          fill="url(#hoja${id})" stroke="rgba(8,22,10,.4)" stroke-width=".6"/>
-
-    <!-- tallo -->
-    <path d="M50 204 C47.5 178 52 148 50 120" stroke="url(#tallo${id})"
-          stroke-width="5.2" stroke-linecap="round" fill="none"/>
-
-    <!-- flor -->
-    <g stroke="rgba(30,6,16,.28)" stroke-width=".6" stroke-linejoin="round">${flor}</g>
-  </svg>`;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   3. SEMBRAR LA PRADERA
-   ═══════════════════════════════════════════════════════════════ */
-
-function plantar(contenedor, cuantos, alto, suelo, interactivo){
-  for (let i=0;i<cuantos;i++){
-    const tono = TONOS[i % TONOS.length];
-    const el = document.createElement(interactivo ? "button" : "div");
-    if (interactivo){ el.type = "button"; el.setAttribute("aria-label","Florecer"); }
-    el.className = "tulipan";
-    el.style.cssText =
-      `--x:${(((i + .5)/cuantos)*100 + azar(-7,7)).toFixed(1)}%;` +
-      `--h:${azar(alto[0],alto[1]).toFixed(1)}vh;` +
-      `--suelo:${azar(suelo[0],suelo[1]).toFixed(1)}%;` +
-      `--sway:${azar(4.5,7.5).toFixed(1)}s;--del:${azar(-6,0).toFixed(1)}s`;
-    el.innerHTML = tulipan(tono, +(i * 0.11).toFixed(2));
-    contenedor.appendChild(el);
-  }
-}
-
-plantar(document.getElementById("filaFondo"),
-        movil ? CONFIG.fondoMovil : CONFIG.fondo, [26,36], [26,38], false);
-
-plantar(document.getElementById("filaFrente"),
-        movil ? CONFIG.frenteMovil : CONFIG.frente, [42,56], [0,9], true);
-
-/* motas de luz */
-(function(){
-  const frag = document.createDocumentFragment();
-  for (let i=0;i<CONFIG.polvo;i++){
-    const d = document.createElement("div");
-    d.className = "polvo";
-    d.style.cssText =
-      `--x:${azar(0,100).toFixed(1)}%;--p:${azar(3,8).toFixed(1)}px;` +
-      `--dx:${azar(-9,9).toFixed(0)}vw;` +
-      `--dur:${azar(16,32).toFixed(1)}s;--del:${azar(-30,0).toFixed(1)}s`;
-    frag.appendChild(d);
-  }
-  document.body.appendChild(frag);
-})();
-
-/* ═══════════════════════════════════════════════════════════════
-   4. COMPORTAMIENTO
-   ═══════════════════════════════════════════════════════════════ */
-
-const $ = id => document.getElementById(id);
-$("rotulo").textContent = ROTULO;
-$("intro").textContent  = INTRO;
-$("firma").textContent  = FIRMA;
-
-let orden = [], quedan = [];
-
-/* baraja para no repetir mensaje hasta agotar la lista */
-function siguienteMensaje(){
-  if (!quedan.length){
-    orden = MENSAJES.map((_,i) => i).sort(() => Math.random() - .5);
-    quedan = orden.slice();
-  }
-  return MENSAJES[quedan.pop()];
-}
-
-let ocupado = false;
-
-function florecer(){
-  if (ocupado) return;
-  ocupado = true;
-
-  const primera = !document.body.classList.contains("florecido");
-
-  if (primera){
-    document.body.classList.add("florecido");
-    $("mensaje").textContent = siguienteMensaje();
-    setTimeout(() => { ocupado = false; }, 1400);
-  } else {
-    /* se cierran y se vuelven a abrir con el mensaje nuevo */
-    document.body.classList.remove("florecido");
-    $("mensaje").classList.add("cambiando");
-    setTimeout(() => {
-      $("mensaje").textContent = siguienteMensaje();
-      $("mensaje").classList.remove("cambiando");
-      document.body.classList.add("florecido");
-      ocupado = false;
-    }, 700);
-  }
-}
-
-$("btnFlorecer").addEventListener("click", florecer);
-document.querySelectorAll(".fila--frente .tulipan")
-  .forEach(t => t.addEventListener("click", florecer));
-
-/* ── Datos curiosos ── */
-let iDato = 0;
-const modal = $("modal");
-function pintarDato(){
-  $("dato").textContent = DATOS[iDato];
-  $("contador").textContent = (iDato+1) + " / " + DATOS.length;
-}
-$("btnDatos").addEventListener("click", () => { pintarDato(); modal.classList.add("visible"); });
-$("antDato").addEventListener("click", () => { iDato = (iDato - 1 + DATOS.length) % DATOS.length; pintarDato(); });
-$("sigDato").addEventListener("click", () => { iDato = (iDato + 1) % DATOS.length; pintarDato(); });
-modal.querySelectorAll("[data-cerrar]").forEach(e =>
-  e.addEventListener("click", () => modal.classList.remove("visible")));
-
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") modal.classList.remove("visible");
-  if (modal.classList.contains("visible")){
-    if (e.key === "ArrowLeft")  $("antDato").click();
-    if (e.key === "ArrowRight") $("sigDato").click();
-  }
-});
-</script>
 </body>
 </html>
