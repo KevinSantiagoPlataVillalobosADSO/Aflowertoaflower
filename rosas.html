@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Un campo de rosas</title>
+<style>
+  /* ═════════════════════════════════════════════
+     TOKENS
+     ═════════════════════════════════════════════ */
+  :root{
+    --fondo-1:#2b1220;
+    --fondo-2:#180d14;
+    --fondo-3:#080508;
+
+    --papel:#f7f0e2;
+    --papel-2:#e9dcc8;
+    --tinta:#4a1526;
+    --tinta-suave:rgba(247,235,222,.58);
+    --serif:Georgia,"Times New Roman",serif;
+
+    --glow:#c23a5e;
+    --verde:#2f5c40;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+
+  body{
+    font-family:var(--serif);
+    color:var(--tinta-suave);
+    background:
+      radial-gradient(80% 45% at 50% 6%, rgba(255,186,164,.10) 0%, transparent 66%),
+      linear-gradient(176deg, var(--fondo-1) 0%, var(--fondo-2) 46%, var(--fondo-3) 100%);
+    overflow:hidden;
+    position:relative;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ═════════════════════════════════════════════
+     EL CAMPO — tres capas en profundidad
+     ═════════════════════════════════════════════ */
+  .campo{position:fixed;inset:0;z-index:1;overflow:hidden}
+
+  /* Dos tiras idénticas apiladas; el desfile recorre exactamente
+     una tira, así que el salto al reiniciar es invisible.        */
+  .capa{
+    position:absolute;
+    left:0;right:0;top:0;
+    height:calc(var(--alto) * 2);
+    will-change:transform;
+    animation:desfile var(--dur) linear infinite;
+  }
+  @keyframes desfile{
+    from{transform:translate3d(0,0,0)}
+    to  {transform:translate3d(0,-50%,0)}
+  }
+  .tira{position:relative;height:var(--alto)}
+
+  .capa--lejos{--alto:100vh;--dur:150s;opacity:.42;filter:blur(3px)}
+  .capa--medio{--alto:130vh;--dur:112s;opacity:.72}
+  .capa--cerca{--alto:170vh;--dur:92s}
+
+  body.detenido .capa{animation-play-state:paused}
+
+  /* bruma de fondo y viñeta: el campo no tiene principio ni final */
+  .vineta{
+    position:absolute;inset:0;pointer-events:none;z-index:6;
+    background:
+      linear-gradient(180deg, rgba(8,5,8,.86) 0%, transparent 22%, transparent 74%, rgba(8,5,8,.9) 100%),
+      radial-gradient(120% 78% at 50% 50%, transparent 42%, rgba(8,5,8,.62) 100%);
+  }
+
+  /* ═════════════════════════════════════════════
+     UNA ROSA
+     ═════════════════════════════════════════════ */
+  .rosa{
+    position:absolute;
+    width:var(--w);height:var(--w);
+    margin:calc(var(--w) / -2);
+    padding:0;border:0;background:none;
+    display:block;
+    transform:scale(1);
+    transition:transform .5s cubic-bezier(.2,.7,.3,1), filter .5s;
+    cursor:default;
+  }
+  .rosa svg{width:100%;height:100%;display:block;overflow:visible}
+
+  .cuerpo{
+    display:block;width:100%;height:100%;
+    animation:mecer var(--sway) ease-in-out infinite alternate;
+    animation-delay:var(--del);
+  }
+  @keyframes mecer{
+    from{transform:rotate(calc(var(--rot) - 3.5deg))}
+    to  {transform:rotate(calc(var(--rot) + 3.5deg))}
+  }
+
+  /* sólo las de primer plano responden */
+  .capa--cerca .rosa{cursor:pointer}
+  .capa--cerca .rosa:hover,
+  .capa--cerca .rosa:focus-visible{
+    transform:scale(1.13);
+    filter:drop-shadow(0 0 22px rgba(194,58,94,.55));
+    outline:none;
+  }
+  .capa--cerca .rosa:active{transform:scale(1.05)}
+
+  /* marca discreta en las que ya leíste */
+  .rosa.leida::after{
+    content:"";
+    position:absolute;left:50%;bottom:-4%;
+    width:6px;height:6px;margin-left:-3px;
+    border-radius:50%;
+    background:var(--papel);
+    opacity:.5;
+    box-shadow:0 0 8px rgba(247,240,226,.7);
+  }
+
+  /* la que está abierta ahora mismo */
+  .rosa.viva{
+    transform:scale(1.2);
+    filter:drop-shadow(0 0 30px rgba(232,120,150,.75));
+  }
+
+  /* ═════════════════════════════════════════════
+     PÉTALOS A LA DERIVA
+     ═════════════════════════════════════════════ */
+  .petalo-suelto{
+    position:absolute;z-index:5;
+    width:var(--p);height:calc(var(--p) * .74);
+    border-radius:56% 44% 52% 48% / 62% 58% 42% 38%;
+    background:linear-gradient(140deg, var(--c1), var(--c2));
+    opacity:0;
+    animation:derivar var(--dur) linear infinite;
+    animation-delay:var(--del);
+    will-change:transform,opacity;
+  }
+  @keyframes derivar{
+    0%  {transform:translate3d(0,-14vh,0) rotate(0deg);opacity:0}
+    12% {opacity:.7}
+    88% {opacity:.55}
+    100%{transform:translate3d(var(--dx),112vh,0) rotate(var(--giro));opacity:0}
+  }
+
+  /* ═════════════════════════════════════════════
+     INTERFAZ
+     ═════════════════════════════════════════════ */
+  .rotulo{
+    position:fixed;top:0;left:0;right:0;z-index:20;
+    padding:clamp(18px,4vh,34px) 20px 0;
+    text-align:center;
+    font-size:clamp(11px,1.5vw,13px);
+    letter-spacing:.34em;text-transform:lowercase;
+    color:rgba(247,240,226,.42);
+    pointer-events:none;
+    transition:opacity .6s;
+  }
+  .rotulo span{position:relative;padding:0 clamp(14px,4vw,26px)}
+  .rotulo span::before,.rotulo span::after{
+    content:"";position:absolute;top:50%;width:clamp(16px,5vw,38px);height:1px;
+    background:linear-gradient(90deg,transparent,rgba(247,240,226,.36));
+  }
+  .rotulo span::before{right:100%}
+  .rotulo span::after{left:100%;transform:scaleX(-1)}
+
+  .guia{
+    position:fixed;left:50%;top:50%;z-index:20;
+    transform:translate(-50%,-50%);
+    width:min(88vw,520px);
+    text-align:center;
+    pointer-events:none;
+    transition:opacity .7s, transform .7s;
+  }
+  .guia__intro{
+    font-size:clamp(19px,4.4vw,29px);
+    font-style:italic;
+    color:var(--papel);
+    line-height:1.5;
+    text-shadow:0 2px 26px rgba(0,0,0,.6);
+    animation:aparecer 1.8s ease .3s both;
+  }
+  .guia__pista{
+    margin-top:clamp(14px,3vh,22px);
+    font-size:clamp(10.5px,1.6vw,12.5px);
+    letter-spacing:.3em;text-transform:lowercase;
+    color:rgba(247,240,226,.44);
+    animation:latido 3.4s ease-in-out 1.6s infinite both;
+  }
+  @keyframes aparecer{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes latido{0%,100%{opacity:.28}50%{opacity:.72}}
+
+  body.tocada .guia{opacity:0;transform:translate(-50%,-58%);pointer-events:none}
+  body.tocada .rotulo{opacity:.34}
+
+  .acciones{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;
+    padding:0 20px clamp(20px,4.5vh,38px);
+    display:flex;justify-content:center;align-items:center;
+    gap:clamp(10px,2.5vw,18px);
+    flex-wrap:wrap;
+  }
+  .acciones button{
+    font-family:var(--serif);
+    font-size:clamp(11px,1.6vw,13px);
+    letter-spacing:.24em;text-transform:lowercase;
+    color:var(--papel-2);
+    padding:.82em 1.9em;
+    border-radius:999px;
+    border:1px solid rgba(247,240,226,.22);
+    background:rgba(28,12,20,.5);
+    backdrop-filter:blur(9px);
+    -webkit-backdrop-filter:blur(9px);
+    cursor:pointer;
+    transition:transform .3s, background .3s, border-color .3s, box-shadow .3s;
+  }
+  .acciones button:hover{
+    background:rgba(120,26,54,.5);
+    border-color:rgba(232,150,170,.5);
+    box-shadow:0 0 24px rgba(194,58,94,.3);
+  }
+  .acciones button:active{transform:scale(.95)}
+  .acciones button:focus-visible{outline:2px solid var(--glow);outline-offset:3px}
+  .acciones button[disabled]{opacity:.3;cursor:default;transform:none;box-shadow:none}
+
+  /* ═════════════════════════════════════════════
+     TARJETA DEL MENSAJE
+     ═════════════════════════════════════════════ */
+  .lienzo{
+    position:fixed;inset:0;z-index:30;
+    display:grid;place-items:center;
+    padding:clamp(16px,4vw,28px);
+    background:rgba(8,5,8,.62);
+    backdrop-filter:blur(7px);
+    -webkit-backdrop-filter:blur(7px);
+    opacity:0;visibility:hidden;
+    transition:opacity .5s, visibility .5s;
+  }
+  body.abierto .lienzo{opacity:1;visibility:visible}
+  body.abierto .campo{filter:brightness(.5) saturate(.7);transition:filter .6s}
+  body.abierto .acciones{opacity:.25;pointer-events:none;transition:opacity .4s}
+
+  .tarjeta{
+    position:relative;
+    width:min(92vw,470px);
+    max-height:88vh;overflow-y:auto;
+    padding:clamp(26px,5vw,40px) clamp(22px,5vw,38px) clamp(20px,4vw,30px);
+    text-align:center;
+    border-radius:20px;
+    border:1px solid rgba(247,240,226,.16);
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(194,58,94,.2), transparent 60%),
+      linear-gradient(168deg, rgba(44,18,30,.94), rgba(18,9,14,.96));
+    box-shadow:0 30px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+    transform:translateY(22px) scale(.96);
+    opacity:0;
+    transition:transform .55s cubic-bezier(.2,.8,.3,1), opacity .45s;
+  }
+  body.abierto .tarjeta{transform:none;opacity:1}
+
+  .tarjeta__x{
+    position:absolute;top:10px;right:12px;
+    width:34px;height:34px;
+    border:0;border-radius:50%;
+    background:transparent;color:rgba(247,240,226,.5);
+    font-size:24px;line-height:1;font-family:var(--serif);
+    cursor:pointer;transition:color .25s, background .25s;
+  }
+  .tarjeta__x:hover{color:var(--papel);background:rgba(255,255,255,.07)}
+
+  .tarjeta__rosa{
+    width:clamp(108px,26vw,150px);
+    aspect-ratio:1;
+    margin:0 auto clamp(14px,3vw,20px);
+    position:relative;
+  }
+  .tarjeta__rosa svg{width:100%;height:100%;display:block;overflow:visible}
+  .tarjeta__rosa::before{
+    content:"";position:absolute;inset:-24%;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(194,58,94,.34), transparent 66%);
+    animation:respiro 5.5s ease-in-out infinite;
+  }
+  @keyframes respiro{0%,100%{transform:scale(.9);opacity:.55}50%{transform:scale(1.08);opacity:.95}}
+
+  /* despliegue de la rosa grande, anillo por anillo */
+  .tarjeta__rosa .anillo{
+    transform-origin:50% 50%;
+    animation:desplegar .95s cubic-bezier(.2,.75,.3,1) both;
+    animation-delay:calc(var(--i) * .085s);
+  }
+  @keyframes desplegar{
+    from{transform:rotate(-26deg) scale(.34);opacity:0}
+    to  {transform:rotate(0deg) scale(1);opacity:1}
+  }
+
+  .tarjeta__tono{
+    font-size:clamp(9.5px,1.4vw,11px);
+    letter-spacing:.32em;text-transform:uppercase;
+    color:rgba(232,150,170,.62);
+    margin-bottom:clamp(12px,2.4vw,17px);
+  }
+  .tarjeta__msg{
+    font-size:clamp(15.5px,2.5vw,18.5px);
+    line-height:1.72;
+    color:var(--papel);
+    font-style:italic;
+  }
+  .tarjeta__final{
+    margin-top:clamp(16px,3vw,22px);
+    padding-top:clamp(14px,2.6vw,18px);
+    border-top:1px solid rgba(232,150,170,.22);
+    font-size:clamp(13.5px,2.1vw,15.5px);
+    line-height:1.7;
+    color:rgba(232,150,170,.9);
+    animation:aparecer 1.4s ease .5s both;
+  }
+  .tarjeta__firma{
+    margin-top:clamp(16px,3vw,22px);
+    font-size:clamp(11px,1.7vw,13px);
+    letter-spacing:.22em;text-transform:lowercase;
+    color:rgba(247,240,226,.44);
+  }
+  .tarjeta__cuenta{
+    margin-top:clamp(16px,3vw,22px);
+    padding-top:clamp(13px,2.4vw,17px);
+    border-top:1px solid rgba(247,240,226,.1);
+    font-size:clamp(9.5px,1.4vw,11px);
+    letter-spacing:.2em;
+    color:rgba(247,240,226,.34);
+  }
+
+  /* ═════════════════════════════════════════════
+     MODAL DE DATOS
+     ═════════════════════════════════════════════ */
+  .modal{
+    position:fixed;inset:0;z-index:40;
+    display:grid;place-items:center;
+    padding:clamp(16px,4vw,28px);
+    opacity:0;visibility:hidden;
+    transition:opacity .4s, visibility .4s;
+  }
+  .modal.visible{opacity:1;visibility:visible}
+  .modal__fondo{position:absolute;inset:0;background:rgba(6,4,7,.82);backdrop-filter:blur(6px)}
+  .modal__caja{
+    position:relative;
+    width:min(92vw,460px);
+    padding:clamp(28px,5vw,38px) clamp(22px,5vw,34px) clamp(18px,3.5vw,26px);
+    border-radius:18px;
+    border:1px solid rgba(247,240,226,.15);
+    background:linear-gradient(168deg, rgba(40,17,28,.97), rgba(16,8,13,.98));
+    box-shadow:0 28px 70px rgba(0,0,0,.6);
+    text-align:center;
+    transform:translateY(16px);
+    transition:transform .45s cubic-bezier(.2,.8,.3,1);
+  }
+  .modal.visible .modal__caja{transform:none}
+  .modal__titulo{
+    font-size:clamp(9.5px,1.4vw,11px);
+    letter-spacing:.34em;text-transform:uppercase;
+    color:rgba(232,150,170,.6);
+    margin-bottom:clamp(14px,3vw,20px);
+  }
+  .modal__dato{
+    font-size:clamp(14px,2.2vw,16.5px);
+    line-height:1.75;color:var(--papel-2);
+    min-height:7.5em;
+  }
+  .modal__pie{
+    display:flex;align-items:center;justify-content:center;
+    gap:18px;margin-top:clamp(14px,3vw,20px);
+    padding-top:clamp(12px,2.4vw,16px);
+    border-top:1px solid rgba(247,240,226,.1);
+  }
+  .modal__pie button{
+    width:36px;height:36px;border-radius:50%;
+    border:1px solid rgba(247,240,226,.18);
+    background:transparent;color:var(--papel-2);
+    font-family:var(--serif);font-size:19px;line-height:1;
+    cursor:pointer;transition:background .25s, transform .25s;
+  }
+  .modal__pie button:hover{background:rgba(255,255,255,.08)}
+  .modal__pie button:active{transform:scale(.9)}
+  .modal__cuenta{
+    font-size:11px;letter-spacing:.2em;
+    color:rgba(247,240,226,.4);min-width:64px;
+  }
+
+  /* ═════════════════════════════════════════════
+     RESPONSIVE
+     ═════════════════════════════════════════════ */
+  @media (max-width:620px){
+    .capa--lejos{filter:blur(2px)}
+    .rotulo{letter-spacing:.26em}
+    .acciones button{padding:.78em 1.5em}
+  }
+  @media (max-height:560px){
+    .guia__pista{display:none}
+    .rotulo{padding-top:12px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .capa{animation:none}
+    .cuerpo,.petalo-suelto,.tarjeta__rosa::before,.guia__pista{animation:none !important}
+    .tarjeta__rosa .anillo{animation:none !important}
+    *{transition-duration:.05s !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="campo" id="campo" aria-hidden="true">
+  <div class="capa capa--lejos" id="capaLejos"></div>
+  <div class="capa capa--medio" id="capaMedio"></div>
+  <div class="capa capa--cerca" id="capaCerca"></div>
+  <div id="petalos"></div>
+  <div class="vineta"></div>
+</div>
+
+<svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+
+<header class="rotulo"><span id="rotulo"></span></header>
+
+<div class="guia" id="guia">
+  <p class="guia__intro" id="intro"></p>
+  <p class="guia__pista" id="pista">toca una rosa</p>
+</div>
+
+<div class="acciones">
+  <button id="btnFlorecer" type="button">florecer</button>
+  <button id="btnDatos" type="button">datos curiosos</button>
+</div>
+
+<div class="lienzo" id="lienzo">
+  <article class="tarjeta" role="dialog" aria-modal="true" aria-labelledby="mensaje">
+    <button class="tarjeta__x" id="cerrar" type="button" aria-label="Cerrar">&times;</button>
+    <div class="tarjeta__rosa" id="heroRosa" aria-hidden="true"></div>
+    <p class="tarjeta__tono" id="tonoNombre"></p>
+    <p class="tarjeta__msg" id="mensaje"></p>
+    <p class="tarjeta__final" id="final" hidden></p>
+    <p class="tarjeta__firma" id="firma"></p>
+    <p class="tarjeta__cuenta" id="cuenta"></p>
+  </article>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal__fondo" data-cerrar></div>
+  <div class="modal__caja">
+    <p class="modal__titulo" id="modalTitulo">datos curiosos</p>
+    <p class="modal__dato" id="dato"></p>
+    <div class="modal__pie">
+      <button id="antDato" type="button" aria-label="Anterior">&lsaquo;</button>
+      <span class="modal__cuenta" id="contador"></span>
+      <button id="sigDato" type="button" aria-label="Siguiente">&rsaquo;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   1. PERSONALIZABLE — edita este bloque y nada más
+   ═══════════════════════════════════════════════════════════════ */
+
+const ROTULO = "un campo de rosas sin final";
+const INTRO  = "Sembré un campo entero y ninguna se parece a ti";
+const FIRMA  = "para ti";
+const PISTA  = "toca una rosa";
+
+/* Cada rosa del primer plano toma un mensaje de esta lista, en orden.
+   Agrega o quita los que quieras: el contador se ajusta solo.        */
+const MENSAJES = [
+  "Dicen que una rosa basta para decirlo todo. Yo por si acaso te sembré un campo entero.",
+  "Cada una tardó lo suyo en abrirse. Como las cosas que valen la pena, más o menos.",
+  "Si el día viene torcido, aquí queda esto: un lugar al que volver donde siempre es primavera.",
+  "No hay dos iguales. Ninguna se repite, por más que sigas caminando.",
+  "Las rosas tienen espinas para que uno se acerque despacio. Contigo aprendí a hacer lo mismo.",
+  "Un campo entero y todavía me parece poco para lo que quería decirte.",
+  "Esta la dejé un poco más abierta que las demás. Sin razón. O con todas.",
+  "Que sepas que existe un sitio, aunque sea de código, hecho nada más para que te sientas bien.",
+  "Podría explicarte por qué rosas. Pero creo que ya lo sabes.",
+  "Si algún día se te olvida lo que vales, vuelve y cuenta cuántas hay. Se acaba el día antes que el campo.",
+  "Ninguna de estas se marchita. Ese fue el punto entero de hacerlas así.",
+  "Y si llegaste hasta esta, gracias por seguir caminando. El campo siempre te va a estar esperando."
+];
+
+/* Mensaje al abrir todas las rosas */
+const FINAL = "Las abriste todas. El campo sigue, pero ya te dijo todo lo que tenía que decirte.";
+
+const DATOS = [
+  "Las rosas llevan aquí unos 35 millones de años. Se han encontrado fósiles en Colorado y Oregón, mucho antes de que existiera alguien para regalarlas.",
+  "Lo que llamamos espinas técnicamente son aguijones. Nacen de la piel del tallo, no de su interior, y por eso se desprenden con la uña sin herir a la planta.",
+  "No existe la rosa azul natural: al género le falta la delfinidina, el pigmento del azul. La primera modificada genéticamente llegó en 2004 y aun así salió malva.",
+  "El fruto de la rosa se llama escaramujo y tiene bastante más vitamina C que una naranja del mismo peso.",
+  "Para destilar un solo kilo de aceite de rosa hacen falta unas tres o cuatro toneladas de pétalos. Por eso vale más que el oro por gramo.",
+  "En el rosal de la catedral de Hildesheim, en Alemania, se calculan más de mil años de vida. En 1945 un bombardeo arrasó la catedral y la raíz volvió a brotar.",
+  "Todas las rosas son comestibles. Los pétalos se usan en mermeladas, siropes y repostería desde hace siglos.",
+  "En Roma se colgaba una rosa del techo cuando lo que se hablaba abajo era secreto. De ahí viene la expresión sub rosa.",
+  "La guerra civil inglesa del siglo XV se recuerda como la Guerra de las Dos Rosas: la blanca de York contra la roja de Lancaster.",
+  "Colombia y Ecuador están entre los mayores exportadores de rosas del mundo. Buena parte de las que se regalan en febrero salieron de la sabana de Bogotá."
+];
+
+/* Paletas. claro = borde del pétalo, hondo = corazón de la flor. */
+const TONOS = [
+  { nombre:"Rojo terciopelo", hondo:"#4a0413", medio:"#9e0f2c", claro:"#e8798f", brillo:"#ff9fb0" },
+  { nombre:"Rosa antiguo",    hondo:"#5c1032", medio:"#b4406a", claro:"#f3b3c6", brillo:"#ffd0dd" },
+  { nombre:"Coral encendido", hondo:"#5e1a14", medio:"#c25236", claro:"#f6b394", brillo:"#ffd2b6" },
+  { nombre:"Marfil",          hondo:"#6b4a3e", medio:"#d8b79c", claro:"#fdf2e2", brillo:"#ffffff" },
+  { nombre:"Borgoña",         hondo:"#380a17", medio:"#78122f", claro:"#c9718c", brillo:"#e79bb0" },
+  { nombre:"Durazno",         hondo:"#6a3418", medio:"#d1793f", claro:"#fbd0a6", brillo:"#ffe6c8" }
+];
+
+/* Las rosas del primer plano son una por mensaje: si agregas mensajes,
+   el campo siembra más rosas solo. Aquí solo se decide en cuántas
+   columnas se reparten.                                              */
+const CONFIG = {
+  columnas:3,        // columnas de rosas grandes en pantalla ancha
+  columnasMovil:2,   // ...y en móvil
+  medioFilas:4,      // rosas medianas del fondo
+  medioCols:4,
+  hojas:9,           // hojas sueltas entre las rosas
+  lejos:22,          // manchas desenfocadas del fondo
+  petalosSueltos:7   // pétalos que caen
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   2. GEOMETRÍA — de aquí para abajo no hace falta tocar nada
+   ═══════════════════════════════════════════════════════════════ */
+
+const azar  = (a,b) => Math.random()*(b-a)+a;
+const eleg  = a => a[Math.floor(Math.random()*a.length)];
+const movil = matchMedia("(max-width:620px)").matches;
+
+const C = 50; // centro del viewBox 0 0 100 100
+
+/* Un pétalo de rosa visto desde arriba: base estrecha, borde muy
+   ancho y escotadura en la punta. `sesgo` desplaza la punta hacia
+   un lado — es lo que le da a la flor el giro de espiral.          */
+function pathPetalo(r0, r1, w, sesgo){
+  const L = r1 - r0;
+  const y = k => (C - (r0 + L*k)).toFixed(2);
+  const cx = C + sesgo*w;
+  return `M${C} ${(C-r0).toFixed(2)}
+    C${(C-w*.42).toFixed(2)} ${y(.13)} ${(cx-w*1.03).toFixed(2)} ${y(.50)} ${(cx-w*.90).toFixed(2)} ${y(.84)}
+    C${(cx-w*.58).toFixed(2)} ${y(1.06)} ${(cx-w*.19).toFixed(2)} ${y(1.07)} ${cx.toFixed(2)} ${y(.96)}
+    C${(cx+w*.19).toFixed(2)} ${y(1.07)} ${(cx+w*.58).toFixed(2)} ${y(1.06)} ${(cx+w*.90).toFixed(2)} ${y(.84)}
+    C${(cx+w*1.03).toFixed(2)} ${y(.50)} ${(C+w*.42).toFixed(2)} ${y(.13)} ${C} ${(C-r0).toFixed(2)} Z`;
+}
+
+/* Un anillo de pétalos anchos y solapados */
+function anillo(n, r0, r1, w, giro, sesgo, opac, i){
+  let s = `<g class="anillo" style="--i:${i}" opacity="${opac}">`;
+  for (let k=0;k<n;k++){
+    const ang = (360/n)*k + giro + azar(-3.5,3.5);
+    const rr  = r1 * azar(.93,1.07);
+    const ww  = w  * azar(.92,1.08);
+    s += `<path d="${pathPetalo(r0, rr, ww, sesgo * azar(.8,1.2))}"
+             transform="rotate(${ang.toFixed(1)} ${C} ${C})"/>`;
+  }
+  return s + `</g>`;
+}
+
+/* El cogollo: pétalos cada vez más pequeños repartidos por el
+   ángulo áureo (137.5°), que es la espiral real de una rosa.  */
+function cogollo(i, tono){
+  let s = `<g class="anillo" style="--i:${i}">`;
+  for (let k=0;k<8;k++){
+    const t = k/8;
+    const r = 12.5 - 10.2*t;
+    s += `<path d="${pathPetalo(r*.14, r, r*1.02, .52)}"
+             transform="rotate(${(k*137.5).toFixed(1)} ${C} ${C})"/>`;
+  }
+  return s + `<circle cx="${C}" cy="${C}" r="1.9" fill="${tono.hondo}" opacity=".8" stroke="none"/></g>`;
+}
+
+/* Rosa completa. detalle=true → más capas (primer plano) */
+function rosa(tono, detalle){
+  const id = "g" + Math.random().toString(36).slice(2,9);
+  /* [nº pétalos, radio base, radio punta, ancho, giro, sesgo] */
+  const capas = detalle
+    ? [[5,11,46,31,  0,.30],[5,9,37.5,25.5,38,.30],[5,7,29.5,20,20,.28],
+       [5,5,22,15,  52,.26],[4,3.5,15.5,11,28,.24]]
+    : [[5,10,45,32,  0,.30],[5,8,34,23.5,40,.28],[4,5.5,22.5,15.5,18,.26]];
+
+  let cuerpo = "";
+  capas.forEach((c,i) => {
+    cuerpo += anillo(c[0], c[1], c[2], c[3], c[4], c[5], (0.97 - i*0.012).toFixed(2), i);
+  });
+  cuerpo += cogollo(capas.length, tono);
+
+  return `
+  <svg viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="p${id}" cx="${C}" cy="${C}" r="46" gradientUnits="userSpaceOnUse">
+        <stop offset="0"    stop-color="${tono.hondo}"/>
+        <stop offset=".34"  stop-color="${tono.medio}"/>
+        <stop offset=".82"  stop-color="${tono.claro}"/>
+        <stop offset="1"    stop-color="${tono.brillo}"/>
+      </radialGradient>
+      <radialGradient id="l${id}" cx="34" cy="30" r="52" gradientUnits="userSpaceOnUse">
+        <stop offset="0"   stop-color="#fff" stop-opacity=".30"/>
+        <stop offset=".55" stop-color="#fff" stop-opacity=".05"/>
+        <stop offset="1"   stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="s${id}" cx="${C}" cy="${C}" r="26" gradientUnits="userSpaceOnUse">
+        <stop offset="0"   stop-color="${tono.hondo}" stop-opacity=".85"/>
+        <stop offset=".68" stop-color="${tono.hondo}" stop-opacity=".26"/>
+        <stop offset="1"   stop-color="${tono.hondo}" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <g fill="url(#p${id})" stroke="rgba(28,4,12,.34)" stroke-width=".55" stroke-linejoin="round">
+      ${cuerpo}
+    </g>
+    <circle cx="${C}" cy="${C}" r="26" fill="url(#s${id})" pointer-events="none"/>
+    <circle cx="${C}" cy="${C}" r="47" fill="url(#l${id})" pointer-events="none"/>
+  </svg>`;
+}
+
+/* Hoja de rosal: dentada, con nervadura */
+function hoja(){
+  const L = 78, A = 21, n = 8;
+  const w = t => A * Math.sin(Math.PI * Math.pow(t,.68));
+  let d = "M50 92";
+  for (let i=1;i<=n;i++){
+    const t=i/n, tm=(i-.5)/n;
+    d += ` Q${(50 - w(tm)*1.34).toFixed(1)} ${(92 - L*tm).toFixed(1)} ${(50 - w(t)).toFixed(1)} ${(92 - L*t).toFixed(1)}`;
+  }
+  for (let i=n-1;i>=0;i--){
+    const t=i/n, tm=(i+.5)/n;
+    d += ` Q${(50 + w(tm)*1.34).toFixed(1)} ${(92 - L*tm).toFixed(1)} ${(50 + w(t)).toFixed(1)} ${(92 - L*t).toFixed(1)}`;
+  }
+  const id = "h" + Math.random().toString(36).slice(2,8);
+  return `
+  <svg viewBox="0 0 100 100">
+    <defs>
+      <linearGradient id="${id}" x1="0" y1="1" x2=".6" y2="0">
+        <stop offset="0" stop-color="#14341f"/>
+        <stop offset=".6" stop-color="#2f5c40"/>
+        <stop offset="1" stop-color="#4a8159"/>
+      </linearGradient>
+    </defs>
+    <path d="${d} Z" fill="url(#${id})" stroke="rgba(6,20,10,.45)" stroke-width=".7"/>
+    <path d="M50 92 L50 15" stroke="rgba(160,210,175,.28)" stroke-width="1" fill="none"/>
+  </svg>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. SEMBRAR EL CAMPO
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Reparte en una rejilla con desorden, para que se vea natural
+   pero sin amontonarse. El desorden vertical se ajusta al número
+   de filas para que nunca se pisen.                               */
+function rejilla(filas, cols){
+  const p = [], jy = Math.min(11, 34/filas);
+  for (let f=0; f<filas; f++)
+    for (let c=0; c<cols; c++)
+      p.push({
+        x: ((c + .5)/cols)*100 + azar(-13,13),
+        y: ((f + .5)/filas)*100 + azar(-jy,jy)
+      });
+  return p.sort(() => Math.random() - .5);
+}
+
+function nuevaRosa(pos, ancho, detalle, tono, indiceMsg){
+  const el = document.createElement(indiceMsg == null ? "div" : "button");
+  el.className = "rosa";
+  if (indiceMsg != null){ el.type = "button"; el.dataset.msg = indiceMsg; el.dataset.tono = TONOS.indexOf(tono);
+    el.setAttribute("aria-label", "Abrir una rosa"); }
+  el.style.cssText = `left:${pos.x.toFixed(1)}%;top:${pos.y.toFixed(1)}%;--w:${ancho.toFixed(1)}vmin`;
+  el.innerHTML = `<span class="cuerpo" style="--rot:${azar(-180,180).toFixed(0)}deg;
+                   --sway:${azar(6,11).toFixed(1)}s;--del:${azar(-8,0).toFixed(1)}s">
+                   ${rosa(tono, detalle)}</span>`;
+  return el;
+}
+
+function nuevaHoja(){
+  const el = document.createElement("div");
+  el.className = "rosa";
+  el.style.cssText = `left:${azar(2,98).toFixed(1)}%;top:${azar(2,98).toFixed(1)}%;--w:${azar(9,15).toFixed(1)}vmin`;
+  el.innerHTML = `<span class="cuerpo" style="--rot:${azar(-180,180).toFixed(0)}deg;
+                   --sway:${azar(8,14).toFixed(1)}s;--del:${azar(-10,0).toFixed(1)}s">${hoja()}</span>`;
+  return el;
+}
+
+function nuevaMancha(){
+  const el = document.createElement("div");
+  const t = eleg(TONOS), s = azar(9,26);
+  el.style.cssText =
+    `position:absolute;border-radius:50%;pointer-events:none;` +
+    `left:${azar(-4,102).toFixed(1)}%;top:${azar(-3,101).toFixed(1)}%;` +
+    `width:${s.toFixed(1)}vmin;height:${s.toFixed(1)}vmin;margin:${(-s/2).toFixed(1)}vmin;` +
+    `background:radial-gradient(circle at 38% 34%, ${t.claro}, ${t.medio} 52%, transparent 72%);` +
+    `opacity:${azar(.25,.6).toFixed(2)}`;
+  return el;
+}
+
+/* Dos tiras idénticas apiladas = desfile sin costuras */
+function sembrar(capa, construir){
+  const tira = document.createElement("div");
+  tira.className = "tira";
+  construir(tira);
+  capa.appendChild(tira);
+  const clon = tira.cloneNode(true);
+  // los botones clonados también deben funcionar
+  capa.appendChild(clon);
+}
+
+const capaCerca = document.getElementById("capaCerca");
+const capaMedio = document.getElementById("capaMedio");
+const capaLejos = document.getElementById("capaLejos");
+
+/* una rosa por mensaje: así ninguno queda fuera del campo */
+const colsC  = movil ? CONFIG.columnasMovil : CONFIG.columnas;
+const filasC = Math.ceil(MENSAJES.length / colsC);
+
+sembrar(capaCerca, tira => {
+  rejilla(filasC, colsC).forEach((p, k) => {
+    if (k >= MENSAJES.length) return;
+    tira.appendChild(nuevaRosa(p, azar(15,23), true, TONOS[k % TONOS.length], k));
+  });
+});
+
+sembrar(capaMedio, tira => {
+  rejilla(movil ? 4 : CONFIG.medioFilas, movil ? 2 : CONFIG.medioCols).forEach(p => {
+    tira.appendChild(nuevaRosa(p, azar(7,12), false, eleg(TONOS), null));
+  });
+  for (let i=0; i<(movil ? 5 : CONFIG.hojas); i++) tira.appendChild(nuevaHoja());
+});
+
+sembrar(capaLejos, tira => {
+  for (let i=0;i<CONFIG.lejos;i++) tira.appendChild(nuevaMancha());
+});
+
+/* Pétalos a la deriva */
+(function(){
+  const cont = document.getElementById("petalos");
+  for (let i=0;i<CONFIG.petalosSueltos;i++){
+    const t = eleg(TONOS), d = document.createElement("div");
+    d.className = "petalo-suelto";
+    d.style.cssText =
+      `left:${azar(-2,100).toFixed(1)}%;--p:${azar(9,17).toFixed(0)}px;` +
+      `--c1:${t.claro};--c2:${t.medio};` +
+      `--dx:${azar(-16,16).toFixed(0)}vw;--giro:${azar(240,900).toFixed(0)}deg;` +
+      `--dur:${azar(16,30).toFixed(1)}s;--del:${azar(-28,0).toFixed(1)}s`;
+    cont.appendChild(d);
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   4. COMPORTAMIENTO
+   ═══════════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+$("rotulo").textContent = ROTULO;
+$("intro").textContent  = INTRO;
+$("pista").textContent  = PISTA;
+$("firma").textContent  = FIRMA;
+
+const leidas = new Set();
+
+function pintarCuenta(){
+  const n = leidas.size, t = MENSAJES.length;
+  $("cuenta").textContent = n >= t
+    ? "abriste las " + t
+    : "abriste " + n + " de " + t;
+  $("btnFlorecer").disabled = n >= t;
+}
+
+function abrir(indice, tonoIdx, origen){
+  leidas.add(indice);
+
+  const tono = TONOS[tonoIdx % TONOS.length];
+  $("heroRosa").innerHTML = rosa(tono, true);
+  $("tonoNombre").textContent = tono.nombre;
+  $("mensaje").textContent = MENSAJES[indice];
+
+  /* al abrir la última se suma el cierre */
+  const cerrado = leidas.size >= MENSAJES.length;
+  $("final").hidden = !cerrado;
+  $("final").textContent = cerrado ? FINAL : "";
+
+  document.body.classList.add("abierto","detenido","tocada");
+
+  // marca todas las copias de esa rosa (hay dos tiras)
+  document.querySelectorAll('.capa--cerca .rosa[data-msg="'+indice+'"]')
+    .forEach(r => r.classList.add("leida"));
+  if (origen) origen.classList.add("viva");
+
+  pintarCuenta();
+  $("cerrar").focus();
+}
+
+function cerrarTarjeta(){
+  document.body.classList.remove("abierto","detenido");
+  document.querySelectorAll(".rosa.viva").forEach(r => r.classList.remove("viva"));
+  if (leidas.size >= MENSAJES.length) $("btnFlorecer").disabled = true;
+}
+
+document.querySelectorAll(".capa--cerca .rosa").forEach(r => {
+  r.addEventListener("click", () => abrir(+r.dataset.msg, +r.dataset.tono, r));
+});
+
+$("cerrar").addEventListener("click", cerrarTarjeta);
+$("lienzo").addEventListener("click", e => { if (e.target === $("lienzo")) cerrarTarjeta(); });
+
+$("btnFlorecer").addEventListener("click", () => {
+  const libres = MENSAJES.map((_,i) => i).filter(i => !leidas.has(i));
+  if (!libres.length) return;
+  const i = eleg(libres);
+  const r = document.querySelector('.capa--cerca .rosa[data-msg="'+i+'"]');
+  abrir(i, r ? +r.dataset.tono : i, r);
+});
+
+/* ── Datos curiosos ── */
+let iDato = 0;
+const modal = $("modal");
+function pintarDato(){
+  $("dato").textContent = DATOS[iDato];
+  $("contador").textContent = (iDato+1) + " / " + DATOS.length;
+}
+function abrirModal(){ pintarDato(); modal.classList.add("visible"); document.body.classList.add("detenido"); }
+function cerrarModal(){ modal.classList.remove("visible"); if (!document.body.classList.contains("abierto")) document.body.classList.remove("detenido"); }
+
+$("btnDatos").addEventListener("click", abrirModal);
+$("antDato").addEventListener("click", () => { iDato = (iDato - 1 + DATOS.length) % DATOS.length; pintarDato(); });
+$("sigDato").addEventListener("click", () => { iDato = (iDato + 1) % DATOS.length; pintarDato(); });
+modal.querySelectorAll("[data-cerrar]").forEach(e => e.addEventListener("click", cerrarModal));
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape"){ cerrarModal(); cerrarTarjeta(); }
+  if (modal.classList.contains("visible")){
+    if (e.key === "ArrowLeft")  $("antDato").click();
+    if (e.key === "ArrowRight") $("sigDato").click();
+  }
+});
+
+/* la primera interacción retira la frase de bienvenida */
+addEventListener("pointerdown", () => document.body.classList.add("tocada"), { once:true });
+
+pintarCuenta();
+</script>
+</body>
+</html>
