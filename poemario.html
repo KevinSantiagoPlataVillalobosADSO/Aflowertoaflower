@@ -30,19 +30,18 @@
     --giro:1.05s;
   }
 
-  /* Las medidas van en body, no en :root: una custom property
-     resuelve sus var() en el elemento donde se declara, así que
-     --ph debe vivir junto al --pw que de verdad gana la cascada. */
+  /* Medida de arranque. El tamaño real lo calcula medir() en JS a
+     partir del hueco disponible: en móvil `vh` es el viewport
+     grande —el que incluye la barra de direcciones— y el libro
+     quedaría más alto que el espacio que de verdad se ve. */
   body{
-    --pw:min(44vw, 50vh, 360px);
+    --pw:min(44vw, 46vh, 360px);
     --ph:calc(var(--pw) * 1.42);
-  }
-  body.una-pagina{
-    --pw:min(84vw, 56vh, 400px);
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
+  @supports (height:100dvh){ html,body{height:100dvh} }
 
   body{
     font-family:var(--serif);
@@ -100,7 +99,7 @@
   /* canto: el bloque de páginas que asoma */
   .canto{
     position:absolute;top:1.2%;bottom:1.2%;
-    width:calc(var(--pw) * .97);
+    width:48.5%;
     border-radius:3px;
     background:
       repeating-linear-gradient(90deg,
@@ -126,6 +125,13 @@
   }
   body.una-pagina .hoja{left:0;width:100%}
   .hoja.volteada{transform:translateZ(var(--z,0px)) rotateY(-180deg)}
+  .hoja.girando{will-change:transform}
+
+  /* Cada cara es una textura del tamaño de la página: en un móvil a
+     3x son varios MB por cara. Las hojas lejanas se sacan del árbol
+     de render, que es la diferencia entre ir fluido y no ir. */
+  .hoja.oculta{display:none}
+
   /* al ir a un poema desde el panel las hojas pasan más rápido */
   .libro.pasando{--giro:.58s}
 
@@ -464,6 +470,28 @@
     letter-spacing:.2em;
     color:rgba(247,235,222,.4);
     min-width:78px;text-align:center;
+  }
+
+  /* ═════════════════════════════════════════════
+     MÓVIL: menos trabajo por fotograma
+     ═════════════════════════════════════════════ */
+  @media (max-width:860px){
+    /* backdrop-filter sobre una escena 3D obliga a releer el fondo
+       en cada fotograma; en el móvil sale carísimo */
+    .btn{
+      backdrop-filter:none;-webkit-backdrop-filter:none;
+      background:rgba(40,20,34,.88);
+    }
+    .panel__fondo{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(8,5,10,.94)}
+    /* el grano del papel y la sombra interior se pintan en toda la
+       página: se notan poco y cuestan mucho */
+    .cara{
+      background:
+        linear-gradient(90deg, rgba(150,120,80,.14) 0%, transparent 9%),
+        radial-gradient(120% 90% at 78% 12%, #f7eeda 0%, var(--papel) 48%, var(--papel-2) 100%);
+      box-shadow:none;
+    }
+    .canto{box-shadow:0 14px 30px rgba(0,0,0,.5)}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -807,10 +835,39 @@ const PAGINAS = {
    vistas[i+1].izq — que es lo que queda a la izquierda al voltearla.
    ═══════════════════════════════════════════════════════════════ */
 
-const libro = document.getElementById("libro");
-const anchoCorto = matchMedia("(max-width:760px)");
+const libro  = document.getElementById("libro");
+const escena = document.querySelector(".escena");
 
-let vistas = [], hojas = [], pagina = 0, girando = false;
+let vistas = [], hojas = [], pagina = 0, girando = false, unaPagina = false;
+
+/* ¿cabe un pliego de dos páginas con holgura? */
+function tocaUnaPagina(){
+  return escena.clientWidth / 2 < 300 || matchMedia("(max-width:760px)").matches;
+}
+
+/* Mide el hueco real en píxeles en vez de fiarse de vh: en móvil
+   `vh` incluye la barra de direcciones y el libro se desborda. */
+function medir(){
+  const dispH = escena.clientHeight * 0.96;
+  const dispW = escena.clientWidth;
+  const cols  = unaPagina ? 1 : 2;
+
+  let ph = Math.min(dispH, 560);
+  let pw = ph / 1.42;
+  const pwMax = (dispW * (unaPagina ? 0.9 : 0.94)) / cols;
+  if (pw > pwMax){ pw = pwMax; ph = pw * 1.42; }
+
+  document.body.style.setProperty("--pw", Math.round(pw) + "px");
+  document.body.style.setProperty("--ph", Math.round(ph) + "px");
+}
+
+/* aplica un cambio sin que se anime */
+function sinTransicion(fn){
+  hojas.forEach(h => h.style.transition = "none");
+  fn();
+  void libro.offsetHeight;
+  hojas.forEach(h => h.style.transition = "");
+}
 
 function armarVistas(unaPagina){
   const v = [{ der:PAGINAS.tapa() }];
@@ -833,8 +890,9 @@ function construir(){
      vistas: nos quedamos con el poema, no con el número de página */
   const poemaAbierto = vistas[pagina] ? vistas[pagina].poema : undefined;
 
-  const unaPagina = anchoCorto.matches;
+  unaPagina = tocaUnaPagina();
   document.body.classList.toggle("una-pagina", unaPagina);
+  medir();
   vistas = armarVistas(unaPagina);
 
   if (poemaAbierto !== undefined){
@@ -864,9 +922,15 @@ function construir(){
 
 /* Dentro de un contexto preserve-3d el navegador ordena por
    profundidad, no por z-index: cada hoja necesita su propio Z. */
+/* saca del render las hojas que no se ven; deja un colchón para que
+   la siguiente ya esté lista cuando se pase */
+function acotar(desde, hasta){
+  hojas.forEach((h,i) => h.classList.toggle("oculta", i < desde || i > hasta));
+}
+
 function pintar(sinAnimar){
   const N = vistas.length;
-  const unaPagina = document.body.classList.contains("una-pagina");
+  acotar(pagina - 2, pagina + 2);
   hojas.forEach((h,i) => {
     const volteada = i < pagina;
     h.classList.toggle("volteada", volteada);
@@ -924,16 +988,33 @@ async function ir(destino, encadenado){
   if (girando || destino === pagina) return;
   girando = true;
 
-  const salto = Math.abs(destino - pagina);
+  const dir = destino > pagina ? 1 : -1;
+  let salto = Math.abs(destino - pagina);
+
   if (encadenado && salto > 1){
-    /* hojas más rápidas y solapadas: se ve el pasar del libro */
+    /* Sólo se animan las últimas hojas: pasar doce a la vez es
+       mucha tela en un móvil y tampoco se alcanza a ver. */
+    const tope = unaPagina ? 3 : 5;
+    if (salto > tope){
+      const arranque = destino - dir * tope;
+      sinTransicion(() => {
+        acotar(Math.min(pagina, arranque) - 1, Math.max(pagina, arranque) + 1);
+        pagina = arranque;
+        hojas.forEach((h,i) => h.classList.toggle("volteada", i < pagina));
+      });
+      salto = tope;
+    }
+    /* que las del tramo estén en el árbol antes de animarlas */
+    acotar(Math.min(pagina, destino) - 1, Math.max(pagina, destino) + 1);
+    void libro.offsetHeight;
+
     libro.classList.add("pasando");
-    const paso = salto > 6 ? 150 : 210;
-    const dir  = destino > pagina ? 1 : -1;
-    while (pagina !== destino) await girarUna(pagina + dir, paso);
+    while (pagina !== destino) await girarUna(pagina + dir, 210);
     await espera(520);                /* que termine la última */
     libro.classList.remove("pasando");
   } else {
+    acotar(Math.min(pagina, destino) - 1, Math.max(pagina, destino) + 1);
+    void libro.offsetHeight;
     await girarUna(destino, 1080);
   }
 
@@ -1028,13 +1109,21 @@ document.addEventListener("keydown", e => {
   }, { passive:true });
 })();
 
-/* rehacer el libro al cruzar el punto de quiebre */
-anchoCorto.addEventListener("change", construir);
+/* remedir al cambiar el tamaño; rehacer sólo si cambia el modo */
+let temporizador;
+addEventListener("resize", () => {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(() => {
+    if (tocaUnaPagina() !== unaPagina) construir();
+    else medir();
+  }, 180);
+});
+addEventListener("orientationchange", () => setTimeout(construir, 260));
 
 /* motas */
 (function(){
   const frag = document.createDocumentFragment();
-  for (let i=0;i<12;i++){
+  for (let i=0, n=(innerWidth<760 ? 6 : 12); i<n; i++){
     const d = document.createElement("div");
     d.className = "mota";
     d.style.cssText =
