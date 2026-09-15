@@ -297,6 +297,31 @@
   }
   .indice__item b{font-weight:400;color:var(--tinta-2);font-size:.85em}
 
+  /* ── portadilla de sección ── */
+  .pag--seccion{text-align:center}
+  .seccion__orden{
+    font-size:clamp(8px,1.1vmin,9.5px);
+    letter-spacing:.32em;text-transform:uppercase;
+    color:rgba(107,84,66,.5);
+  }
+  .seccion__titulo{
+    margin-top:clamp(8px,2%,14px);
+    font-size:clamp(19px,3.3vmin,28px);
+    font-weight:400;font-style:italic;
+    line-height:1.25;color:#2e1f18;
+  }
+  .dibujo{
+    display:block;margin:clamp(14px,3.4%,26px) auto;
+    width:clamp(84px,17vmin,128px);height:auto;
+    color:var(--tinta-2);
+    transform:rotate(-1.5deg);
+  }
+  .seccion__nota{
+    font-size:clamp(11px,1.5vmin,13px);
+    font-style:italic;line-height:1.72;
+    color:var(--tinta-2);padding:0 4%;
+  }
+
   /* ── portadilla del poema ── */
   .pag--portada{text-align:center}
   .portada__marca{
@@ -545,6 +570,7 @@ const LIBRO = {
 const SECCIONES = [
   {
     nombre: "según cómo amanezcas",
+    nota: "No hay que leerlos en orden.\nBusca el que se parezca al día que llevas.",
     poemas: [
       {
         titulo: "Cuando el día pesa",
@@ -649,6 +675,7 @@ const SECCIONES = [
   },
   {
     nombre: "lo que yo siento",
+    nota: "Hasta aquí venía hablando de ti\npara que estuvieras mejor.\n\nDe aquí en adelante\nhablo de ti y ya.",
     poemas: [
       {
         titulo: "Lo primero que pensé",
@@ -736,12 +763,32 @@ const SECCIONES = [
         versos: [
           "Ahora lo veo en todas partes.",
           "",
-          "En las gerberas que te mandé,",
-          "en lo primero que miro",
-          "cuando paso por cualquier lado.",
+          "Quedó en las gerberas",
+          "que nos pusimos a hacer entre los dos,",
+          "porque tú dijiste ese color",
+          "y yo no iba a discutir.",
           "",
           "Antes era un color.",
           "Ahora es un recado."
+        ]
+      },
+      {
+        titulo: "Lo que hicimos entre los dos",
+        para: "de por qué este lugar no es del todo mío",
+        versos: [
+          "Las flores de aquí",
+          "no las hice yo solo.",
+          "",
+          "Estabas tú diciendo",
+          "que ese rojo no,",
+          "que ese otro sí,",
+          "que le faltaba algo.",
+          "",
+          "Por eso este sitio",
+          "tampoco es del todo mío.",
+          "",
+          "Es la primera cosa",
+          "que tenemos los dos."
         ]
       },
       {
@@ -760,18 +807,20 @@ const SECCIONES = [
       },
       {
         titulo: "Parcera",
-        para: "de una canción que ya no es una canción",
+        para: "de una canción que era tuya",
         versos: [
-          "La puse otra vez.",
-          "Van no sé cuántas.",
+          "Es tuya. Eso lo sé.",
           "",
-          "Ya no la escucho como una canción.",
-          "La escucho como quien pasa",
-          "por una calle donde le pasó algo bueno.",
+          "Pero se me metió,",
+          "y ahora la pongo cuando no estás",
+          "para que el cuarto se parezca un poco",
+          "a estar contigo.",
           "",
-          "Un día te la voy a poner",
-          "y no voy a decir nada.",
-          "A ver si te das cuenta."
+          "No sé si eso se puede hacer",
+          "con la canción de alguien.",
+          "",
+          "Te la devuelvo cuando quieras.",
+          "Mientras tanto la cuido."
         ]
       },
       {
@@ -909,6 +958,47 @@ function adorno(tam){
 }
 const filete = `<div class="filete" aria-hidden="true"><i></i><b></b><i></i></div>`;
 
+/* Flor a lápiz para las portadillas. El truco del trazo hecho a
+   mano: dibujarlo dos veces con medio punto de desfase, para que
+   ninguna línea quede perfectamente limpia.                      */
+function dibujoFlor(){
+  const j = n => azar(-n, n);
+  const sal = [];
+
+  /* cada línea se repasa una segunda vez con su propio desvío:
+     ningún trazo queda limpio y ninguno se repite igual */
+  const traza = (d, tr) => {
+    sal.push(`<path d="${d}"${tr ? ` transform="${tr}"` : ""}/>`);
+    sal.push(`<path d="${d}" opacity="${azar(.28,.48).toFixed(2)}" transform="${
+      (tr ? tr + " " : "")}translate(${j(1).toFixed(2)} ${j(1).toFixed(2)})"/>`);
+  };
+
+  /* tallo y hojas */
+  traza(`M50 99 C${(46.2+j(1)).toFixed(1)} 81 ${(53.4+j(1)).toFixed(1)} 66 50.4 51`);
+  traza(`M50 86 C36.8 81.5 30 70 ${(29.2+j(1.4)).toFixed(1)} 58.6 C39.2 63 47.2 72.6 50 86`);
+  traza(`M50.4 74 C63.2 71 70.4 62.6 ${(72.2+j(1.4)).toFixed(1)} 51.4 C62 54.6 53.8 62.4 50.4 74`);
+
+  /* pétalos: ninguno del mismo tamaño ni al mismo ángulo */
+  for (let i=0;i<8;i++){
+    const l = azar(.86,1.14), w = azar(.84,1.16);
+    traza(
+      `M0 0 C${(-6.4*w).toFixed(1)} ${(-8.6*l).toFixed(1)} ${(-4.6*w).toFixed(1)} ` +
+      `${(-18.6*l).toFixed(1)} 0 ${(-21*l).toFixed(1)} C${(4.6*w).toFixed(1)} ` +
+      `${(-18.6*l).toFixed(1)} ${(6.4*w).toFixed(1)} ${(-8.6*l).toFixed(1)} 0 0`,
+      `translate(50 44) rotate(${(i*45 + j(5)).toFixed(1)})`
+    );
+  }
+
+  /* corazón de la flor */
+  traza("M-4.8 .4 A4.8 4.8 0 1 1 4.8 .4 A4.8 4.8 0 1 1 -4.8 .4", "translate(50 44)");
+  traza("M-2.6 .8 C-1.1 -2.3 1.7 -2.1 2.6 .2", "translate(50 44)");
+
+  return `<svg class="dibujo" viewBox="0 0 100 106" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="1.45"
+       stroke-linecap="round" stroke-linejoin="round">${sal.join("")}</g>
+  </svg>`;
+}
+
 const lineas = txt => txt.split("\n")
   .map((l,i) => l.trim()
     ? `<p class="verso" style="--i:${i}">${esc(l)}</p>`
@@ -954,6 +1044,13 @@ const PAGINAS = {
         <div class="indice__lista">${html}</div>
       </div>`;
   },
+
+  seccion: (s, i) => `<div class="pag pag--seccion"><div class="pag__cuerpo">
+      <p class="seccion__orden">${["primera parte","segunda parte","tercera parte"][i] || "parte " + (i+1)}</p>
+      <h2 class="seccion__titulo">${esc(s.nombre)}</h2>
+      ${dibujoFlor()}
+      ${s.nota ? `<p class="seccion__nota">${lineas(s.nota)}</p>` : ""}
+    </div></div>`,
 
   portada: k => `<div class="pag pag--portada"><div class="pag__cuerpo">
       ${adorno("clamp(38px,7vmin,58px)")}
@@ -1038,16 +1135,25 @@ function sinTransicion(fn){
 function armarVistas(unaPagina){
   const v = [{ der:PAGINAS.tapa() }];
 
-  if (unaPagina){
-    v.push({ der:PAGINAS.dedicatoria() });
-    v.push({ der:PAGINAS.indice() });
-    POEMAS.forEach((_,k) => v.push({ der:PAGINAS.completa(k), poema:k }));
-    v.push({ der:PAGINAS.cierre() });
-  } else {
-    v.push({ izq:PAGINAS.dedicatoria(), der:PAGINAS.indice() });
-    POEMAS.forEach((_,k) => v.push({ izq:PAGINAS.portada(k), der:PAGINAS.versos(k), poema:k }));
-    v.push({ izq:PAGINAS.cierre(), der:PAGINAS.vacia() });
-  }
+  if (unaPagina) v.push({ der:PAGINAS.dedicatoria() }, { der:PAGINAS.indice() });
+  else           v.push({ izq:PAGINAS.dedicatoria(), der:PAGINAS.indice() });
+
+  /* cada sección abre con su propia portadilla, en página derecha
+     y con la de enfrente en blanco, como en un libro impreso */
+  let k = 0;
+  SECCIONES.forEach((s, i) => {
+    if (unaPagina) v.push({ der:PAGINAS.seccion(s, i) });
+    else           v.push({ izq:PAGINAS.vacia(), der:PAGINAS.seccion(s, i) });
+
+    s.poemas.forEach(() => {
+      if (unaPagina) v.push({ der:PAGINAS.completa(k), poema:k });
+      else           v.push({ izq:PAGINAS.portada(k), der:PAGINAS.versos(k), poema:k });
+      k++;
+    });
+  });
+
+  if (unaPagina) v.push({ der:PAGINAS.cierre() });
+  else           v.push({ izq:PAGINAS.cierre(), der:PAGINAS.vacia() });
   return v;
 }
 
