@@ -471,25 +471,21 @@
   }
 
   /* ═════════════════════════════════════════════
-     MÓVIL: menos trabajo por fotograma
+     MÓVIL
+     ─────────────────────────────────────────────
+     El papel, sus sombras y el vidrio de los botones son idénticos
+     a los de escritorio: se pintan una vez al rasterizar la capa,
+     no en cada fotograma. Lo que de verdad costaba era tener vivas
+     las 26 caras a la vez, y eso se arregla acotando las hojas
+     (.oculta), no rebajando el diseño.
+
+     Lo único que sí se paga por fotograma es el backdrop-filter
+     cuando hay algo moviéndose detrás; por eso se apaga solo
+     mientras el libro gira, y vuelve en cuanto se detiene.
      ═════════════════════════════════════════════ */
-  @media (max-width:860px){
-    /* backdrop-filter sobre una escena 3D obliga a releer el fondo
-       en cada fotograma; en el móvil sale carísimo */
-    .btn{
-      backdrop-filter:none;-webkit-backdrop-filter:none;
-      background:rgba(40,20,34,.88);
-    }
-    .panel__fondo{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(8,5,10,.94)}
-    /* el grano del papel y la sombra interior se pintan en toda la
-       página: se notan poco y cuestan mucho */
-    .cara{
-      background:
-        linear-gradient(90deg, rgba(150,120,80,.14) 0%, transparent 9%),
-        radial-gradient(120% 90% at 78% 12%, #f7eeda 0%, var(--papel) 48%, var(--papel-2) 100%);
-      box-shadow:none;
-    }
-    .canto{box-shadow:0 14px 30px rgba(0,0,0,.5)}
+  body.moviendo .btn,
+  body.moviendo .panel__fondo{
+    backdrop-filter:none;-webkit-backdrop-filter:none;
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -981,6 +977,7 @@ async function ir(destino, encadenado){
   destino = Math.max(0, Math.min(vistas.length - 1, destino));
   if (girando || destino === pagina) return;
   girando = true;
+  document.body.classList.add("moviendo");
 
   const dir = destino > pagina ? 1 : -1;
   let salto = Math.abs(destino - pagina);
@@ -988,7 +985,7 @@ async function ir(destino, encadenado){
   if (encadenado && salto > 1){
     /* Sólo se animan las últimas hojas: pasar doce a la vez es
        mucha tela en un móvil y tampoco se alcanza a ver. */
-    const tope = unaPagina ? 3 : 5;
+    const tope = 5;
     if (salto > tope){
       const arranque = destino - dir * tope;
       sinTransicion(() => {
@@ -1014,6 +1011,7 @@ async function ir(destino, encadenado){
 
   cima = 0;
   girando = false;
+  document.body.classList.remove("moviendo");
   pintar();
 }
 
@@ -1117,7 +1115,7 @@ addEventListener("orientationchange", () => setTimeout(construir, 260));
 /* motas */
 (function(){
   const frag = document.createDocumentFragment();
-  for (let i=0, n=(innerWidth<760 ? 6 : 12); i<n; i++){
+  for (let i=0;i<12;i++){
     const d = document.createElement("div");
     d.className = "mota";
     d.style.cssText =
