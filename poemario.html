@@ -327,8 +327,6 @@
     text-align:left;
   }
   .verso--hueco{height:.9em}
-  .cara.viva .verso{animation:asoma .65s ease both;animation-delay:calc(var(--i) * .055s + .12s)}
-  @keyframes asoma{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 
   .pag--vacia{background:none}
 
@@ -854,7 +852,9 @@ function medir(){
 
   let ph = Math.min(dispH, 560);
   let pw = ph / 1.42;
-  const pwMax = (dispW * (unaPagina ? 0.9 : 0.94)) / cols;
+  /* en página única se deja margen a la izquierda para que se vean
+     reposando las hojas ya pasadas */
+  const pwMax = (dispW * (unaPagina ? 0.84 : 0.94)) / cols;
   if (pw > pwMax){ pw = pwMax; ph = pw * 1.42; }
 
   document.body.style.setProperty("--pw", Math.round(pw) + "px");
@@ -935,9 +935,9 @@ function pintar(sinAnimar){
     const volteada = i < pagina;
     h.classList.toggle("volteada", volteada);
     h.style.setProperty("--z", ((volteada ? i + 1 : N - i) * 0.4).toFixed(2) + "px");
-    /* en página única el dorso nunca se lee: una hoja ya pasada
-       solo asomaría como una tira a la izquierda del libro */
-    h.style.visibility = (unaPagina && volteada) ? "hidden" : "";
+    /* las hojas ya pasadas se quedan reposando a la izquierda, como
+       en un libro de verdad: ni se ocultan ni se desvanecen */
+    h.style.visibility = "";
     if (sinAnimar){
       h.style.transition = "none";
       requestAnimationFrame(() => { h.style.transition = ""; });
@@ -945,12 +945,6 @@ function pintar(sinAnimar){
   });
 
   document.body.classList.toggle("abierto", pagina > 0);
-
-  /* la vista actual se anima al llegar */
-  libro.querySelectorAll(".cara.viva").forEach(c => c.classList.remove("viva"));
-  const der = hojas[pagina] && hojas[pagina].querySelector(".cara--frente");
-  const izq = pagina > 0 && hojas[pagina-1].querySelector(".cara--dorso");
-  [der, izq].forEach(c => { if (c){ void c.offsetWidth; c.classList.add("viva"); } });
 
   const total = vistas.length - 1;
   $("marcador").textContent = pagina === 0 ? "portada" : pagina + " / " + total;
