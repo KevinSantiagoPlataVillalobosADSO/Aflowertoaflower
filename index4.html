@@ -177,6 +177,8 @@
 
   .lirio stop{transition:stop-color 1.5s ease}
   .contorno{fill:none;stroke:rgba(255,255,255,.6);stroke-width:.9}
+  /* envés del tépalo asomando en la punta doblada */
+  .vuelta{fill:rgba(214,198,206,.75);stroke:rgba(255,255,255,.45);stroke-width:.6}
   .nervio{fill:none;stroke:var(--rosa);stroke-width:1.1;opacity:.32;stroke-linecap:round;
           transition:stroke 1.5s ease}
   .mota{transition:fill 1.5s ease}
@@ -465,15 +467,28 @@ function construirFollaje(){
    4. CONSTRUCCIÓN DEL LIRIO
    ═══════════════════════════════════════════════════════════════ */
 
+/* Tépalo de lirio: no es un óvalo. Es una lanza — panza baja,
+   hacia el tercio inferior, y de ahí adelgaza hasta terminar en
+   punta. Es lo que separa un lirio de una margarita.            */
 function pathPetalo(largo, ancho){
   const w = ancho/2, y = t => (100 - largo*t).toFixed(1);
   const xi = k => (100 - w*k).toFixed(1);
   const xd = k => (100 + w*k).toFixed(1);
   return `M100 100
-    C ${xi(.72)} ${y(.16)}, ${xi(1)} ${y(.44)}, ${xi(.84)} ${y(.72)}
-    C ${xi(.62)} ${y(.90)}, ${xi(.24)} ${y(.98)}, 100 ${y(1)}
-    C ${xd(.24)} ${y(.98)}, ${xd(.62)} ${y(.90)}, ${xd(.84)} ${y(.72)}
-    C ${xd(1)} ${y(.44)}, ${xd(.72)} ${y(.16)}, 100 100 Z`;
+    C ${xi(.62)} ${y(.12)}, ${xi(1)} ${y(.34)}, ${xi(.90)} ${y(.60)}
+    C ${xi(.74)} ${y(.82)}, ${xi(.26)} ${y(.96)}, 100 ${y(1.04)}
+    C ${xd(.26)} ${y(.96)}, ${xd(.74)} ${y(.82)}, ${xd(.90)} ${y(.60)}
+    C ${xd(1)} ${y(.34)}, ${xd(.62)} ${y(.12)}, 100 100 Z`;
+}
+
+/* La punta doblada hacia atrás. Al curvarse se ve el envés del
+   tépalo, que es más apagado: por eso va en otro tono.          */
+function puntaVuelta(largo, ancho){
+  const w = ancho/2, y = t => (100 - largo*t).toFixed(1);
+  return `<path class="vuelta"
+    d="M${(100-w*.26).toFixed(1)} ${y(.955)}
+       C ${(100-w*.30).toFixed(1)} ${y(1.10)}, ${(100+w*.30).toFixed(1)} ${y(1.10)}, ${(100+w*.26).toFixed(1)} ${y(.955)}
+       C ${(100+w*.12).toFixed(1)} ${y(1.00)}, ${(100-w*.12).toFixed(1)} ${y(1.00)}, ${(100-w*.26).toFixed(1)} ${y(.955)} Z"/>`;
 }
 
 function motas(largo, ancho){
@@ -491,35 +506,47 @@ function motas(largo, ancho){
   return s;
 }
 
+/* Seis filamentos largos que se arquean hacia afuera y terminan en
+   anteras gordas, más el pistilo por encima. Un lirio se reconoce
+   por esto antes que por los pétalos.                            */
 function estambres(){
   let s = "";
-  const angs = [-58,-35,-12,12,35,58];
+  const angs = [-150,-95,-38,38,95,150];
   angs.forEach((a,i) => {
-    const L   = [40,46,43,43,46,40][i];
+    const L   = [58,66,62,62,66,58][i];
     const rad = a*Math.PI/180;
-    const x   = 100 + L*Math.sin(rad);
+    const x   = 100 + L*Math.sin(rad)*1.18;
     const yy  = 100 - L*Math.cos(rad);
-    const cx  = 100 + L*.55*Math.sin(rad) + Math.sin(rad)*7;
-    const cy  = 100 - L*.62*Math.cos(rad);
+    const cx  = 100 + L*.42*Math.sin(rad);
+    const cy  = 100 - L*.80*Math.cos(rad);
     s += `<path d="M100 100 Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${yy.toFixed(1)}"
             fill="none" stroke="#e9f4cd" stroke-width="1.5" stroke-linecap="round" opacity=".92"/>`;
-    s += `<ellipse cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}" rx="6.6" ry="2.9" fill="#c22a1e"
-            transform="rotate(${(a+62).toFixed(0)} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
-    s += `<ellipse cx="${(x-1).toFixed(1)}" cy="${(yy-1).toFixed(1)}" rx="3.4" ry="1.2"
-            fill="#f26a4b" opacity=".7"
-            transform="rotate(${(a+62).toFixed(0)} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
+    /* la antera cuelga atravesada en la punta del filamento */
+    const giro = (a + 74).toFixed(0);
+    s += `<ellipse cx="${x.toFixed(1)}" cy="${yy.toFixed(1)}" rx="9.2" ry="3.4" fill="#a81f14"
+            transform="rotate(${giro} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
+    s += `<ellipse cx="${(x-.8).toFixed(1)}" cy="${(yy-1.2).toFixed(1)}" rx="5.6" ry="1.5"
+            fill="#f2764b" opacity=".75"
+            transform="rotate(${giro} ${x.toFixed(1)} ${yy.toFixed(1)})"/>`;
   });
-  s += `<path d="M100 100 Q 96 74 94 54" fill="none" stroke="#dceeb2"
-          stroke-width="2.1" stroke-linecap="round"/>`;
-  s += `<ellipse cx="94" cy="52" rx="4.2" ry="3.2" fill="#cfe79a"/>`;
+  /* pistilo: sale por encima de todos y remata en tres lóbulos */
+  s += `<path d="M100 100 Q 95 70 92.5 44" fill="none" stroke="#dceeb2"
+          stroke-width="2.3" stroke-linecap="round"/>`;
+  s += `<g transform="translate(92.5 42)">
+          <ellipse cx="-2.6" cy="1" rx="3" ry="2.4" fill="#cfe79a"/>
+          <ellipse cx="2.6" cy="1" rx="3" ry="2.4" fill="#cfe79a"/>
+          <ellipse cx="0" cy="-1.8" rx="3" ry="2.4" fill="#dcf0ae"/>
+        </g>`;
   return s;
 }
 
 let uid = 0;
 function crearLirio(clase, giro){
   const id = "f" + (uid++);
-  const externo = { largo:88, ancho:40 };
-  const interno = { largo:84, ancho:49 };
+  /* los tres de fuera son sépalos: más largos y más estrechos que
+     los tres de dentro, como en la flor real */
+  const externo = { largo:96, ancho:29 };
+  const interno = { largo:90, ancho:38 };
 
   const grad = (sufijo, ancho) => `
     <linearGradient id="len${id}${sufijo}" gradientUnits="userSpaceOnUse"
@@ -548,6 +575,7 @@ function crearLirio(clase, giro){
           <path d="${d}" fill="url(#bor${id}${sufijo})"/>
           <path class="nervio" d="M100 97 C 99 ${100-cfg.largo*.22}, 100 ${100-cfg.largo*.40}, 100 ${100-cfg.largo*.56}"/>
           ${motas(cfg.largo, cfg.ancho)}
+          ${puntaVuelta(cfg.largo, cfg.ancho)}
           <path class="contorno" d="${d}"/>
         </g>
       </g>`;
