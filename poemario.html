@@ -352,6 +352,10 @@
     text-align:left;
   }
   .verso--hueco{height:.9em}
+  /* los poemas largos respiran un poco menos, para no partirlos
+     ni tener que tocarles el texto */
+  .pag--apretada .verso{line-height:1.78}
+  .pag--apretada .verso--hueco{height:.7em}
 
   .pag--vacia{background:none}
 
@@ -923,6 +927,28 @@ const SECCIONES = [
         ]
       },
       {
+        titulo: "¿Por qué?",
+        para: "de la pregunta que no tiene respuesta",
+        versos: [
+          "Te amo porque eres tú.",
+          "",
+          "No le pides aroma a las flores,",
+          "ni al sol su luz.",
+          "",
+          "Eres única,",
+          "diferente,",
+          "especial...",
+          "",
+          "Y aquí me tendrías toda la vida,",
+          "descifrando el porqué.",
+          "",
+          "Sencillamente, no hay razón.",
+          "",
+          "Y si la hubiera,",
+          "serías tú."
+        ]
+      },
+      {
         titulo: "Y tú también",
         para: "lo mejor de todo esto",
         versos: [
@@ -1009,6 +1035,9 @@ const versos = arr => arr
     ? `<p class="verso" style="--i:${i}">${esc(l)}</p>`
     : `<p class="verso verso--hueco" style="--i:${i}"></p>`).join("");
 
+/* a partir de esta cantidad de versos la página se aprieta */
+const largo = k => POEMAS[k].versos.length > 12 ? " pag--apretada" : "";
+
 /* catálogo plano de poemas, para el índice y los saltos */
 const POEMAS = [];
 SECCIONES.forEach(s => s.poemas.forEach(p => POEMAS.push({ ...p, seccion:s.nombre })));
@@ -1060,13 +1089,13 @@ const PAGINAS = {
       <p class="portada__para">${esc(POEMAS[k].para)}</p>
     </div></div>`,
 
-  versos: k => `<div class="pag pag--versos">
+  versos: k => `<div class="pag pag--versos${largo(k)}">
       <div class="pag__cuerpo">${versos(POEMAS[k].versos)}</div>
       <span class="folio">${k+1} de ${POEMAS.length}</span>
     </div>`,
 
   /* móvil: portadilla y versos en una sola página */
-  completa: k => `<div class="pag pag--versos">
+  completa: k => `<div class="pag pag--versos${largo(k)}">
       <div class="pag__cuerpo">
         <p class="portada__marca" style="text-align:center">${esc(POEMAS[k].seccion)}</p>
         <h2 class="portada__titulo" style="text-align:center">${esc(POEMAS[k].titulo)}</h2>
