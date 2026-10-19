@@ -27,6 +27,13 @@
 
     --serif:Georgia,"Times New Roman",serif;
     --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+
+    /* Palo seco pesado para la letra. No se puede traer una fuente de
+       fuera, así que la pila pide en cada sistema la más negra que
+       exista de verdad: Arial Black en Windows y macOS (neo-grotesca),
+       Avenir Next Heavy en iPhone (geométrica) y Roboto Black en
+       Android (neo-grotesca). Ninguna se sintetiza: todas existen. */
+    --palo:"Arial Black","Avenir Next","Segoe UI",Roboto,system-ui,-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -231,11 +238,11 @@
   .estrofa.entrando{opacity:0}
 
   .verso{
-    font-family:var(--serif);
-    font-weight:700;
+    font-family:var(--palo);
+    font-weight:900;
     font-size:calc(var(--base,40px) * var(--w,1));
-    line-height:1.12;
-    letter-spacing:0;
+    line-height:1.04;
+    letter-spacing:-.02em;
     white-space:pre-wrap;
     overflow-wrap:break-word;
     margin-bottom:.08em;
