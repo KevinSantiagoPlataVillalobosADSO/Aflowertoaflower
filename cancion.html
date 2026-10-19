@@ -3,30 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mil cosas</title>
+<title>Parcera</title>
 <style>
   /* ═════════════════════════════════════════════
      TOKENS
      ═════════════════════════════════════════════ */
   :root{
-    --fondo-1:#1d0a13;
-    --fondo-2:#110609;
-    --fondo-3:#050305;
+    --fondo-1:#1e0b14;
+    --fondo-2:#120709;
+    --fondo-3:#060305;
+
+    --carta-1:#2a1019;
+    --carta-2:#1a0a11;
 
     --vino:#5b0f2a;
     --vino-2:#8e1b3f;
     --rosa:#e58ba4;
     --rosa-2:#f6c3cf;
 
-    --texto:#f7eef0;
-    --medio:rgba(247,238,240,.60);
-    --tenue:rgba(247,238,240,.30);
-    --mudo:rgba(247,238,240,.20);
+    --texto:#fbf4f5;
+    --medio:rgba(251,244,245,.56);
+    --tenue:rgba(251,244,245,.26);
 
     --serif:Georgia,"Times New Roman",serif;
-    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-
-    --barra:104px;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -34,206 +34,176 @@
 
   body{
     height:100dvh;
+    display:grid;
+    place-items:center;
+    padding:clamp(12px,2.4vw,34px);
     font-family:var(--serif);
     color:var(--texto);
-    background:linear-gradient(172deg,var(--fondo-1) 0%,var(--fondo-2) 52%,var(--fondo-3) 100%);
+    background:linear-gradient(168deg,var(--fondo-1) 0%,var(--fondo-2) 54%,var(--fondo-3) 100%);
     overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    position:relative;
     -webkit-font-smoothing:antialiased;
     -webkit-tap-highlight-color:transparent;
   }
 
-  /* ═════════════════════════════════════════════
-     AMBIENTE — manchas de color que respiran
-     ═════════════════════════════════════════════ */
-  .ambiente{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-  .mancha{
-    position:absolute;border-radius:50%;
-    filter:blur(90px);opacity:.42;
-    will-change:transform;
-  }
-  .m1{width:52vw;height:52vw;left:-12vw;top:-14vw;background:var(--vino-2);animation:vagar 26s ease-in-out infinite}
-  .m2{width:44vw;height:44vw;right:-10vw;top:18vh;background:#3c0f3a;animation:vagar 34s ease-in-out infinite reverse}
-  .m3{width:38vw;height:38vw;left:28vw;bottom:-16vw;background:#7a2235;opacity:.3;animation:vagar 42s ease-in-out infinite}
+  /* resplandor lento detrás de la tarjeta */
+  .halo{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .halo span{position:absolute;border-radius:50%;filter:blur(96px);opacity:.38;will-change:transform}
+  .halo span:nth-child(1){width:54vw;height:54vw;left:-14vw;top:-16vw;background:var(--vino-2);animation:vagar 30s ease-in-out infinite}
+  .halo span:nth-child(2){width:46vw;height:46vw;right:-12vw;bottom:-14vw;background:#3d1038;animation:vagar 38s ease-in-out infinite reverse}
   @keyframes vagar{
     0%,100%{transform:translate3d(0,0,0) scale(1)}
-    50%    {transform:translate3d(4vw,-5vh,0) scale(1.12)}
+    50%    {transform:translate3d(3vw,-4vh,0) scale(1.14)}
   }
 
   /* ═════════════════════════════════════════════
-     ESTRUCTURA
+     LA TARJETA
      ═════════════════════════════════════════════ */
-  .reproductor{
+  .tarjeta{
     position:relative;z-index:2;
-    flex:1;min-height:0;
+    width:min(1060px,100%);
+    height:min(640px,100%);
     display:grid;
-    grid-template-columns:minmax(260px,34%) 1fr;
-    gap:clamp(20px,4vw,64px);
-    padding:clamp(20px,3.4vw,52px) clamp(18px,4vw,60px) 0;
+    grid-template-columns:minmax(0,34%) minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) auto;
+    grid-template-areas:"foto letra" "pie pie";
+    gap:clamp(18px,3vw,46px);
+    padding:clamp(18px,2.6vw,36px);
+    border-radius:clamp(16px,2vw,26px);
+    background:linear-gradient(152deg,var(--carta-1) 0%,var(--carta-2) 72%,#140709 100%);
+    box-shadow:
+      0 40px 90px rgba(0,0,0,.55),
+      0 0 0 1px rgba(255,255,255,.07) inset;
+  }
+
+  /* ───── la foto ───── */
+  .marco{
+    grid-area:foto;
+    align-self:center;
+    position:relative;
+    width:100%;
+    aspect-ratio:4/5;
+    max-height:100%;
+    border-radius:clamp(10px,1.3vw,16px);
+    overflow:hidden;
+    background:linear-gradient(150deg,#3a0f22,#1b0810);
+    box-shadow:0 18px 44px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08) inset;
+  }
+  .marco img{display:block;width:100%;height:100%;object-fit:cover}
+  .marco svg{display:block;width:100%;height:100%}
+  /* un velo tenue para que la foto no compita con la letra */
+  .marco::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(170deg,rgba(90,15,42,.16),rgba(10,4,7,.34));
+  }
+
+  /* ───── la estrofa ───── */
+  .lienzo{
+    grid-area:letra;
+    position:relative;
+    display:flex;
     align-items:center;
+    min-width:0;min-height:0;
   }
+  .estrofa{
+    width:100%;
+    transition:opacity .34s ease;
+  }
+  .estrofa.entrando{opacity:0}
 
-  /* ───── Carátula y disco ───── */
-  .arte{display:flex;flex-direction:column;gap:24px;min-width:0}
-  .arte__marco{position:relative;width:100%;max-width:340px;aspect-ratio:1}
+  .verso{
+    font-family:var(--sans);
+    font-weight:900;
+    font-size:calc(var(--base,40px) * var(--w,1));
+    line-height:.98;
+    letter-spacing:-.025em;
+    white-space:pre-wrap;
+    overflow-wrap:break-word;
+    margin-bottom:.04em;
+  }
+  .verso:last-child{margin-bottom:0}
 
-  .disco{
-    position:absolute;top:50%;right:-26%;
-    width:88%;aspect-ratio:1;border-radius:50%;
-    transform:translateY(-50%);
-    background:
-      repeating-radial-gradient(circle at 50% 50%,
-        rgba(255,255,255,.045) 0 1px, transparent 1px 5px),
-      radial-gradient(circle at 36% 30%, rgba(255,255,255,.10) 0%, transparent 46%),
-      radial-gradient(circle at 50% 50%, #2b0e19 0 17%, #15070d 17.5% 100%);
-    box-shadow:0 24px 60px rgba(0,0,0,.62);
-    animation:girar 8s linear infinite;
-    animation-play-state:paused;
+  /* cada letra aparece por su cuenta */
+  .l{
+    opacity:0;
+    transition:opacity .22s ease;
   }
-  .disco::before{
-    content:'';position:absolute;inset:38%;border-radius:50%;
-    background:radial-gradient(circle at 40% 34%,var(--rosa-2),var(--vino) 78%);
-  }
-  .disco::after{
-    content:'';position:absolute;inset:48.4%;border-radius:50%;
-    background:var(--fondo-3);
-  }
-  body.sonando .disco{animation-play-state:running}
-  @keyframes girar{to{transform:translateY(-50%) rotate(360deg)}}
+  .l.vista{opacity:1}
 
-  .caratula{
-    position:absolute;inset:0;
-    border-radius:10px;overflow:hidden;
-    background:linear-gradient(150deg,#45102a 0%,#2a0a18 56%,#190610 100%);
-    box-shadow:0 26px 64px rgba(0,0,0,.56), 0 0 0 1px rgba(255,255,255,.06) inset;
+  /* tramos sin letra */
+  .respiro{
+    font-family:var(--serif);
+    font-size:clamp(15px,1.5vw,20px);
+    line-height:1.72;
+    color:var(--medio);
+    font-style:italic;
+    max-width:30em;
   }
-  .caratula svg{display:block;width:100%;height:100%}
-
-  .rotulo{max-width:340px}
-  .rotulo__album{
-    font:400 11px/1 var(--sans);letter-spacing:.24em;text-transform:uppercase;
-    color:var(--tenue);margin-bottom:12px;
-  }
-  .rotulo__titulo{font:400 clamp(26px,3.1vw,38px)/1.1 var(--serif);letter-spacing:.01em}
-  .rotulo__artista{font:400 15px/1.5 var(--sans);color:var(--medio);margin-top:6px}
-
-  /* ───── Letra ───── */
-  .letra{
-    position:relative;height:100%;min-height:0;overflow:hidden;
-    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 76%,transparent 99%);
-            mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 76%,transparent 99%);
-  }
-  .pista{
-    position:absolute;left:0;right:0;top:0;
-    padding:42% 0 58%;
-    transform:translate3d(0,var(--y,0px),0);
-    transition:transform .62s cubic-bezier(.22,.61,.36,1);
-    will-change:transform;
-  }
-
-  .linea{
-    font:700 clamp(19px,2.25vw,29px)/1.34 var(--sans);
-    letter-spacing:-.012em;
-    color:var(--mudo);
-    padding:.44em 0;
-    cursor:pointer;
-    transition:color .4s ease, opacity .4s ease;
-  }
-  .linea:hover{color:var(--tenue)}
-  .linea.pasada{color:rgba(247,238,240,.26)}
-  .linea.activa{color:var(--texto);cursor:default}
-  .linea.activa:hover{color:var(--texto)}
-
-  /* palabra por palabra: en la línea activa se van encendiendo */
-  .linea .p{transition:color .22s ease, opacity .22s ease}
-  .linea.activa .p{color:rgba(247,238,240,.34)}
-  .linea.activa .p.dicha{color:var(--texto)}
-
-  /* tramo sin letra */
-  .linea--hueco{display:flex;gap:9px;align-items:center;padding:.9em 0;cursor:pointer}
-  .linea--hueco i{
-    width:9px;height:9px;border-radius:50%;
-    background:currentColor;opacity:.5;
-  }
-  .linea--hueco.activa i{animation:pulso 1.5s ease-in-out infinite}
-  .linea--hueco.activa i:nth-child(2){animation-delay:.22s}
-  .linea--hueco.activa i:nth-child(3){animation-delay:.44s}
+  .puntos{display:flex;gap:11px;align-items:center}
+  .puntos i{width:10px;height:10px;border-radius:50%;background:var(--rosa);opacity:.45}
+  .puntos i:nth-child(1){animation:pulso 1.6s ease-in-out infinite}
+  .puntos i:nth-child(2){animation:pulso 1.6s ease-in-out .22s infinite}
+  .puntos i:nth-child(3){animation:pulso 1.6s ease-in-out .44s infinite}
   @keyframes pulso{
-    0%,100%{opacity:.26;transform:scale(.82)}
-    45%    {opacity:1;transform:scale(1.18)}
+    0%,100%{opacity:.22;transform:scale(.8)}
+    45%    {opacity:.95;transform:scale(1.2)}
   }
 
   /* ═════════════════════════════════════════════
-     BARRA DE REPRODUCCIÓN
+     EL PIE — reproductor al mínimo
      ═════════════════════════════════════════════ */
-  .barra{
-    position:relative;z-index:3;
-    height:var(--barra);flex:0 0 auto;
-    padding:0 clamp(18px,4vw,60px) env(safe-area-inset-bottom);
-    display:flex;flex-direction:column;justify-content:center;gap:12px;
-    border-top:1px solid rgba(255,255,255,.07);
-    background:linear-gradient(to top,rgba(5,3,5,.86),rgba(5,3,5,.18));
+  .pie{
+    grid-area:pie;
+    display:flex;align-items:center;gap:clamp(12px,1.6vw,20px);
   }
 
-  .tiempos{display:flex;align-items:center;gap:14px}
-  .reloj{
-    font:400 12px/1 var(--sans);color:var(--tenue);
-    font-variant-numeric:tabular-nums;min-width:38px;
-  }
-  .reloj--fin{text-align:right}
-
-  .riel{position:relative;flex:1;height:20px;cursor:pointer;touch-action:none}
-  .riel__via{
-    position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;
-    border-radius:2px;background:rgba(255,255,255,.14);
-  }
-  .riel__lleno{
-    position:absolute;left:0;top:50%;height:4px;margin-top:-2px;width:0;
-    border-radius:2px;background:linear-gradient(90deg,var(--vino-2),var(--rosa));
-  }
-  .riel__perilla{
-    position:absolute;top:50%;left:0;width:12px;height:12px;margin:-6px 0 0 -6px;
-    border-radius:50%;background:var(--texto);
-    opacity:0;transform:scale(.6);transition:opacity .2s,transform .2s;
-    box-shadow:0 2px 8px rgba(0,0,0,.5);
-  }
-  .riel:hover .riel__perilla,.riel.activa .riel__perilla{opacity:1;transform:scale(1)}
-
-  .mandos{display:flex;align-items:center;justify-content:center;gap:clamp(14px,2.4vw,26px);position:relative}
-
-  .btn{
+  .play{
+    flex:0 0 auto;
     display:grid;place-items:center;
-    width:40px;height:40px;border:0;border-radius:50%;
-    background:transparent;color:var(--medio);cursor:pointer;
-    transition:color .2s,transform .14s;
+    width:46px;height:46px;border:0;border-radius:50%;
+    background:var(--texto);color:#1b0810;cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,0,0,.42);
+    transition:transform .16s ease, opacity .2s;
   }
-  .btn:hover{color:var(--texto)}
-  .btn:active{transform:scale(.9)}
-  .btn svg{width:21px;height:21px;fill:currentColor}
-
-  .btn--play{
-    width:54px;height:54px;
-    background:var(--texto);color:#17070e;
-    box-shadow:0 6px 22px rgba(0,0,0,.45);
-  }
-  .btn--play:hover{background:#fff;transform:scale(1.05)}
-  body.cargando .btn--play{animation:latido 1.1s ease-in-out infinite}
+  .play:hover{transform:scale(1.07)}
+  .play:active{transform:scale(.93)}
+  .play svg{width:19px;height:19px;fill:currentColor}
+  body.cargando .play{animation:latido 1.1s ease-in-out infinite}
   @keyframes latido{
     0%,100%{opacity:1;transform:scale(1)}
-    50%    {opacity:.55;transform:scale(.94)}
+    50%    {opacity:.5;transform:scale(.93)}
   }
-  .btn--play svg{width:24px;height:24px}
 
-  .volumen{position:absolute;right:0;display:flex;align-items:center;gap:8px;width:142px}
-  .volumen .riel{height:18px}
-  .volumen .riel__lleno{background:rgba(247,238,240,.78)}
+  .rotulo{min-width:0;flex:0 0 auto;max-width:34%}
+  .rotulo b{
+    display:block;
+    font:400 clamp(14px,1.5vw,17px)/1.25 var(--serif);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .rotulo span{
+    display:block;
+    font:400 11px/1.5 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
 
-  .nota{
-    position:absolute;left:0;
-    font:400 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
-    color:var(--tenue);
+  .riel{position:relative;flex:1;height:22px;cursor:pointer;touch-action:none;min-width:0}
+  .riel__via{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:rgba(255,255,255,.14)}
+  .riel__lleno{position:absolute;left:0;top:50%;height:2px;margin-top:-1px;width:0;border-radius:2px;background:linear-gradient(90deg,var(--vino-2),var(--rosa))}
+  .riel__perilla{
+    position:absolute;top:50%;left:0;width:10px;height:10px;margin:-5px 0 0 -5px;
+    border-radius:50%;background:var(--texto);
+    opacity:0;transform:scale(.5);transition:opacity .2s,transform .2s;
+  }
+  .riel:hover .riel__perilla,.riel.agarrada .riel__perilla{opacity:1;transform:scale(1)}
+
+  .reloj{
+    flex:0 0 auto;
+    font:400 11px/1 var(--sans);color:var(--tenue);
+    font-variant-numeric:tabular-nums;
+  }
+  .aviso{
+    flex:0 0 auto;
+    font:400 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);
   }
 
   /* ═════════════════════════════════════════════
@@ -241,46 +211,42 @@
      ═════════════════════════════════════════════ */
   .intro{
     position:fixed;inset:0;z-index:40;
-    display:grid;place-content:center;justify-items:center;gap:22px;
+    display:grid;place-content:center;justify-items:center;gap:20px;
     text-align:center;padding:30px;
-    background:linear-gradient(172deg,var(--fondo-1) 0%,var(--fondo-2) 54%,var(--fondo-3) 100%);
+    background:linear-gradient(168deg,var(--fondo-1) 0%,var(--fondo-2) 56%,var(--fondo-3) 100%);
     transition:opacity .9s ease, visibility .9s;
   }
   .intro.ida{opacity:0;visibility:hidden;pointer-events:none}
-  .intro__ojo{
-    font:400 11px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:var(--tenue);
-  }
-  .intro__titulo{font:400 clamp(34px,7vw,64px)/1.06 var(--serif)}
-  .intro__artista{font:400 15px/1.5 var(--sans);color:var(--medio);margin-top:-10px}
+  .intro__ojo{font:400 11px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:var(--tenue)}
+  .intro__titulo{font:400 clamp(36px,7.5vw,68px)/1.04 var(--serif)}
+  .intro__artista{font:400 14px/1.5 var(--sans);color:var(--medio);margin-top:-8px}
   .intro__play{
-    margin-top:14px;
-    display:inline-flex;align-items:center;gap:11px;
+    margin-top:12px;display:inline-flex;align-items:center;gap:11px;
     padding:14px 30px 14px 24px;border:0;border-radius:999px;
-    background:var(--texto);color:#17070e;cursor:pointer;
-    font:600 14px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+    background:var(--texto);color:#1b0810;cursor:pointer;
+    font:600 13px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;
     box-shadow:0 10px 34px rgba(0,0,0,.5);
     transition:transform .16s;
   }
   .intro__play:hover{transform:translateY(-2px) scale(1.03)}
-  .intro__play svg{width:17px;height:17px;fill:currentColor}
+  .intro__play svg{width:16px;height:16px;fill:currentColor}
 
   /* ═════════════════════════════════════════════
-     TALLER — se abre con la tecla S (solo para ti)
+     TALLER — tecla S, solo para el autor
      ═════════════════════════════════════════════ */
   .taller{
-    position:fixed;right:16px;bottom:calc(var(--barra) + 16px);z-index:50;
-    width:min(400px,calc(100vw - 32px));
-    max-height:70vh;overflow:auto;
+    position:fixed;right:16px;bottom:16px;z-index:50;
+    width:min(390px,calc(100vw - 32px));max-height:68dvh;overflow:auto;
     padding:18px;border-radius:14px;
-    background:rgba(16,7,12,.96);
-    border:1px solid rgba(255,255,255,.12);
+    background:rgba(18,8,12,.97);
+    border:1px solid rgba(255,255,255,.13);
     box-shadow:0 24px 60px rgba(0,0,0,.6);
-    font-family:var(--sans);
-    display:none;
+    font-family:var(--sans);display:none;
   }
   .taller.abierto{display:block}
-  .taller h2{font:600 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--tenue);margin-bottom:14px}
-  .taller p{font:400 12.5px/1.6 var(--sans);color:var(--medio);margin-bottom:12px}
+  .taller h2{font:600 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);margin-bottom:12px}
+  .taller p{font:400 12.5px/1.65 var(--sans);color:var(--medio);margin-bottom:12px}
+  .taller__estado{font:500 12px/1.5 var(--sans);color:var(--rosa);margin-bottom:10px;min-height:1.5em}
   .taller__fila{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   .taller button{
     padding:9px 14px;border:1px solid rgba(255,255,255,.18);border-radius:8px;
@@ -288,118 +254,75 @@
     font:500 12.5px/1 var(--sans);
   }
   .taller button:hover{background:rgba(255,255,255,.12)}
-  .taller button.fuerte{background:var(--rosa);color:#17070e;border-color:transparent}
-  .taller textarea{
-    width:100%;height:150px;resize:vertical;
-    background:#0a0407;color:var(--medio);
-    border:1px solid rgba(255,255,255,.12);border-radius:8px;
-    padding:10px;font:400 11.5px/1.5 ui-monospace,Menlo,Consolas,monospace;
-  }
-  .taller textarea:not([readonly]){
-    color:var(--texto);
-    border-color:rgba(229,139,164,.55);
-    font:400 13px/1.55 var(--sans);
-  }
-  .taller__estado{font:500 12px/1.5 var(--sans);color:var(--rosa);margin-bottom:10px}
-  .pendiente{outline:2px dashed rgba(229,139,164,.6);outline-offset:6px;border-radius:6px}
+  .taller code{font:400 11.5px/1 ui-monospace,Consolas,monospace;color:var(--rosa-2)}
 
   /* ═════════════════════════════════════════════
-     MÓVIL — mismo diseño, apilado
+     MÓVIL — la misma tarjeta, de pie
      ═════════════════════════════════════════════ */
-  @media (max-width:880px){
-    :root{--barra:96px}
-    .reproductor{
-      grid-template-columns:1fr;
-      grid-template-rows:auto 1fr;
-      gap:16px;
-      padding:calc(14px + env(safe-area-inset-top)) 20px 0;
-      align-items:stretch;
+  @media (max-width:820px){
+    body{padding:0}
+    .tarjeta{
+      width:100%;height:100%;
+      border-radius:0;
+      grid-template-columns:minmax(0,1fr);
+      grid-template-rows:auto minmax(0,1fr) auto;
+      grid-template-areas:"foto" "letra" "pie";
+      gap:clamp(14px,3.4vw,24px);
+      padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));
+      box-shadow:none;
+      background:transparent;
     }
-    .arte{flex-direction:row;align-items:center;gap:14px}
-    .arte__marco{width:62px;height:62px;flex:0 0 62px;aspect-ratio:auto}
-    .disco{display:none}
-    .caratula{border-radius:7px;box-shadow:0 8px 22px rgba(0,0,0,.5)}
-    .rotulo{min-width:0;flex:1}
-    .rotulo__album{display:none}
-    .rotulo__titulo{font-size:21px}
-    .rotulo__artista{font-size:13px;margin-top:2px}
-    .linea{font-size:clamp(20px,5.4vw,27px);padding:.42em 0}
-    .pista{padding:46% 0 62%}
-    .volumen{display:none}
-    .nota{font-size:10px;letter-spacing:.08em}
-    .taller{right:10px;left:10px;width:auto;bottom:calc(var(--barra) + 10px)}
+    .marco{
+      justify-self:center;
+      width:auto;height:min(32dvh,300px);
+      aspect-ratio:4/5;
+    }
+    .rotulo{max-width:40%}
+    .reloj{display:none}
+  }
+
+  /* pantallas muy bajas: la foto estorba más de lo que aporta */
+  @media (max-height:520px) and (max-width:820px){
+    .marco{height:20dvh}
   }
 
   @media (prefers-reduced-motion:reduce){
-    .disco,.mancha,.linea--hueco.activa i{animation:none}
-    .pista{transition-duration:.2s}
+    .halo span,.puntos i{animation:none}
+    .l,.estrofa{transition:none}
   }
 </style>
 </head>
 <body>
 
-<div class="ambiente" aria-hidden="true">
-  <span class="mancha m1"></span>
-  <span class="mancha m2"></span>
-  <span class="mancha m3"></span>
-</div>
+<div class="halo" aria-hidden="true"><span></span><span></span></div>
 
-<main class="reproductor">
-  <section class="arte">
-    <div class="arte__marco">
-      <div class="disco" aria-hidden="true"></div>
-      <div class="caratula" id="caratula" aria-hidden="true"></div>
-    </div>
+<main class="tarjeta">
+  <div class="marco" id="marco" aria-hidden="true"></div>
+
+  <div class="lienzo">
+    <div class="estrofa" id="estrofa"></div>
+  </div>
+
+  <div class="pie">
+    <button class="play" id="btnPlay" type="button" aria-label="Reproducir">
+      <svg id="icoPlay" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+    </button>
+
     <div class="rotulo">
-      <p class="rotulo__album" id="rAlbum"></p>
-      <h1 class="rotulo__titulo" id="rTitulo"></h1>
-      <p class="rotulo__artista" id="rArtista"></p>
+      <b id="rTitulo"></b>
+      <span id="rArtista"></span>
     </div>
-  </section>
 
-  <section class="letra" id="caja">
-    <div class="pista" id="pista"></div>
-  </section>
-</main>
-
-<footer class="barra">
-  <div class="tiempos">
-    <span class="reloj" id="relojIni">0:00</span>
     <div class="riel" id="rielTiempo" role="slider" aria-label="Posición de la canción" tabindex="0">
       <div class="riel__via"></div>
       <div class="riel__lleno" id="llenoTiempo"></div>
       <div class="riel__perilla" id="perillaTiempo"></div>
     </div>
-    <span class="reloj reloj--fin" id="relojFin">0:00</span>
+
+    <span class="reloj" id="reloj">0:00</span>
+    <span class="aviso" id="aviso"></span>
   </div>
-
-  <div class="mandos">
-    <span class="nota" id="nota"></span>
-
-    <button class="btn" id="btnAtras" type="button" aria-label="Retroceder diez segundos">
-      <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5.5 5.5 0 1 1-5.5 5.5H4.5A7.5 7.5 0 1 0 12 5z"/><text x="12" y="16.1" font-size="8.4" font-weight="700" text-anchor="middle" fill="currentColor" font-family="sans-serif">10</text></svg>
-    </button>
-
-    <button class="btn btn--play" id="btnPlay" type="button" aria-label="Reproducir">
-      <svg id="icoPlay" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
-    </button>
-
-    <button class="btn" id="btnAdelante" type="button" aria-label="Avanzar diez segundos">
-      <svg viewBox="0 0 24 24"><path d="M12 5V2l5 4-5 4V7a5.5 5.5 0 1 0 5.5 5.5h2A7.5 7.5 0 1 1 12 5z"/><text x="12" y="16.1" font-size="8.4" font-weight="700" text-anchor="middle" fill="currentColor" font-family="sans-serif">10</text></svg>
-    </button>
-
-    <div class="volumen">
-      <button class="btn" id="btnMudo" type="button" aria-label="Silenciar">
-        <svg id="icoVol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
-      </button>
-      <div class="riel" id="rielVol" role="slider" aria-label="Volumen" tabindex="0">
-        <div class="riel__via"></div>
-        <div class="riel__lleno" id="llenoVol"></div>
-        <div class="riel__perilla" id="perillaVol"></div>
-      </div>
-    </div>
-  </div>
-</footer>
+</main>
 
 <div class="intro" id="intro">
   <p class="intro__ojo" id="iOjo"></p>
@@ -414,23 +337,16 @@
 <div class="taller" id="taller">
   <h2>Taller · solo lo ves tú</h2>
   <div class="taller__estado" id="tEstado"></div>
-  <p>El audio sale de <code>CANCION.audio</code>. También puedes arrastrar uno encima para probarlo sin subirlo al repo.</p>
+  <p>Arrastra encima el audio, el <code>.lrc</code> o la foto para probarlos sin subirlos al repositorio.</p>
   <div class="taller__fila">
-    <button type="button" id="tArchivo">Cargar audio…</button>
-    <button type="button" id="tPegar">Pegar letra</button>
-    <button type="button" id="tSync">Sincronizar</button>
-    <button type="button" id="tCopiar">Copiar arreglo</button>
+    <button type="button" id="tArchivo">Abrir archivos…</button>
+    <button type="button" id="tMas">Estrofas más largas</button>
+    <button type="button" id="tMenos">Más cortas</button>
   </div>
-  <p id="tAyuda"><b>1.</b> Pegar letra: una línea por verso, línea en blanco donde solo haya música. <b>2.</b> Sincronizar: suena desde cero y marcas con <b>Enter</b> en cuanto entra cada línea. <b>3.</b> Copiar arreglo y pegarlo en el bloque <code>LETRA</code> del archivo.</p>
-  <div class="taller__fila" id="tBarraSync" style="display:none">
-    <button type="button" class="fuerte" id="tMarcar">Marcar línea (Enter)</button>
-    <button type="button" id="tDeshacer">Deshacer</button>
-    <button type="button" id="tSalir">Terminar</button>
-  </div>
-  <textarea id="tSalida" spellcheck="false" readonly></textarea>
+  <p id="tInfo"></p>
 </div>
 
-<input type="file" id="archivoAudio" accept="audio/*,.lrc,.txt" multiple hidden>
+<input type="file" id="archivos" accept="audio/*,image/*,.lrc,.txt" multiple hidden>
 <audio id="audio" preload="metadata"></audio>
 
 <script>
@@ -441,201 +357,158 @@
 const CANCION = {
   titulo:  "Parcera",
   artista: "Penyair",
-  album:   "Jardín · colección",
   ojo:     "tu canción",
 
-  /* Letra sincronizada en formato .lrc, al lado del audio. Si carga,
-     manda ella y el arreglo LETRA de más abajo queda solo de reserva
-     (que es lo que se ve si abres el archivo sin servidor, porque
-     entonces el navegador no deja leer archivos vecinos).           */
+  /* La foto de los dos. Si no está, en su sitio va una flor dibujada. */
+  foto:    "assets/foto.jpg",
+
+  /* Audio y letra sincronizada, servidos estáticos por GitHub Pages. */
+  audio:   "assets/archivomulti.mp3",
   letra:   "assets/archivomulti.lrc",
 
-  /* Archivo de audio, al lado de este .html y subido al repo.
-     GitHub Pages lo sirve como cualquier otro archivo estático:
-     no hace falta servidor ni base de datos.
+  /* Lo que se lee en los silencios largos. Déjalo en "" para que
+     salgan solo tres puntos.                                      */
+  respiro: "",
 
-       · formato mp3 (es el único que tocan todos los navegadores,
-         iPhone incluido); nombre sin tildes ni espacios
-       · con 128 kbps una canción de 3 min pesa unos 3 MB, que es
-         nada para el límite de 1 GB del sitio
-       · NO lo metas en Git LFS: Pages serviría el archivo de texto
-         que LFS deja en su lugar y no sonaría nada
-       · es un repo público, así que el mp3 queda descargable
-
-     Si el archivo no está, la página no se rompe: la letra corre
-     con un reloj interno y la barra avisa "solo letra".          */
-  audio:   "assets/archivomulti.mp3",
-
-  /* Duración en segundos. Solo se usa cuando no hay audio;
-     con audio real se toma la del archivo.                       */
+  /* Solo se usa si no hay audio; con el archivo manda su duración. */
   duracion: 192
 };
 
-/* La letra: [segundo en que entra, texto].
-   Una línea vacía "" es un tramo instrumental (salen tres puntos).
-   ¿Vas a poner otra canción? Pulsa S, "Sincronizar letra",
-   y los segundos los marcas tú escuchándola.                     */
-const LETRA = [
-  [  0, ""],
-  [ 10, "Son las siete y todavía estás contando"],
-  [ 15, "cómo te fue en el turno de hoy,"],
-  [ 20, "y yo tenía algo importante que decirte"],
-  [ 25, "pero se me olvidó."],
-  [ 30, ""],
-  [ 32, "Me hablas de una señora del tercero,"],
-  [ 37, "del profesor que no entendió,"],
-  [ 42, "de una canción que se te quedó pegada"],
-  [ 47, "desde el lunes y no sabes por qué."],
-  [ 52, ""],
-  [ 54, "Y yo aquí, haciendo como que trabajo,"],
-  [ 59, "oyéndote nombrar el mundo entero."],
-  [ 65, ""],
-  [ 68, "Habla de mil cosas,"],
-  [ 72, "que yo tengo toda la noche."],
-  [ 76, "Habla de mil cosas,"],
-  [ 80, "que el día de afuera no me importa."],
-  [ 85, "Si te enojas tantito, igual te veo hermosa;"],
-  [ 91, "si te ríes, ya no hay nada que me salga mal."],
-  [ 97, "Habla de mil cosas."],
-  [102, ""],
-  [106, "Te gustan las flores que no duran nada"],
-  [111, "y yo aprendí a sembrarlas en pantalla,"],
-  [116, "una por una, pétalo por pétalo,"],
-  [121, "pa' que te duren hasta mañana."],
-  [126, ""],
-  [128, "Dicen que uno se enamora de a poquitos,"],
-  [133, "de un ojo café, de un pelo suelto,"],
-  [138, "pero a mí me pasó de un solo golpe"],
-  [143, "un miércoles cualquiera, sin aviso."],
-  [148, ""],
-  [151, "Y le pido a Dios, que tú lo cargas siempre,"],
-  [156, "que te alcance el tiempo pa' graduarte,"],
-  [161, "que te alcance el tiempo pa' quererme,"],
-  [166, "que te alcance el tiempo pa' contarme"],
-  [171, "todas esas mil cosas otra vez."],
-  [176, ""],
-  [179, "Habla de mil cosas."],
-  [184, "Yo me quedo."],
-  [189, ""]
-];
-
 const CONFIG = {
-  volumen:  0.85,   // 0 a 1
-  repetir:  false,  // vuelve a empezar al terminar
-  palabras: true,   // encender la línea activa palabra por palabra
-  saltar:   10      // segundos de los botones de avance/retroceso
+  volumen:   0.85,
+  repetir:   false,
+  mayusculas:true,   // el aire de las historias viene de las mayúsculas
+  saltar:    10,     // segundos de las flechas
+
+  /* Cómo se parten los versos en estrofas. Un silencio más largo que
+     `corte` empieza estrofa nueva, y ninguna pasa de `maxVersos`.   */
+  maxVersos: 2,
+  corte:     2.6,
+  maxVerso:  6,      // segundos máximos que tarda un verso en revelarse
+
+  /* Cada verso se parte en trozos. De ahí sale el aire de las
+     historias: unos trozos enormes y otros pequeños. El patrón son
+     anchos OBJETIVO EN CARACTERES, no en palabras: contar palabras
+     no sirve, porque una larga mide casi lo mismo que dos cortas.
+     Ponlo en false para que cada verso ocupe una sola línea.      */
+  trocear:   true,
+  patron:    [4, 19, 10, 5, 15, 24, 7],
+
+  /* Los anchos del patrón se escalan para que cada tarjeta ronde
+     este número de líneas, lleve un verso o lleve dos. Sin esto,
+     una tarjeta de dos versos salía en nueve líneas diminutas.  */
+  lineasPorTarjeta: 4,
+
+  /* El tamaño de cada trozo es `fuerza / letras^contraste`, acotado.
+     Sube `contraste` para que la diferencia entre el trozo corto y el
+     largo sea más bestia; bájalo para igualarlos.                   */
+  fuerza:    4.5,
+  contraste: 0.72,
+  pesoMin:   0.40,
+  pesoMax:   2.2
 };
+
+/* Letra de reserva. Solo se ve si el .lrc no carga: por ejemplo al
+   abrir este archivo con doble clic, porque entonces el navegador no
+   deja leer archivos vecinos. */
+const LETRA = [
+  [ 0, ""],
+  [ 6, "Son las siete"],
+  [10, "y todavía estás contando"],
+  [15, "cómo te fue en el turno de hoy"],
+  [21, "y yo tenía algo importante que decirte"],
+  [27, "pero se me olvidó"]
+];
 
 /* ═══════════════════════════════════════════════════════════════
    2. MOTOR — de aquí para abajo no hace falta tocar nada
    ═══════════════════════════════════════════════════════════════ */
 
 const $ = id => document.getElementById(id);
-const audio = $("audio");
-const pista = $("pista"), caja = $("caja");
-const movil = matchMedia("(max-width:880px)").matches;
+const audio   = $("audio");
+const estrofa = $("estrofa");
+const lienzo  = estrofa.parentElement;
 
-let hayAudio   = false;   // el archivo suena y manda su reloj
-let sinAudio   = false;   // ya sabemos que no hay audio: va el reloj interno
-let probando   = false;   // play() lanzado, esperando a ver si suena
-let intento    = 0;       // para descartar intentos que el usuario canceló
+let hayAudio = false;   // el archivo suena y manda su reloj
+let sinAudio = false;   // ya sabemos que no hay: va el reloj interno
+let probando = false;   // play() lanzado, esperando a ver si suena
+let intento  = 0;       // descarta los intentos que se cancelaron
+
 let sonando    = false;
-let posVirtual = 0;       // reloj interno cuando no hay audio
+let posVirtual = 0;
 let t0Virtual  = 0;
 let raf        = 0;
-let iActiva    = -1;
-let nDichas    = 0;
-let lineas     = [];      // [{el, palabras:[{el,k}]}]
 
-/* ───────── carátula: una flor dibujada, nada de imágenes ───────── */
-function dibujarCaratula(){
+let ESTROFAS = [];
+let iEstrofa = -1;
+let vivos    = [];      // versos en pantalla: [{ini, fin, letras, n}]
+
+/* ───────── la foto ───────── */
+function ponerFoto(url){
+  const marco = $("marco");
+  const img = new Image();
+  img.alt = "";
+  img.onload  = () => { marco.innerHTML = ""; marco.appendChild(img); };
+  img.onerror = () => { if (!marco.children.length) dibujarFlor(marco); };
+  img.src = url;
+}
+
+/* Si no hay foto, una flor. Nada de archivos externos. */
+function dibujarFlor(destino){
   const NS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(NS, "svg");
-  svg.setAttribute("viewBox", "0 0 200 200");
+  svg.setAttribute("viewBox", "0 0 200 250");
   svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+  svg.innerHTML =
+    '<defs>' +
+      '<radialGradient id="gp" cx="50%" cy="76%" r="78%">' +
+        '<stop offset="0%" stop-color="#f8d4dd"/>' +
+        '<stop offset="54%" stop-color="#e58ba4"/>' +
+        '<stop offset="100%" stop-color="#9e2049"/>' +
+      '</radialGradient>' +
+      '<radialGradient id="gc" cx="42%" cy="36%" r="72%">' +
+        '<stop offset="0%" stop-color="#7a1734"/>' +
+        '<stop offset="100%" stop-color="#2b0711"/>' +
+      '</radialGradient>' +
+    '</defs>';
 
-  const defs = document.createElementNS(NS, "defs");
-  defs.innerHTML =
-    '<radialGradient id="gPetalo" cx="50%" cy="78%" r="78%">' +
-      '<stop offset="0%"  stop-color="#f8d4dd"/>' +
-      '<stop offset="52%" stop-color="#e58ba4"/>' +
-      '<stop offset="100%" stop-color="#a62650"/>' +
-    '</radialGradient>' +
-    '<radialGradient id="gCorazon" cx="42%" cy="36%" r="72%">' +
-      '<stop offset="0%"  stop-color="#7a1734"/>' +
-      '<stop offset="100%" stop-color="#2d0712"/>' +
-    '</radialGradient>' +
-    '<radialGradient id="gLuz" cx="28%" cy="22%" r="74%">' +
-      '<stop offset="0%"  stop-color="rgba(255,255,255,.17)"/>' +
-      '<stop offset="100%" stop-color="rgba(255,255,255,0)"/>' +
-    '</radialGradient>';
-  svg.appendChild(defs);
-
-  const luz = document.createElementNS(NS, "rect");
-  luz.setAttribute("width", "200"); luz.setAttribute("height", "200");
-  luz.setAttribute("fill", "url(#gLuz)");
-  svg.appendChild(luz);
-
-  /* un pétalo: base angosta en r0, punta redondeada en r1 */
+  const cx = 100, cy = 125;
   const petalo = (r0, r1, w) => {
-    const L = r1 - r0, y = k => (100 - (r0 + L * k)).toFixed(2);
-    return "M100 " + (100 - r0).toFixed(2) +
-      " C" + (100 - w * .46).toFixed(2) + " " + y(.14) +
-       " " + (100 - w).toFixed(2)       + " " + y(.52) +
-       " " + (100 - w * .78).toFixed(2) + " " + y(.86) +
-      " C" + (100 - w * .46).toFixed(2) + " " + y(1.04) +
-       " " + (100 + w * .46).toFixed(2) + " " + y(1.04) +
-       " " + (100 + w * .78).toFixed(2) + " " + y(.86) +
-      " C" + (100 + w).toFixed(2)       + " " + y(.52) +
-       " " + (100 + w * .46).toFixed(2) + " " + y(.14) +
-       " 100 " + (100 - r0).toFixed(2) + "Z";
+    const L = r1 - r0, y = k => (cy - (r0 + L * k)).toFixed(2);
+    return "M" + cx + " " + (cy - r0).toFixed(2) +
+      " C" + (cx - w * .46) + " " + y(.14) + " " + (cx - w) + " " + y(.52) + " " + (cx - w * .78) + " " + y(.86) +
+      " C" + (cx - w * .46) + " " + y(1.04) + " " + (cx + w * .46) + " " + y(1.04) + " " + (cx + w * .78) + " " + y(.86) +
+      " C" + (cx + w) + " " + y(.52) + " " + (cx + w * .46) + " " + y(.14) + " " + cx + " " + (cy - r0).toFixed(2) + "Z";
   };
 
-  const anillos = [
-    { n:24, r0:26, r1:96, w:8.2, op:.96, giro:0  },
-    { n:22, r0:22, r1:74, w:7.0, op:.82, giro:8  },
-    { n:18, r0:17, r1:52, w:5.8, op:.66, giro:14 }
-  ];
-
-  anillos.forEach(a => {
+  [{n:24,r0:26,r1:104,w:8.6,op:.95,g:0},
+   {n:20,r0:21,r1:78,w:7,op:.8,g:9},
+   {n:16,r0:16,r1:54,w:5.6,op:.62,g:15}].forEach(a => {
     const g = document.createElementNS(NS, "g");
     g.setAttribute("opacity", a.op);
     for (let i = 0; i < a.n; i++){
-      const ang = (360 / a.n) * i + a.giro;
       const p = document.createElementNS(NS, "path");
-      p.setAttribute("d", petalo(a.r0, a.r1 * (0.93 + Math.random() * 0.14), a.w));
-      p.setAttribute("fill", "url(#gPetalo)");
-      p.setAttribute("transform", "rotate(" + ang.toFixed(2) + " 100 100)");
+      p.setAttribute("d", petalo(a.r0, a.r1 * (0.92 + Math.random() * 0.16), a.w));
+      p.setAttribute("fill", "url(#gp)");
+      p.setAttribute("transform", "rotate(" + ((360 / a.n) * i + a.g).toFixed(2) + " " + cx + " " + cy + ")");
       g.appendChild(p);
     }
     svg.appendChild(g);
   });
 
-  const centro = document.createElementNS(NS, "circle");
-  centro.setAttribute("cx", "100"); centro.setAttribute("cy", "100");
-  centro.setAttribute("r", "19"); centro.setAttribute("fill", "url(#gCorazon)");
-  svg.appendChild(centro);
+  const c = document.createElementNS(NS, "circle");
+  c.setAttribute("cx", cx); c.setAttribute("cy", cy);
+  c.setAttribute("r", "19"); c.setAttribute("fill", "url(#gc)");
+  svg.appendChild(c);
 
-  for (let i = 0; i < 34; i++){
-    const ang = Math.random() * Math.PI * 2;
-    const rad = 4 + Math.sqrt(Math.random()) * 14;
-    const d = document.createElementNS(NS, "circle");
-    d.setAttribute("cx", (100 + Math.cos(ang) * rad).toFixed(2));
-    d.setAttribute("cy", (100 + Math.sin(ang) * rad).toFixed(2));
-    d.setAttribute("r", (0.7 + Math.random() * 1.1).toFixed(2));
-    d.setAttribute("fill", "rgba(246,195,207,.55)");
-    svg.appendChild(d);
-  }
-
-  $("caratula").appendChild(svg);
+  destino.innerHTML = "";
+  destino.appendChild(svg);
 }
 
-/* ───────── letra ───────── */
-
-/* Lee un .lrc: el formato estándar de letra sincronizada, con un sello
-   [mm:ss.cc] delante de cada verso. Admite varios sellos en la misma
-   línea, la variante que separa las centésimas con dos puntos, las
-   etiquetas de cabecera y el desfase global [offset:].              */
+/* ───────── leer un .lrc ─────────
+   Formato estándar de letra sincronizada: un sello [mm:ss.cc] delante
+   de cada verso. Admite varios sellos por línea, la variante con dos
+   puntos en las centésimas, las cabeceras y el desfase [offset:].   */
 function leerLRC(txt){
   const sello = /\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
   let desfase = 0;
@@ -644,7 +517,7 @@ function leerLRC(txt){
   txt.replace(/^﻿/, "").split(/\r?\n/).forEach(cruda => {
     const off = cruda.match(/^\s*\[offset:\s*([+-]?\d+)\s*\]/i);
     if (off){ desfase = parseInt(off[1], 10) / 1000; return; }
-    if (/^\s*\[[a-z]{2,}:/i.test(cruda)) return;      // [ti:] [ar:] [al:] …
+    if (/^\s*\[[a-z]{2,}:/i.test(cruda)) return;
 
     sello.lastIndex = 0;
     const tiempos = [];
@@ -661,103 +534,164 @@ function leerLRC(txt){
   if (!bruto.length) return null;
   bruto.sort((a, b) => a[0] - b[0]);
 
-  /* Un verso vacío que dura un parpadeo no es un silencio: es la marca
-     que usa el formato para borrar de pantalla el verso anterior.     */
-  const fin = duracion() || CANCION.duracion || 0;
-  const letra = bruto.filter((e, i) => {
+  /* Un verso vacío que dura un parpadeo no es silencio: es la marca
+     con la que el formato borra de pantalla el verso anterior.     */
+  const fin = duracion();
+  return bruto.filter((e, i) => {
     if (e[1]) return true;
     const sig = i + 1 < bruto.length ? bruto[i + 1][0] : (fin || e[0] + 99);
     return sig - e[0] >= 2.5;
   });
-
-  /* Puntos suspensivos en la entrada y en el cierre, si hay sitio. */
-  if (letra[0][0] > 1.5) letra.unshift([0, ""]);
-  const ultimo = letra[letra.length - 1][0];
-  if (fin && fin - ultimo > 6) letra.push([+(ultimo + 4).toFixed(2), ""]);
-
-  return letra;
 }
 
-/* Cambia la letra en caliente y vuelve a pintarla. */
-function ponerLetra(arr){
-  if (!arr || !arr.length) return 0;
-  LETRA.length = 0;
-  arr.forEach(e => LETRA.push(e));
-  iActiva = -1;
-  nDichas = 0;
-  sync.n = 0;
-  sync.marcas = [];
-  pintarLetra();
-  marco();
-  volcarSalida();
-  return LETRA.length;
-}
+/* ───────── de versos sueltos a estrofas ───────── */
+function armarEstrofas(){
+  const fin = duracion();
+  const E = [];
+  let act = null;
+  const cerrar = () => { if (act){ act.fin = act.ultimo; E.push(act); act = null; } };
 
-function pintarLetra(){
-  pista.innerHTML = "";
-  lineas = [];
+  LETRA.forEach((e, i) => {
+    const t = e[0], txt = e[1];
+    const sig = (i + 1 < LETRA.length) ? LETRA[i + 1][0] : fin;
 
-  LETRA.forEach((fila, i) => {
-    const texto = fila[1];
-    const el = document.createElement("p");
-    el.className = "linea" + (texto ? "" : " linea--hueco");
-    const palabras = [];
-
-    if (texto){
-      const trozos = texto.split(" ");
-      const total = trozos.reduce((s, p) => s + p.length, 0) || 1;
-      let acc = 0;
-      trozos.forEach((t, j) => {
-        const s = document.createElement("span");
-        s.className = "p";
-        s.textContent = t;
-        acc += t.length;
-        palabras.push({ el: s, k: acc / total });
-        el.appendChild(s);
-        if (j < trozos.length - 1) el.appendChild(document.createTextNode(" "));
-      });
-    } else {
-      el.innerHTML = "<i></i><i></i><i></i>";
+    if (!txt){                       // silencio
+      cerrar();
+      E.push({ hueco:true, ini:t, fin:sig });
+      return;
     }
+    /* Un verso no tarda en revelarse más de lo razonable aunque el
+       siguiente llegue mucho después: lo que sobra es silencio.    */
+    const hasta = Math.min(sig, t + CONFIG.maxVerso);
 
-    el.addEventListener("click", () => {
-      if (sync.activo) return;
-      irA(LETRA[i][0] + 0.05);   // el tiempo vivo: el sincronizado lo cambia
-    });
-
-    pista.appendChild(el);
-    lineas.push({ el, palabras });
+    /* El corte mira la distancia entre ARRANQUES. En un .lrc el final
+       de un verso es el arranque del siguiente, así que medir contra
+       el final daría cero siempre y nunca partiría.                 */
+    if (act && (act.versos.length >= CONFIG.maxVersos || t - act.ultimoIni > CONFIG.corte)) cerrar();
+    if (!act) act = { ini:t, versos:[] };
+    act.versos.push({ ini:t, fin:hasta, txt });
+    act.ultimoIni = t;
+    act.ultimo    = hasta;
   });
+  cerrar();
+
+  /* Un respiro al entrar y otro al cerrar, si hay sitio. */
+  if (E.length && E[0].ini > 1.5) E.unshift({ hueco:true, ini:0, fin:E[0].ini });
+  const ult = E[E.length - 1];
+  if (ult && fin - ult.fin > 6) E.push({ hueco:true, ini:ult.fin, fin:fin });
+
+  ESTROFAS = E;
+  iEstrofa = -1;
 }
 
-function indiceEn(p){
-  let i = -1;
-  for (let k = 0; k < LETRA.length; k++){
-    if (LETRA[k][0] <= p) i = k; else break;
+/* ───────── pintar una estrofa ───────── */
+const peso = n => +Math.min(CONFIG.pesoMax,
+                   Math.max(CONFIG.pesoMin,
+                   CONFIG.fuerza / Math.pow(Math.max(2, n), CONFIG.contraste))).toFixed(3);
+
+/* Parte un verso en trozos de anchos desiguales. El patrón rota con
+   la semilla para que dos estrofas seguidas no se corten igual.   */
+function trocear(palabras, semilla, escala){
+  const pat = CONFIG.patron, trozos = [];
+  let i = 0, k = Math.abs(semilla) % pat.length;
+  while (i < palabras.length){
+    const meta = pat[k++ % pat.length] * escala;
+    let tr = palabras[i++];                       // siempre al menos una
+    while (i < palabras.length && tr.length + 1 + palabras[i].length <= meta){
+      tr += " " + palabras[i++];
+    }
+    trozos.push(tr);
   }
-  return i;
+  return trozos;
 }
 
-function centrar(i){
-  const el = lineas[i] ? lineas[i].el : null;
-  if (!el) return;
-  const y = -(el.offsetTop + el.offsetHeight / 2 - caja.clientHeight * 0.42);
-  pista.style.setProperty("--y", Math.round(y) + "px");
+/* Cuánto hay que ensanchar el patrón para que la tarjeta quepa en
+   las líneas previstas. */
+function escalaDe(versos){
+  const total = versos.reduce((s, v) => s + v.txt.length, 0);
+  const medio = CONFIG.patron.reduce((a, b) => a + b, 0) / CONFIG.patron.length;
+  const quiere = total / Math.max(1, CONFIG.lineasPorTarjeta);
+  return Math.max(0.7, Math.min(3, quiere / medio));
 }
 
-function cambiarLinea(i){
-  if (iActiva >= 0 && lineas[iActiva]){
-    lineas[iActiva].el.classList.remove("activa");
-    lineas[iActiva].palabras.forEach(w => w.el.classList.remove("dicha"));
+function pintarEstrofa(e){
+  estrofa.classList.add("entrando");
+  estrofa.innerHTML = "";
+  estrofa.style.removeProperty("--base");
+  vivos = [];
+
+  if (!e){ estrofa.classList.remove("entrando"); return; }
+
+  if (e.hueco){
+    if (CANCION.respiro){
+      const p = document.createElement("p");
+      p.className = "respiro";
+      p.textContent = CANCION.respiro;
+      estrofa.appendChild(p);
+    } else {
+      const d = document.createElement("div");
+      d.className = "puntos";
+      d.innerHTML = "<i></i><i></i><i></i>";
+      estrofa.appendChild(d);
+    }
+  } else {
+    const escala = escalaDe(e.versos);
+    e.versos.forEach((v, vi) => {
+      const texto  = CONFIG.mayusculas ? v.txt.toLocaleUpperCase("es") : v.txt;
+      const trozos = CONFIG.trocear
+        ? trocear(texto.split(/\s+/).filter(Boolean), vi + Math.round(v.ini), escala)
+        : [texto];
+      const letras = [];
+      trozos.forEach(tr => {
+        const p = document.createElement("p");
+        p.className = "verso";
+        p.style.setProperty("--w", peso(tr.length));
+        for (const ch of tr){
+          const s = document.createElement("span");
+          s.className = "l";
+          s.textContent = ch;
+          p.appendChild(s);
+          letras.push(s);          // el verso se revela seguido, trozo tras trozo
+        }
+        estrofa.appendChild(p);
+      });
+      vivos.push({ ini:v.ini, fin:v.fin, letras, n:0 });
+    });
+    encajar();
   }
-  /* todo lo anterior a la línea actual queda apagado (vale también al saltar atrás) */
-  lineas.forEach((l, k) => l.el.classList.toggle("pasada", k < i));
 
-  iActiva = i;
-  nDichas = 0;
-  if (i >= 0 && lineas[i]){
-    lineas[i].el.classList.add("activa");
-    if (!sync.activo) centrar(i);   // marcando tiempos manda la línea pendiente
+  void estrofa.offsetWidth;            // reflujo forzado antes de aparecer
+  estrofa.classList.remove("entrando");
+}
+
+/* Busca por bisección el cuerpo de letra más grande con el que la
+   estrofa entera sigue cabiendo en su hueco.                      */
+function encajar(){
+  const alto = lienzo.clientHeight;
+  if (!alto) return;
+  let bajo = 11, cima = 132;
+  for (let i = 0; i < 9; i++){
+    const med = (bajo + cima) / 2;
+    estrofa.style.setProperty("--base", med.toFixed(2) + "px");
+    if (estrofa.scrollHeight <= alto) bajo = med; else cima = med;
+  }
+  estrofa.style.setProperty("--base", bajo.toFixed(2) + "px");
+}
+
+/* ───────── revelar letra a letra ───────── */
+function revelar(p){
+  for (let k = 0; k < vivos.length; k++){
+    const v = vivos[k];
+    const total = v.letras.length;
+    let n;
+    if (p >= v.fin) n = total;
+    else if (p <= v.ini) n = 0;
+    else n = Math.floor((p - v.ini) / Math.max(.35, (v.fin - v.ini) * .92) * total);
+    n = n < 0 ? 0 : (n > total ? total : n);
+    if (n === v.n) continue;
+    if (n > v.n) for (let i = v.n; i < n; i++) v.letras[i].classList.add("vista");
+    else         for (let i = n; i < v.n; i++) v.letras[i].classList.remove("vista");
+    v.n = n;
   }
 }
 
@@ -775,7 +709,6 @@ function reloj(s){
   s = Math.max(0, Math.floor(s || 0));
   return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 }
-
 function irA(t){
   const d = duracion();
   t = Math.min(d - 0.05, Math.max(0, t));
@@ -784,43 +717,37 @@ function irA(t){
   marco();
 }
 
-/* un fotograma: barra, línea y palabras */
+function indiceEstrofa(p){
+  let i = -1;
+  for (let k = 0; k < ESTROFAS.length; k++){
+    if (ESTROFAS[k].ini <= p) i = k; else break;
+  }
+  return i;
+}
+
+/* un fotograma */
 function marco(){
   const p = pos(), d = duracion();
   const pc = d ? Math.min(1, p / d) : 0;
   $("llenoTiempo").style.width = (pc * 100) + "%";
   $("perillaTiempo").style.left = (pc * 100) + "%";
-  $("relojIni").textContent = reloj(p);
-  $("relojFin").textContent = reloj(d);
+  $("reloj").textContent = reloj(p) + " / " + reloj(d);
 
-  const i = indiceEn(p);
-  if (i !== iActiva) cambiarLinea(i);
-
-  if (CONFIG.palabras && iActiva >= 0 && lineas[iActiva] && lineas[iActiva].palabras.length){
-    const t0 = LETRA[iActiva][0];
-    const t1 = (iActiva + 1 < LETRA.length) ? LETRA[iActiva + 1][0] : d;
-    const tramo = Math.max(0.5, (t1 - t0) * 0.86);
-    const k = Math.min(1, Math.max(0, (p - t0) / tramo));
-    const ws = lineas[iActiva].palabras;
-    let n = 0;
-    while (n < ws.length && ws[n].k <= k) n++;
-    if (n > nDichas) for (let j = nDichas; j < n; j++) ws[j].el.classList.add("dicha");
-    else if (n < nDichas) for (let j = n; j < nDichas; j++) ws[j].el.classList.remove("dicha");
-    nDichas = n;
-  }
+  const i = indiceEstrofa(p);
+  if (i !== iEstrofa){ iEstrofa = i; pintarEstrofa(ESTROFAS[i]); }
+  revelar(p);
 
   if (!hayAudio && sonando && p >= d - 0.05) terminar();
 }
-
 function latir(){
   marco();
   if (sonando) raf = requestAnimationFrame(latir);
 }
 
 /* ───────── mandos ─────────
-   El toque del usuario es lo que carga el audio, no solo lo que lo arranca:
-   Safari en iPhone ignora el preload y no pide un solo byte hasta que hay
-   un gesto. Por eso tocar() lanza play() primero y decide después.        */
+   El toque del usuario es lo que carga el audio, no solo lo que lo
+   arranca: Safari en iPhone ignora el preload y no pide un byte
+   hasta que hay un gesto.                                         */
 function tocar(){
   if (sonando || probando) return;
 
@@ -828,370 +755,247 @@ function tocar(){
     const mio = ++intento;
     probando = true;
     document.body.classList.add("cargando");
-    $("nota").textContent = "cargando";
+    $("aviso").textContent = "cargando";
 
     Promise.resolve(audio.play()).then(() => {
-      if (mio !== intento) return;          // lo cancelaron mientras tanto
+      if (mio !== intento) return;
       probando = false;
       hayAudio = true;
       document.body.classList.remove("cargando");
-      $("nota").textContent = "";
+      $("aviso").textContent = "";
       arrancar();
     }).catch(() => {
       if (mio !== intento) return;
       probando = false;
       document.body.classList.remove("cargando");
-      if (audio.error){                     // el archivo no está o no se decodifica
+      if (audio.error){
         sinAudio = true;
         hayAudio = false;
-        $("nota").textContent = "solo letra";
-        arrancar();                         // seguimos con el reloj interno
-      } else {                              // el navegador negó el sonido
-        $("nota").textContent = "";
+        $("aviso").textContent = "solo letra";
+        arrancar();
+      } else {
+        $("aviso").textContent = "";
       }
     });
     return;
   }
-
   arrancar();
 }
 
 function arrancar(){
   sonando = true;
-  document.body.classList.add("sonando");
   $("icoPlay").innerHTML = '<path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>';
   $("btnPlay").setAttribute("aria-label", "Pausar");
   if (!hayAudio) t0Virtual = performance.now() - posVirtual * 1000;
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(latir);
 }
-
 function pausar(){
   if (!sonando) return;
   posVirtual = pos();
   sonando = false;
-  document.body.classList.remove("sonando");
   $("icoPlay").innerHTML = '<path d="M7 4.5v15l13-7.5z"/>';
   $("btnPlay").setAttribute("aria-label", "Reproducir");
   if (hayAudio) audio.pause();
   cancelAnimationFrame(raf);
   marco();
 }
-
 function alternar(){
-  if (probando){                 // estaba intentando arrancar: cancelar
+  if (probando){
     intento++;
     probando = false;
     audio.pause();
     document.body.classList.remove("cargando");
-    $("nota").textContent = "";
+    $("aviso").textContent = "";
     return;
   }
   sonando ? pausar() : tocar();
 }
-
 function terminar(){
   if (CONFIG.repetir){ irA(0); return; }
   pausar();
   irA(0);
 }
 
-/* ───────── rieles (arrastre) ───────── */
-function riel(elRiel, alMover){
+/* ───────── arrastre del riel ───────── */
+function riel(el, alMover){
   let agarrado = false;
-  const leer = e => {
-    const r = elRiel.getBoundingClientRect();
-    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  const leer = ev => {
+    const r = el.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
   };
-  elRiel.addEventListener("pointerdown", e => {
+  el.addEventListener("pointerdown", ev => {
     agarrado = true;
-    elRiel.classList.add("activa");
-    elRiel.setPointerCapture(e.pointerId);
-    alMover(leer(e));
+    el.classList.add("agarrada");
+    el.setPointerCapture(ev.pointerId);
+    alMover(leer(ev));
   });
-  elRiel.addEventListener("pointermove", e => { if (agarrado) alMover(leer(e)); });
-  const soltar = e => {
+  el.addEventListener("pointermove", ev => { if (agarrado) alMover(leer(ev)); });
+  const soltar = ev => {
     if (!agarrado) return;
     agarrado = false;
-    elRiel.classList.remove("activa");
-    try { elRiel.releasePointerCapture(e.pointerId); } catch (_){}
+    el.classList.remove("agarrada");
+    try { el.releasePointerCapture(ev.pointerId); } catch (_){}
   };
-  elRiel.addEventListener("pointerup", soltar);
-  elRiel.addEventListener("pointercancel", soltar);
+  el.addEventListener("pointerup", soltar);
+  el.addEventListener("pointercancel", soltar);
 }
 
-function ponerVolumen(v){
-  v = Math.min(1, Math.max(0, v));
-  audio.volume = v;
-  audio.muted = v === 0;
-  $("llenoVol").style.width = (v * 100) + "%";
-  $("perillaVol").style.left = (v * 100) + "%";
-  $("icoVol").innerHTML = v === 0
-    ? '<path d="M4 9v6h4l5 4V5L8 9H4zm15.1 3 2.4-2.4-1.1-1.1-2.4 2.4-2.4-2.4-1.1 1.1 2.4 2.4-2.4 2.4 1.1 1.1 2.4-2.4 2.4 2.4 1.1-1.1z"/>'
-    : v < .5
-      ? '<path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/>'
-      : '<path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM16 2.3v2.1a7.6 7.6 0 0 1 0 15.2v2.1a9.7 9.7 0 0 0 0-19.4z"/>';
+/* ───────── cambiar la letra en caliente ───────── */
+function ponerLetra(arr){
+  if (!arr || !arr.length) return 0;
+  LETRA.length = 0;
+  arr.forEach(e => LETRA.push(e));
+  armarEstrofas();
+  marco();
+  return LETRA.length;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   3. TALLER — cargar audio y sincronizar (tecla S)
+   3. TALLER — tecla S
    ═══════════════════════════════════════════════════════════════ */
-const sync = { activo:false, n:0, marcas:[] };
-let modoPegar = false;
-
-/* Convierte texto plano en el arreglo LETRA. Una línea por verso; una
-   línea en blanco marca un tramo de solo música. Los segundos quedan
-   repartidos a ojo y los afina después el sincronizado.              */
-function usarTexto(txt){
-  const conTiempos = leerLRC(txt);          // ¿pegaron un .lrc entero?
-  if (conTiempos) return ponerLetra(conTiempos);
-
-  const crudas = txt.split(/\r?\n/).map(l => l.trim());
-  const filas = [];
-  crudas.forEach(l => {
-    if (l === ""){
-      if (!filas.length || filas[filas.length - 1] !== "") filas.push("");  // un hueco, no cinco
-    } else filas.push(l);
-  });
-  while (filas.length && filas[filas.length - 1] === "") filas.pop();
-  if (!filas.length) return 0;
-
-  const d = duracion() || CANCION.duracion || filas.length * 5;
-  LETRA.length = 0;
-  filas.forEach((l, i) => LETRA.push([+(i * d / filas.length).toFixed(2), l]));
-
-  iActiva = -1;
-  nDichas = 0;
-  sync.n = 0;
-  sync.marcas = [];
-  pintarLetra();
-  marco();
-  volcarSalida();
-  return filas.length;
-}
-
-function alternarPegar(){
-  const ta = $("tSalida");
-  if (!modoPegar){
-    if (sync.activo){ pausar(); salirSync(); }
-    modoPegar = true;
-    ta.removeAttribute("readonly");
-    ta.value = "";
-    ta.placeholder = "Pega aqui la letra.\nUna linea por verso.\n\nUna linea en blanco donde solo haya musica.";
-    ta.focus();
-    $("tPegar").textContent = "Usar esta letra";
-    $("tPegar").classList.add("fuerte");
-    estado("Pegando letra…");
-  } else {
-    const n = usarTexto(ta.value);
-    modoPegar = false;
-    ta.setAttribute("readonly", "");
-    ta.placeholder = "";
-    $("tPegar").textContent = "Pegar letra";
-    $("tPegar").classList.remove("fuerte");
-    estado(n ? n + " líneas cargadas · ahora sincroniza los tiempos" : "No pegaste nada: la letra sigue igual");
-    if (!n) volcarSalida();
-  }
-}
-
 function estado(txt){ $("tEstado").textContent = txt || ""; }
+
+function info(){
+  const versos  = LETRA.filter(e => e[1]).length;
+  const bloques = ESTROFAS.filter(e => !e.hueco).length;
+  $("tInfo").innerHTML =
+    versos + " versos en " + bloques + " estrofas · corte en " +
+    CONFIG.corte.toFixed(1) + " s, máximo " + CONFIG.maxVersos + " versos.<br>" +
+    "Si la letra va desfasada, ponle <code>[offset:-500]</code> al principio del .lrc.";
+}
 
 function abrirTaller(v){
   const t = $("taller");
   const abierto = v === undefined ? !t.classList.contains("abierto") : v;
   t.classList.toggle("abierto", abierto);
-  if (abierto) estado(hayAudio ? "Audio cargado · " + reloj(duracion()) : "Sin audio · la letra corre con reloj interno");
-}
-
-function entrarSync(){
-  sync.activo = true;
-  sync.n = 0;
-  sync.marcas = [];
-  $("tBarraSync").style.display = "flex";
-  $("tSync").textContent = "Reiniciar marcas";
-  irA(0);
-  marcarPendiente();
-  estado("Marcando… pulsa Enter cuando entre cada línea");
-  tocar();
-}
-function salirSync(){
-  sync.activo = false;
-  $("tBarraSync").style.display = "none";
-  $("tSync").textContent = "Sincronizar letra";
-  lineas.forEach(l => l.el.classList.remove("pendiente"));
-  estado("Listo · " + sync.marcas.length + " de " + LETRA.length + " líneas marcadas");
-}
-function marcarPendiente(){
-  lineas.forEach(l => l.el.classList.remove("pendiente"));
-  const l = lineas[sync.n];
-  if (l){
-    l.el.classList.add("pendiente");
-    const y = -(l.el.offsetTop + l.el.offsetHeight / 2 - caja.clientHeight * 0.42);
-    pista.style.setProperty("--y", Math.round(y) + "px");
+  if (abierto){
+    estado(hayAudio ? "Audio cargado · " + reloj(duracion()) : (sinAudio ? "Sin audio" : "Audio por cargar"));
+    info();
   }
 }
-function marcarAhora(){
-  if (!sync.activo || sync.n >= LETRA.length) return;
-  sync.marcas[sync.n] = +pos().toFixed(2);
-  sync.n++;
-  volcarSalida();
-  if (sync.n >= LETRA.length){ pausar(); salirSync(); }
-  else marcarPendiente();
-}
-function deshacerMarca(){
-  if (sync.n > 0){ sync.n--; sync.marcas.length = sync.n; volcarSalida(); marcarPendiente(); }
-}
-function volcarSalida(){
-  const filas = LETRA.map((f, i) => {
-    const t = sync.marcas[i] !== undefined ? sync.marcas[i] : f[0];
-    return "  [" + String(t).padStart(6, " ") + ", " + JSON.stringify(f[1]) + "]";
-  });
-  $("tSalida").value = "const LETRA = [\n" + filas.join(",\n") + "\n];";
+
+function reagrupar(delta){
+  CONFIG.maxVersos = Math.max(1, Math.min(6, CONFIG.maxVersos + delta));
+  CONFIG.corte     = Math.max(1.2, Math.min(6, +(CONFIG.corte + delta * 0.4).toFixed(1)));
+  armarEstrofas();
+  marco();
+  info();
+  estado("Reagrupado");
 }
 
 /* ═══════════════════════════════════════════════════════════════
    4. ARRANQUE
    ═══════════════════════════════════════════════════════════════ */
 (function inicio(){
-  $("rAlbum").textContent  = CANCION.album;
-  $("rTitulo").textContent = CANCION.titulo;
+  $("rTitulo").textContent  = CANCION.titulo;
   $("rArtista").textContent = CANCION.artista;
   $("iOjo").textContent     = CANCION.ojo;
   $("iTitulo").textContent  = CANCION.titulo;
   $("iArtista").textContent = CANCION.artista;
   document.title = CANCION.titulo;
 
-  dibujarCaratula();
-  pintarLetra();
-  volcarSalida();
+  if (CANCION.foto) ponerFoto(CANCION.foto); else dibujarFlor($("marco"));
 
-  /* La letra sincronizada vive en su propio archivo. Si llega, sustituye
-     a la que está escrita aquí abajo. Si no (sitio abierto sin servidor,
-     archivo borrado), no pasa nada: se queda la de reserva.            */
-  if (CANCION.letra){
-    fetch(CANCION.letra, { cache: "no-cache" })
-      .then(r => r.ok ? r.text() : Promise.reject(r.status))
-      .then(t => {
-        const arr = leerLRC(t);
-        if (arr) ponerLetra(arr);
-      })
-      .catch(() => {});
-  }
+  armarEstrofas();
 
-  /* Audio. Es un archivo estático servido por GitHub Pages; aquí solo se
-     pide la cabecera (preload="metadata"), que es lo que da la duración.
-     El resto se descarga cuando se pulsa play.                          */
   if (CANCION.audio){
     audio.src = CANCION.audio;
-    /* Donde sí se respeta el preload (escritorio, Android) esto llega solo
-       y ya tenemos la duración real antes de pulsar nada. En iPhone no
-       llega hasta el primer toque, y tampoco pasa nada: tocar() se encarga. */
-    audio.addEventListener("loadedmetadata", () => { hayAudio = true; marco(); }, { once:true });
+    audio.addEventListener("loadedmetadata", () => {
+      hayAudio = true;
+      armarEstrofas();      // ahora se conoce la duración real
+      marco();
+    }, { once:true });
     audio.addEventListener("error", () => {
       sinAudio = true;
       hayAudio = false;
-      $("nota").textContent = "solo letra";
+      $("aviso").textContent = "solo letra";
       marco();
     });
   } else {
     sinAudio = true;
-    $("nota").textContent = "solo letra";
+    $("aviso").textContent = "solo letra";
   }
-
-  /* el archivo se va bajando mientras suena: avisa si se queda sin buffer */
-  audio.addEventListener("waiting", () => { if (hayAudio && sonando) $("nota").textContent = "cargando"; });
-  audio.addEventListener("playing", () => { $("nota").textContent = ""; });
+  audio.addEventListener("waiting", () => { if (hayAudio && sonando) $("aviso").textContent = "cargando"; });
+  audio.addEventListener("playing", () => { $("aviso").textContent = ""; });
   audio.addEventListener("ended", terminar);
   audio.addEventListener("timeupdate", marco);   // respaldo si el rAF se frena
 
-  /* al volver a la pestaña, el rAF se reanuda y la letra se pone al día sola */
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && sonando){ cancelAnimationFrame(raf); raf = requestAnimationFrame(latir); }
   });
 
-  ponerVolumen(CONFIG.volumen);
+  /* la letra sincronizada vive en su propio archivo */
+  if (CANCION.letra){
+    fetch(CANCION.letra, { cache:"no-cache" })
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(t => { const arr = leerLRC(t); if (arr) ponerLetra(arr); })
+      .catch(() => {});
+  }
+
+  audio.volume = CONFIG.volumen;
   marco();
 
-  /* mandos */
   $("btnPlay").addEventListener("click", alternar);
-  $("btnAtras").addEventListener("click", () => irA(pos() - CONFIG.saltar));
-  $("btnAdelante").addEventListener("click", () => irA(pos() + CONFIG.saltar));
-  $("btnMudo").addEventListener("click", () => ponerVolumen(audio.volume > 0 ? 0 : (CONFIG.volumen || .8)));
-
   riel($("rielTiempo"), k => irA(k * duracion()));
-  riel($("rielVol"),    k => ponerVolumen(k));
 
-  /* intro */
   $("btnEmpezar").addEventListener("click", () => {
     $("intro").classList.add("ida");
-    centrar(Math.max(0, iActiva));
+    iEstrofa = -1;          // repinta ya, con el hueco medido de verdad
+    marco();
     tocar();
   });
 
-  /* teclado */
   addEventListener("keydown", e => {
-    if (e.target.tagName === "TEXTAREA") return;
     const k = e.key.toLowerCase();
-    if (sync.activo && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); marcarAhora(); return; }
     if (e.key === " " || k === "k"){ e.preventDefault(); alternar(); }
-    else if (e.key === "ArrowRight"){ e.preventDefault(); irA(pos() + 5); }
-    else if (e.key === "ArrowLeft") { e.preventDefault(); irA(pos() - 5); }
-    else if (e.key === "ArrowUp")   { e.preventDefault(); ponerVolumen(audio.volume + .08); }
-    else if (e.key === "ArrowDown") { e.preventDefault(); ponerVolumen(audio.volume - .08); }
+    else if (e.key === "ArrowRight"){ e.preventDefault(); irA(pos() + CONFIG.saltar); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); irA(pos() - CONFIG.saltar); }
     else if (k === "s"){ abrirTaller(); }
     else if (e.key === "Escape"){ abrirTaller(false); }
   });
 
   /* taller */
-  $("tArchivo").addEventListener("click", () => $("archivoAudio").click());
-  $("archivoAudio").addEventListener("change", e => tragar(e.target.files));
-  $("tPegar").addEventListener("click", alternarPegar);
-  $("tSync").addEventListener("click", () => { if (modoPegar) alternarPegar(); entrarSync(); });
-  $("tSalir").addEventListener("click", () => { pausar(); salirSync(); });
-  $("tMarcar").addEventListener("click", marcarAhora);
-  $("tDeshacer").addEventListener("click", deshacerMarca);
-  $("tCopiar").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText($("tSalida").value); estado("Arreglo copiado"); }
-    catch (_){ $("tSalida").removeAttribute("readonly"); $("tSalida").select(); estado("Selecciónalo y copia con Ctrl+C"); }
-  });
+  $("tArchivo").addEventListener("click", () => $("archivos").click());
+  $("archivos").addEventListener("change", ev => tragar(ev.target.files));
+  $("tMas").addEventListener("click", () => reagrupar(+1));
+  $("tMenos").addEventListener("click", () => reagrupar(-1));
 
-  /* arrastrar encima el audio, la letra, o los dos a la vez */
-  addEventListener("dragover", e => { e.preventDefault(); });
-  addEventListener("drop", e => { e.preventDefault(); tragar(e.dataTransfer && e.dataTransfer.files); });
+  addEventListener("dragover", ev => ev.preventDefault());
+  addEventListener("drop", ev => { ev.preventDefault(); tragar(ev.dataTransfer && ev.dataTransfer.files); });
 
   function tragar(lista){
     if (!lista) return;
     Array.prototype.forEach.call(lista, f => {
-      if (/^audio\//.test(f.type) || /\.(mp3|m4a|ogg|wav)$/i.test(f.name)) usarArchivo(f);
-      else if (/\.(lrc|txt)$/i.test(f.name)) f.text().then(usarLetraSuelta.bind(null, f.name));
+      if (/^audio\//.test(f.type) || /\.(mp3|m4a|ogg|wav)$/i.test(f.name)) usarAudio(f);
+      else if (/^image\//.test(f.type)){ ponerFoto(URL.createObjectURL(f)); estado("Foto puesta · " + f.name); }
+      else if (/\.(lrc|txt)$/i.test(f.name)) f.text().then(t => {
+        const arr = leerLRC(t);
+        if (arr && ponerLetra(arr)){ estado(LETRA.length + " versos desde " + f.name); info(); }
+        else estado("No pude leer " + f.name);
+      });
     });
   }
 
-  function usarLetraSuelta(nombre, txt){
-    const arr = leerLRC(txt);
-    if (arr && ponerLetra(arr)) estado(LETRA.length + " versos sincronizados desde " + nombre);
-    else if (usarTexto(txt))   estado(LETRA.length + " versos desde " + nombre + " · faltan los tiempos");
-    else estado("No pude leer " + nombre);
-  }
-
-  function usarArchivo(f){
+  function usarAudio(f){
     pausar();
     audio.src = URL.createObjectURL(f);
     audio.load();
     audio.addEventListener("loadedmetadata", () => {
       sinAudio = false;
       hayAudio = true;
-      $("nota").textContent = "";
+      $("aviso").textContent = "";
+      armarEstrofas();
       marco();
       estado("Audio cargado · " + f.name);
     }, { once:true });
   }
 
-  /* al cambiar el tamaño hay que recentrar la línea */
+  /* al cambiar de tamaño hay que volver a encajar la estrofa */
   let ajuste;
   addEventListener("resize", () => {
     clearTimeout(ajuste);
-    ajuste = setTimeout(() => centrar(Math.max(0, iActiva)), 120);
+    ajuste = setTimeout(() => { if (vivos.length) encajar(); }, 140);
   });
 })();
 </script>
