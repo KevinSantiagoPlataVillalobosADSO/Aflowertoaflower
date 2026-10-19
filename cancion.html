@@ -461,7 +461,7 @@
 </div>
 
 <div class="taller" id="taller">
-  <h2>Taller · solo lo ves tú</h2>
+  <h2>Taller · solo lo ves tú <button type="button" id="tCerrar" style="float:right;padding:3px 9px;font-size:13px">cerrar</button></h2>
   <div class="taller__estado" id="tEstado"></div>
   <p>Arrastra encima el audio, el <code>.lrc</code> o la foto para probarlos sin subirlos al repositorio.</p>
   <div class="taller__fila">
@@ -1066,13 +1066,60 @@ function ponerLetra(arr){
    ═══════════════════════════════════════════════════════════════ */
 function estado(txt){ $("tEstado").textContent = txt || ""; }
 
+/* ───────── diagnostico ─────────
+   Mide el ancho de una palabra en una familia concreta. Si la familia
+   no esta instalada, el navegador cae en la de respaldo y el ancho
+   sale identico: asi se sabe si existe de verdad.                  */
+const lienzoMedidor = document.createElement("canvas").getContext("2d");
+function anchoEn(familia, peso){
+  lienzoMedidor.font = peso + " 72px " + familia;
+  return lienzoMedidor.measureText("Parcera").width;
+}
+function familiaExiste(f){
+  return Math.abs(anchoEn('"' + f + '", monospace', 400) - anchoEn("monospace", 400)) > 0.5;
+}
+
+/* Recorre la pila en el mismo orden que el CSS y devuelve la primera
+   que el sistema tenga de verdad. */
+const PILA = ["Arial Black", "Avenir Next", "Segoe UI", "Roboto", "Helvetica Neue", "Arial"];
+function fuenteResuelta(){
+  for (const f of PILA) if (familiaExiste(f)) return f;
+  return "sans-serif";
+}
+
+/* Una negra autentica es bastante mas ancha que la misma familia en
+   peso normal. El engrosado que inventa el navegador apenas ensancha.
+   Arial Black es caso aparte: la familia ya ES la negra.           */
+function negraDeVerdad(f){
+  if (/black|heavy/i.test(f)) return { real:true, razon:"la familia ya es la negra" };
+  const r = anchoEn('"' + f + '"', 900) / anchoEn('"' + f + '"', 400);
+  return { real: r > 1.06, razon: "ancha " + Math.round((r - 1) * 100) + "% mas en peso 900" };
+}
+
 function info(){
   const versos  = LETRA.filter(e => e[1]).length;
   const bloques = ESTROFAS.filter(e => !e.hueco).length;
+  const f = fuenteResuelta();
+  const n = negraDeVerdad(f);
+  const q = sel => document.querySelector(sel);
+  const cabe = q("#estrofa").scrollHeight <= q("#centro").clientHeight;
+  const sinScroll = document.body.scrollHeight <= document.body.clientHeight;
+  const si = v => v ? "✓" : "✗";
+
   $("tInfo").innerHTML =
-    versos + " versos en " + bloques + " estrofas · corte en " +
-    CONFIG.corte.toFixed(1) + " s, máximo " + CONFIG.maxVersos + " versos.<br>" +
-    "Si la letra va desfasada, ponle <code>[offset:-500]</code> al principio del .lrc.";
+    "<b>Letra</b><br>" +
+    versos + " versos en " + bloques + " estrofas · corte " +
+    CONFIG.corte.toFixed(1) + " s, máximo " + CONFIG.maxVersos + ".<br>" +
+    "Si va desfasada: <code>[offset:-500]</code> al principio del .lrc.<br><br>" +
+
+    "<b>Esta pantalla</b><br>" +
+    "Ventana " + innerWidth + "×" + innerHeight +
+    " · " + (devicePixelRatio || 1) + "x<br>" +
+    "Fuente de la letra: <code>" + f + "</code><br>" +
+    si(n.real) + " negra auténtica — " + n.razon + "<br>" +
+    si(cabe) + " la estrofa cabe · " + si(sinScroll) + " sin desplazamiento<br>" +
+    si(!!q(".instax__ventana img")) + " foto cargada · " +
+    si(hayAudio) + " audio (" + reloj(duracion()) + ")";
 }
 
 function abrirTaller(v){
@@ -1168,9 +1215,25 @@ function reagrupar(delta){
     else if (e.key === "Escape"){ abrirTaller(false); }
   });
 
+  /* En el móvil no hay tecla S. Tres toques seguidos sobre la franja
+     escrita de la copia abren el taller: es un gesto que nadie hace
+     sin querer, y deja comprobar la página en un teléfono prestado. */
+  (function tresToques(){
+    const zona = document.querySelector(".instax__franja");
+    if (!zona) return;
+    zona.style.pointerEvents = "auto";
+    let n = 0, espera = 0;          // no llamarlo reloj: ya existe reloj()
+    zona.addEventListener("pointerup", () => {
+      clearTimeout(espera);
+      if (++n >= 3){ n = 0; abrirTaller(true); return; }
+      espera = setTimeout(() => { n = 0; }, 600);
+    });
+  })();
+
   /* taller */
   $("tArchivo").addEventListener("click", () => $("archivos").click());
   $("archivos").addEventListener("change", ev => tragar(ev.target.files));
+  $("tCerrar").addEventListener("click", () => abrirTaller(false));
   $("tMas").addEventListener("click", () => reagrupar(+1));
   $("tMenos").addEventListener("click", () => reagrupar(-1));
 
