@@ -61,9 +61,9 @@
   .tarjeta{
     position:relative;z-index:2;
     width:min(1060px,100%);
-    height:min(640px,100%);
+    height:min(720px,100%);
     display:grid;
-    grid-template-columns:minmax(0,34%) minmax(0,1fr);
+    grid-template-columns:minmax(0,44%) minmax(0,1fr);
     grid-template-rows:minmax(0,1fr) auto;
     grid-template-areas:"foto letra" "pie pie";
     gap:clamp(18px,3vw,46px);
@@ -78,22 +78,32 @@
   /* ───── la foto ───── */
   .marco{
     grid-area:foto;
-    align-self:center;
+    justify-self:center;align-self:center;
     position:relative;
-    width:100%;
-    aspect-ratio:4/5;
-    max-height:100%;
-    border-radius:clamp(10px,1.3vw,16px);
+    height:100%;
+    aspect-ratio:3/4;              /* la proporción de la foto, sin recortarla */
+    max-width:100%;
+    border-radius:clamp(10px,1.3vw,18px);
     overflow:hidden;
     background:linear-gradient(150deg,#3a0f22,#1b0810);
-    box-shadow:0 18px 44px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08) inset;
+    box-shadow:
+      0 30px 70px rgba(0,0,0,.6),
+      0 0 0 1px rgba(255,255,255,.12) inset,
+      0 0 0 7px rgba(255,255,255,.03);
   }
-  .marco img{display:block;width:100%;height:100%;object-fit:cover}
-  .marco svg{display:block;width:100%;height:100%}
-  /* un velo tenue para que la foto no compita con la letra */
+  .marco img,.marco svg{
+    display:block;width:100%;height:100%;object-fit:cover;
+    transform:scale(1);
+    transition:transform 1.4s ease;
+  }
+  /* mientras suena, la foto respira muy despacio */
+  body.sonando .marco img{animation:respirar 46s ease-in-out infinite alternate}
+  @keyframes respirar{from{transform:scale(1)} to{transform:scale(1.07)}}
+
+  /* solo una viñeta en los bordes, para que no flote recortada */
   .marco::after{
     content:'';position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(170deg,rgba(90,15,42,.16),rgba(10,4,7,.34));
+    background:radial-gradient(130% 100% at 50% 40%, transparent 54%, rgba(8,3,6,.42) 100%);
   }
 
   /* ───── la estrofa ───── */
@@ -101,8 +111,29 @@
     grid-area:letra;
     position:relative;
     display:flex;
-    align-items:center;
+    flex-direction:column;
     min-width:0;min-height:0;
+  }
+
+  /* la cabecera hace de portadilla: dice qué es esto sin estorbar */
+  .cabecera{flex:0 0 auto;padding-bottom:clamp(14px,2vw,26px)}
+  .cabecera__ojo{
+    font:400 10px/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;
+    color:var(--tenue);margin-bottom:10px;
+  }
+  .cabecera__titulo{font:400 clamp(21px,2.2vw,28px)/1.1 var(--serif);letter-spacing:.01em}
+  .cabecera__artista{
+    font:400 10px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;
+    color:var(--medio);margin-top:8px;
+  }
+
+  .centro{flex:1;display:flex;align-items:center;min-height:0}
+
+  .firma{
+    flex:0 0 auto;
+    padding-top:clamp(14px,2vw,26px);
+    font:italic 400 clamp(12px,1.2vw,14px)/1.5 var(--serif);
+    color:var(--tenue);
   }
   .estrofa{
     width:100%;
@@ -112,13 +143,13 @@
 
   .verso{
     font-family:var(--sans);
-    font-weight:900;
+    font-weight:700;
     font-size:calc(var(--base,40px) * var(--w,1));
-    line-height:.98;
-    letter-spacing:-.025em;
+    line-height:1.06;
+    letter-spacing:-.012em;
     white-space:pre-wrap;
     overflow-wrap:break-word;
-    margin-bottom:.04em;
+    margin-bottom:.08em;
   }
   .verso:last-child{margin-bottom:0}
 
@@ -171,19 +202,6 @@
   @keyframes latido{
     0%,100%{opacity:1;transform:scale(1)}
     50%    {opacity:.5;transform:scale(.93)}
-  }
-
-  .rotulo{min-width:0;flex:0 0 auto;max-width:34%}
-  .rotulo b{
-    display:block;
-    font:400 clamp(14px,1.5vw,17px)/1.25 var(--serif);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .rotulo span{
-    display:block;
-    font:400 11px/1.5 var(--sans);
-    letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
 
   .riel{position:relative;flex:1;height:22px;cursor:pointer;touch-action:none;min-width:0}
@@ -274,16 +292,20 @@
     }
     .marco{
       justify-self:center;
-      width:auto;height:min(32dvh,300px);
-      aspect-ratio:4/5;
+      height:min(40dvh,360px);
+      aspect-ratio:3/4;
     }
-    .rotulo{max-width:40%}
+    .cabecera{padding-bottom:14px}
+    .cabecera__ojo{margin-bottom:7px}
+    .cabecera__artista{margin-top:5px}
+    .firma{padding-top:12px}
     .reloj{display:none}
   }
 
   /* pantallas muy bajas: la foto estorba más de lo que aporta */
-  @media (max-height:520px) and (max-width:820px){
-    .marco{height:20dvh}
+  @media (max-height:560px) and (max-width:820px){
+    .marco{height:26dvh}
+    .cabecera__artista,.firma{display:none}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -300,18 +322,23 @@
   <div class="marco" id="marco" aria-hidden="true"></div>
 
   <div class="lienzo">
-    <div class="estrofa" id="estrofa"></div>
+    <header class="cabecera">
+      <p class="cabecera__ojo"     id="rOjo"></p>
+      <h1 class="cabecera__titulo" id="rTitulo"></h1>
+      <p class="cabecera__artista" id="rArtista"></p>
+    </header>
+
+    <div class="centro" id="centro">
+      <div class="estrofa" id="estrofa"></div>
+    </div>
+
+    <p class="firma" id="rFirma"></p>
   </div>
 
   <div class="pie">
     <button class="play" id="btnPlay" type="button" aria-label="Reproducir">
       <svg id="icoPlay" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
     </button>
-
-    <div class="rotulo">
-      <b id="rTitulo"></b>
-      <span id="rArtista"></span>
-    </div>
 
     <div class="riel" id="rielTiempo" role="slider" aria-label="Posición de la canción" tabindex="0">
       <div class="riel__via"></div>
@@ -359,8 +386,12 @@ const CANCION = {
   artista: "Penyair",
   ojo:     "tu canción",
 
-  /* La foto de los dos. Si no está, en su sitio va una flor dibujada. */
-  foto:    "assets/foto.jpg",
+  /* La foto de los dos: es la portada de la tarjeta. Si no está, en
+     su sitio va una flor dibujada.                                */
+  foto:    "assets/imagen.jpg",
+
+  /* Va pequeñita abajo, bajo la letra. Déjala en "" para quitarla. */
+  firma:   "para Sofi",
 
   /* Audio y letra sincronizada, servidos estáticos por GitHub Pages. */
   audio:   "assets/archivomulti.mp3",
@@ -377,7 +408,7 @@ const CANCION = {
 const CONFIG = {
   volumen:   0.85,
   repetir:   false,
-  mayusculas:true,   // el aire de las historias viene de las mayúsculas
+  mayusculas:false,  // en mayúsculas grita; el .lrc ya trae buena caja
   saltar:    10,     // segundos de las flechas
 
   /* Cómo se parten los versos en estrofas. Un silencio más largo que
@@ -402,10 +433,17 @@ const CONFIG = {
   /* El tamaño de cada trozo es `fuerza / letras^contraste`, acotado.
      Sube `contraste` para que la diferencia entre el trozo corto y el
      largo sea más bestia; bájalo para igualarlos.                   */
-  fuerza:    4.5,
-  contraste: 0.72,
-  pesoMin:   0.40,
-  pesoMax:   2.2
+  fuerza:    4.2,
+  contraste: 0.58,
+  pesoMin:   0.55,
+  pesoMax:   1.65,
+
+  /* Tope duro del trozo más grande, en píxeles: una fracción del ancho
+     disponible, acotada. Es lo que impide que la letra se desmadre en
+     pantallas anchas y lo que la mantiene por debajo de la foto.     */
+  cuerpo:    0.15,
+  cuerpoMin: 40,
+  cuerpoMax: 76
 };
 
 /* Letra de reserva. Solo se ve si el .lrc no carga: por ejemplo al
@@ -427,7 +465,7 @@ const LETRA = [
 const $ = id => document.getElementById(id);
 const audio   = $("audio");
 const estrofa = $("estrofa");
-const lienzo  = estrofa.parentElement;
+const centro  = $("centro");
 
 let hayAudio = false;   // el archivo suena y manda su reloj
 let sinAudio = false;   // ya sabemos que no hay: va el reloj interno
@@ -636,6 +674,7 @@ function pintarEstrofa(e){
     }
   } else {
     const escala = escalaDe(e.versos);
+    var mayorPeso = 0;
     e.versos.forEach((v, vi) => {
       const texto  = CONFIG.mayusculas ? v.txt.toLocaleUpperCase("es") : v.txt;
       const trozos = CONFIG.trocear
@@ -643,9 +682,11 @@ function pintarEstrofa(e){
         : [texto];
       const letras = [];
       trozos.forEach(tr => {
+        const w = peso(tr.length);
+        if (w > mayorPeso) mayorPeso = w;
         const p = document.createElement("p");
         p.className = "verso";
-        p.style.setProperty("--w", peso(tr.length));
+        p.style.setProperty("--w", w);
         for (const ch of tr){
           const s = document.createElement("span");
           s.className = "l";
@@ -657,7 +698,7 @@ function pintarEstrofa(e){
       });
       vivos.push({ ini:v.ini, fin:v.fin, letras, n:0 });
     });
-    encajar();
+    encajar(mayorPeso);
   }
 
   void estrofa.offsetWidth;            // reflujo forzado antes de aparecer
@@ -666,10 +707,16 @@ function pintarEstrofa(e){
 
 /* Busca por bisección el cuerpo de letra más grande con el que la
    estrofa entera sigue cabiendo en su hueco.                      */
-function encajar(){
-  const alto = lienzo.clientHeight;
+function encajar(mayorPeso){
+  const alto = centro.clientHeight;
   if (!alto) return;
-  let bajo = 11, cima = 132;
+
+  /* Dos topes a la vez: que la estrofa quepa de alto, y que el trozo
+     más grande no pase del cuerpo máximo. Manda el más estricto.   */
+  const tope = Math.min(CONFIG.cuerpoMax,
+               Math.max(CONFIG.cuerpoMin, centro.clientWidth * CONFIG.cuerpo));
+  let bajo = 10, cima = tope / Math.max(0.2, mayorPeso || 1);
+
   for (let i = 0; i < 9; i++){
     const med = (bajo + cima) / 2;
     estrofa.style.setProperty("--base", med.toFixed(2) + "px");
@@ -784,6 +831,7 @@ function tocar(){
 
 function arrancar(){
   sonando = true;
+  document.body.classList.add("sonando");
   $("icoPlay").innerHTML = '<path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>';
   $("btnPlay").setAttribute("aria-label", "Pausar");
   if (!hayAudio) t0Virtual = performance.now() - posVirtual * 1000;
@@ -794,6 +842,7 @@ function pausar(){
   if (!sonando) return;
   posVirtual = pos();
   sonando = false;
+  document.body.classList.remove("sonando");
   $("icoPlay").innerHTML = '<path d="M7 4.5v15l13-7.5z"/>';
   $("btnPlay").setAttribute("aria-label", "Reproducir");
   if (hayAudio) audio.pause();
@@ -890,6 +939,8 @@ function reagrupar(delta){
 (function inicio(){
   $("rTitulo").textContent  = CANCION.titulo;
   $("rArtista").textContent = CANCION.artista;
+  $("rOjo").textContent     = CANCION.ojo;
+  $("rFirma").textContent   = CANCION.firma || "";
   $("iOjo").textContent     = CANCION.ojo;
   $("iTitulo").textContent  = CANCION.titulo;
   $("iArtista").textContent = CANCION.artista;
@@ -995,7 +1046,10 @@ function reagrupar(delta){
   let ajuste;
   addEventListener("resize", () => {
     clearTimeout(ajuste);
-    ajuste = setTimeout(() => { if (vivos.length) encajar(); }, 140);
+    /* Repintar a secas dejaría la estrofa en blanco: nace con todas las
+       letras ocultas y, en pausa, no hay fotograma que las revele.
+       Pasando por marco() se repinta y se revela de una.              */
+    ajuste = setTimeout(() => { iEstrofa = -1; marco(); }, 140);
   });
 })();
 </script>
