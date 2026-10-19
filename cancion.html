@@ -219,6 +219,11 @@
     box-shadow:0 6px 22px rgba(0,0,0,.45);
   }
   .btn--play:hover{background:#fff;transform:scale(1.05)}
+  body.cargando .btn--play{animation:latido 1.1s ease-in-out infinite}
+  @keyframes latido{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%    {opacity:.55;transform:scale(.94)}
+  }
   .btn--play svg{width:24px;height:24px}
 
   .volumen{position:absolute;right:0;display:flex;align-items:center;gap:8px;width:142px}
@@ -316,7 +321,7 @@
     .linea{font-size:clamp(20px,5.4vw,27px);padding:.42em 0}
     .pista{padding:46% 0 62%}
     .volumen{display:none}
-    .nota{display:none}
+    .nota{font-size:10px;letter-spacing:.08em}
     .taller{right:10px;left:10px;width:auto;bottom:calc(var(--barra) + 10px)}
   }
 
@@ -420,7 +425,7 @@
 </div>
 
 <input type="file" id="archivoAudio" accept="audio/*" hidden>
-<audio id="audio" preload="auto"></audio>
+<audio id="audio" preload="metadata"></audio>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
@@ -433,8 +438,20 @@ const CANCION = {
   album:   "Jardín · colección",
   ojo:     "una canción para ti",
 
-  /* Archivo de audio junto a este .html. Si no existe, la página
-     sigue funcionando: la letra corre con un reloj interno.      */
+  /* Archivo de audio, al lado de este .html y subido al repo.
+     GitHub Pages lo sirve como cualquier otro archivo estático:
+     no hace falta servidor ni base de datos.
+
+       · formato mp3 (es el único que tocan todos los navegadores,
+         iPhone incluido); nombre sin tildes ni espacios
+       · con 128 kbps una canción de 3 min pesa unos 3 MB, que es
+         nada para el límite de 1 GB del sitio
+       · NO lo metas en Git LFS: Pages serviría el archivo de texto
+         que LFS deja en su lugar y no sonaría nada
+       · es un repo público, así que el mp3 queda descargable
+
+     Si el archivo no está, la página no se rompe: la letra corre
+     con un reloj interno y la barra avisa "solo letra".          */
   audio:   "cancion.mp3",
 
   /* Duración en segundos. Solo se usa cuando no hay audio;
@@ -506,7 +523,10 @@ const audio = $("audio");
 const pista = $("pista"), caja = $("caja");
 const movil = matchMedia("(max-width:880px)").matches;
 
-let hayAudio   = false;   // el archivo cargó de verdad
+let hayAudio   = false;   // el archivo suena y manda su reloj
+let sinAudio   = false;   // ya sabemos que no hay audio: va el reloj interno
+let probando   = false;   // play() lanzado, esperando a ver si suena
+let intento    = 0;       // para descartar intentos que el usuario canceló
 let sonando    = false;
 let posVirtual = 0;       // reloj interno cuando no hay audio
 let t0Virtual  = 0;
@@ -723,18 +743,55 @@ function latir(){
   if (sonando) raf = requestAnimationFrame(latir);
 }
 
-/* ───────── mandos ───────── */
+/* ───────── mandos ─────────
+   El toque del usuario es lo que carga el audio, no solo lo que lo arranca:
+   Safari en iPhone ignora el preload y no pide un solo byte hasta que hay
+   un gesto. Por eso tocar() lanza play() primero y decide después.        */
 function tocar(){
-  if (sonando) return;
+  if (sonando || probando) return;
+
+  if (!sinAudio){
+    const mio = ++intento;
+    probando = true;
+    document.body.classList.add("cargando");
+    $("nota").textContent = "cargando";
+
+    Promise.resolve(audio.play()).then(() => {
+      if (mio !== intento) return;          // lo cancelaron mientras tanto
+      probando = false;
+      hayAudio = true;
+      document.body.classList.remove("cargando");
+      $("nota").textContent = "";
+      arrancar();
+    }).catch(() => {
+      if (mio !== intento) return;
+      probando = false;
+      document.body.classList.remove("cargando");
+      if (audio.error){                     // el archivo no está o no se decodifica
+        sinAudio = true;
+        hayAudio = false;
+        $("nota").textContent = "solo letra";
+        arrancar();                         // seguimos con el reloj interno
+      } else {                              // el navegador negó el sonido
+        $("nota").textContent = "";
+      }
+    });
+    return;
+  }
+
+  arrancar();
+}
+
+function arrancar(){
   sonando = true;
   document.body.classList.add("sonando");
   $("icoPlay").innerHTML = '<path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>';
   $("btnPlay").setAttribute("aria-label", "Pausar");
-  if (hayAudio) audio.play().catch(() => {});
-  else t0Virtual = performance.now() - posVirtual * 1000;
+  if (!hayAudio) t0Virtual = performance.now() - posVirtual * 1000;
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(latir);
 }
+
 function pausar(){
   if (!sonando) return;
   posVirtual = pos();
@@ -746,7 +803,19 @@ function pausar(){
   cancelAnimationFrame(raf);
   marco();
 }
-function alternar(){ sonando ? pausar() : tocar(); }
+
+function alternar(){
+  if (probando){                 // estaba intentando arrancar: cancelar
+    intento++;
+    probando = false;
+    audio.pause();
+    document.body.classList.remove("cargando");
+    $("nota").textContent = "";
+    return;
+  }
+  sonando ? pausar() : tocar();
+}
+
 function terminar(){
   if (CONFIG.repetir){ irA(0); return; }
   pausar();
@@ -866,22 +935,29 @@ function volcarSalida(){
   pintarLetra();
   volcarSalida();
 
-  /* audio: si el archivo no está, seguimos con reloj interno */
+  /* Audio. Es un archivo estático servido por GitHub Pages; aquí solo se
+     pide la cabecera (preload="metadata"), que es lo que da la duración.
+     El resto se descarga cuando se pulsa play.                          */
   if (CANCION.audio){
     audio.src = CANCION.audio;
-    audio.addEventListener("canplay", () => {
-      hayAudio = true;
-      $("nota").textContent = "";
-      marco();
-    }, { once:true });
+    /* Donde sí se respeta el preload (escritorio, Android) esto llega solo
+       y ya tenemos la duración real antes de pulsar nada. En iPhone no
+       llega hasta el primer toque, y tampoco pasa nada: tocar() se encarga. */
+    audio.addEventListener("loadedmetadata", () => { hayAudio = true; marco(); }, { once:true });
     audio.addEventListener("error", () => {
+      sinAudio = true;
       hayAudio = false;
       $("nota").textContent = "solo letra";
+      marco();
     });
   } else {
+    sinAudio = true;
     $("nota").textContent = "solo letra";
   }
-  audio.addEventListener("loadedmetadata", marco);
+
+  /* el archivo se va bajando mientras suena: avisa si se queda sin buffer */
+  audio.addEventListener("waiting", () => { if (hayAudio && sonando) $("nota").textContent = "cargando"; });
+  audio.addEventListener("playing", () => { $("nota").textContent = ""; });
   audio.addEventListener("ended", terminar);
   audio.addEventListener("timeupdate", marco);   // respaldo si el rAF se frena
 
@@ -950,7 +1026,8 @@ function volcarSalida(){
     pausar();
     audio.src = URL.createObjectURL(f);
     audio.load();
-    audio.addEventListener("canplay", () => {
+    audio.addEventListener("loadedmetadata", () => {
+      sinAudio = false;
       hayAudio = true;
       $("nota").textContent = "";
       marco();

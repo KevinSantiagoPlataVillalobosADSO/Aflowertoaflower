@@ -1,0 +1,7 @@
+# El audio de cancion.html se sirve como archivo estatico desde GitHub Pages.
+# Pages NO resuelve punteros de Git LFS: si un mp3 acabara en LFS, el
+# navegador recibiria un archivo de texto de 130 bytes y no sonaria nada.
+# Estas reglas lo mantienen como binario normal dentro del repo.
+*.mp3 binary -filter -diff -merge
+*.m4a binary -filter -diff -merge
+*.ogg binary -filter -diff -merge
