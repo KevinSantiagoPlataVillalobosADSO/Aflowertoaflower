@@ -430,7 +430,7 @@
   <textarea id="tSalida" spellcheck="false" readonly></textarea>
 </div>
 
-<input type="file" id="archivoAudio" accept="audio/*" hidden>
+<input type="file" id="archivoAudio" accept="audio/*,.lrc,.txt" multiple hidden>
 <audio id="audio" preload="metadata"></audio>
 
 <script>
@@ -439,10 +439,16 @@
    ═══════════════════════════════════════════════════════════════ */
 
 const CANCION = {
-  titulo:  "Mil cosas",
-  artista: "para Sofi",
+  titulo:  "Parcera",
+  artista: "Penyair",
   album:   "Jardín · colección",
-  ojo:     "una canción para ti",
+  ojo:     "tu canción",
+
+  /* Letra sincronizada en formato .lrc, al lado del audio. Si carga,
+     manda ella y el arreglo LETRA de más abajo queda solo de reserva
+     (que es lo que se ve si abres el archivo sin servidor, porque
+     entonces el navegador no deja leer archivos vecinos).           */
+  letra:   "assets/archivomulti.lrc",
 
   /* Archivo de audio, al lado de este .html y subido al repo.
      GitHub Pages lo sirve como cualquier otro archivo estático:
@@ -625,6 +631,68 @@ function dibujarCaratula(){
 }
 
 /* ───────── letra ───────── */
+
+/* Lee un .lrc: el formato estándar de letra sincronizada, con un sello
+   [mm:ss.cc] delante de cada verso. Admite varios sellos en la misma
+   línea, la variante que separa las centésimas con dos puntos, las
+   etiquetas de cabecera y el desfase global [offset:].              */
+function leerLRC(txt){
+  const sello = /\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
+  let desfase = 0;
+  const bruto = [];
+
+  txt.replace(/^﻿/, "").split(/\r?\n/).forEach(cruda => {
+    const off = cruda.match(/^\s*\[offset:\s*([+-]?\d+)\s*\]/i);
+    if (off){ desfase = parseInt(off[1], 10) / 1000; return; }
+    if (/^\s*\[[a-z]{2,}:/i.test(cruda)) return;      // [ti:] [ar:] [al:] …
+
+    sello.lastIndex = 0;
+    const tiempos = [];
+    let m;
+    while ((m = sello.exec(cruda))){
+      const mil = (m[3] || "0").padEnd(3, "0").slice(0, 3);
+      tiempos.push((+m[1]) * 60 + (+m[2]) + (+mil) / 1000);
+    }
+    if (!tiempos.length) return;
+    const texto = cruda.replace(sello, "").trim();
+    tiempos.forEach(t => bruto.push([+(t + desfase).toFixed(2), texto]));
+  });
+
+  if (!bruto.length) return null;
+  bruto.sort((a, b) => a[0] - b[0]);
+
+  /* Un verso vacío que dura un parpadeo no es un silencio: es la marca
+     que usa el formato para borrar de pantalla el verso anterior.     */
+  const fin = duracion() || CANCION.duracion || 0;
+  const letra = bruto.filter((e, i) => {
+    if (e[1]) return true;
+    const sig = i + 1 < bruto.length ? bruto[i + 1][0] : (fin || e[0] + 99);
+    return sig - e[0] >= 2.5;
+  });
+
+  /* Puntos suspensivos en la entrada y en el cierre, si hay sitio. */
+  if (letra[0][0] > 1.5) letra.unshift([0, ""]);
+  const ultimo = letra[letra.length - 1][0];
+  if (fin && fin - ultimo > 6) letra.push([+(ultimo + 4).toFixed(2), ""]);
+
+  return letra;
+}
+
+/* Cambia la letra en caliente y vuelve a pintarla. */
+function ponerLetra(arr){
+  if (!arr || !arr.length) return 0;
+  LETRA.length = 0;
+  arr.forEach(e => LETRA.push(e));
+  iActiva = -1;
+  nDichas = 0;
+  sync.n = 0;
+  sync.marcas = [];
+  pintarLetra();
+  marco();
+  volcarSalida();
+  return LETRA.length;
+}
+
 function pintarLetra(){
   pista.innerHTML = "";
   lineas = [];
@@ -875,6 +943,9 @@ let modoPegar = false;
    línea en blanco marca un tramo de solo música. Los segundos quedan
    repartidos a ojo y los afina después el sincronizado.              */
 function usarTexto(txt){
+  const conTiempos = leerLRC(txt);          // ¿pegaron un .lrc entero?
+  if (conTiempos) return ponerLetra(conTiempos);
+
   const crudas = txt.split(/\r?\n/).map(l => l.trim());
   const filas = [];
   crudas.forEach(l => {
@@ -994,6 +1065,19 @@ function volcarSalida(){
   pintarLetra();
   volcarSalida();
 
+  /* La letra sincronizada vive en su propio archivo. Si llega, sustituye
+     a la que está escrita aquí abajo. Si no (sitio abierto sin servidor,
+     archivo borrado), no pasa nada: se queda la de reserva.            */
+  if (CANCION.letra){
+    fetch(CANCION.letra, { cache: "no-cache" })
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(t => {
+        const arr = leerLRC(t);
+        if (arr) ponerLetra(arr);
+      })
+      .catch(() => {});
+  }
+
   /* Audio. Es un archivo estático servido por GitHub Pages; aquí solo se
      pide la cabecera (preload="metadata"), que es lo que da la duración.
      El resto se descarga cuando se pulsa play.                          */
@@ -1060,10 +1144,7 @@ function volcarSalida(){
 
   /* taller */
   $("tArchivo").addEventListener("click", () => $("archivoAudio").click());
-  $("archivoAudio").addEventListener("change", e => {
-    const f = e.target.files && e.target.files[0];
-    if (f) usarArchivo(f);
-  });
+  $("archivoAudio").addEventListener("change", e => tragar(e.target.files));
   $("tPegar").addEventListener("click", alternarPegar);
   $("tSync").addEventListener("click", () => { if (modoPegar) alternarPegar(); entrarSync(); });
   $("tSalir").addEventListener("click", () => { pausar(); salirSync(); });
@@ -1074,13 +1155,24 @@ function volcarSalida(){
     catch (_){ $("tSalida").removeAttribute("readonly"); $("tSalida").select(); estado("Selecciónalo y copia con Ctrl+C"); }
   });
 
-  /* arrastrar un audio sobre la página */
+  /* arrastrar encima el audio, la letra, o los dos a la vez */
   addEventListener("dragover", e => { e.preventDefault(); });
-  addEventListener("drop", e => {
-    e.preventDefault();
-    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f && /^audio\//.test(f.type)) usarArchivo(f);
-  });
+  addEventListener("drop", e => { e.preventDefault(); tragar(e.dataTransfer && e.dataTransfer.files); });
+
+  function tragar(lista){
+    if (!lista) return;
+    Array.prototype.forEach.call(lista, f => {
+      if (/^audio\//.test(f.type) || /\.(mp3|m4a|ogg|wav)$/i.test(f.name)) usarArchivo(f);
+      else if (/\.(lrc|txt)$/i.test(f.name)) f.text().then(usarLetraSuelta.bind(null, f.name));
+    });
+  }
+
+  function usarLetraSuelta(nombre, txt){
+    const arr = leerLRC(txt);
+    if (arr && ponerLetra(arr)) estado(LETRA.length + " versos sincronizados desde " + nombre);
+    else if (usarTexto(txt))   estado(LETRA.length + " versos desde " + nombre + " · faltan los tiempos");
+    else estado("No pude leer " + nombre);
+  }
 
   function usarArchivo(f){
     pausar();
