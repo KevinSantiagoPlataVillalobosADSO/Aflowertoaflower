@@ -295,6 +295,11 @@
     border:1px solid rgba(255,255,255,.12);border-radius:8px;
     padding:10px;font:400 11.5px/1.5 ui-monospace,Menlo,Consolas,monospace;
   }
+  .taller textarea:not([readonly]){
+    color:var(--texto);
+    border-color:rgba(229,139,164,.55);
+    font:400 13px/1.55 var(--sans);
+  }
   .taller__estado{font:500 12px/1.5 var(--sans);color:var(--rosa);margin-bottom:10px}
   .pendiente{outline:2px dashed rgba(229,139,164,.6);outline-offset:6px;border-radius:6px}
 
@@ -409,13 +414,14 @@
 <div class="taller" id="taller">
   <h2>Taller · solo lo ves tú</h2>
   <div class="taller__estado" id="tEstado"></div>
-  <p>Deja el audio junto a este archivo con el nombre de <code>CANCION.audio</code>, o cárgalo desde aquí para probarlo sin subirlo.</p>
+  <p>El audio sale de <code>CANCION.audio</code>. También puedes arrastrar uno encima para probarlo sin subirlo al repo.</p>
   <div class="taller__fila">
     <button type="button" id="tArchivo">Cargar audio…</button>
-    <button type="button" id="tSync">Sincronizar letra</button>
+    <button type="button" id="tPegar">Pegar letra</button>
+    <button type="button" id="tSync">Sincronizar</button>
     <button type="button" id="tCopiar">Copiar arreglo</button>
   </div>
-  <p id="tAyuda">Al sincronizar: suena la canción y marcas con <b>Enter</b> (o el botón) justo cuando entra cada línea. Al terminar, copias el arreglo y lo pegas en el bloque <code>LETRA</code>.</p>
+  <p id="tAyuda"><b>1.</b> Pegar letra: una línea por verso, línea en blanco donde solo haya música. <b>2.</b> Sincronizar: suena desde cero y marcas con <b>Enter</b> en cuanto entra cada línea. <b>3.</b> Copiar arreglo y pegarlo en el bloque <code>LETRA</code> del archivo.</p>
   <div class="taller__fila" id="tBarraSync" style="display:none">
     <button type="button" class="fuerte" id="tMarcar">Marcar línea (Enter)</button>
     <button type="button" id="tDeshacer">Deshacer</button>
@@ -452,11 +458,11 @@ const CANCION = {
 
      Si el archivo no está, la página no se rompe: la letra corre
      con un reloj interno y la barra avisa "solo letra".          */
-  audio:   "cancion.mp3",
+  audio:   "assets/archivomulti.mp3",
 
   /* Duración en segundos. Solo se usa cuando no hay audio;
      con audio real se toma la del archivo.                       */
-  duracion: 196
+  duracion: 192
 };
 
 /* La letra: [segundo en que entra, texto].
@@ -648,7 +654,7 @@ function pintarLetra(){
 
     el.addEventListener("click", () => {
       if (sync.activo) return;
-      irA(fila[0] + 0.05);
+      irA(LETRA[i][0] + 0.05);   // el tiempo vivo: el sincronizado lo cambia
     });
 
     pista.appendChild(el);
@@ -863,6 +869,59 @@ function ponerVolumen(v){
    3. TALLER — cargar audio y sincronizar (tecla S)
    ═══════════════════════════════════════════════════════════════ */
 const sync = { activo:false, n:0, marcas:[] };
+let modoPegar = false;
+
+/* Convierte texto plano en el arreglo LETRA. Una línea por verso; una
+   línea en blanco marca un tramo de solo música. Los segundos quedan
+   repartidos a ojo y los afina después el sincronizado.              */
+function usarTexto(txt){
+  const crudas = txt.split(/\r?\n/).map(l => l.trim());
+  const filas = [];
+  crudas.forEach(l => {
+    if (l === ""){
+      if (!filas.length || filas[filas.length - 1] !== "") filas.push("");  // un hueco, no cinco
+    } else filas.push(l);
+  });
+  while (filas.length && filas[filas.length - 1] === "") filas.pop();
+  if (!filas.length) return 0;
+
+  const d = duracion() || CANCION.duracion || filas.length * 5;
+  LETRA.length = 0;
+  filas.forEach((l, i) => LETRA.push([+(i * d / filas.length).toFixed(2), l]));
+
+  iActiva = -1;
+  nDichas = 0;
+  sync.n = 0;
+  sync.marcas = [];
+  pintarLetra();
+  marco();
+  volcarSalida();
+  return filas.length;
+}
+
+function alternarPegar(){
+  const ta = $("tSalida");
+  if (!modoPegar){
+    if (sync.activo){ pausar(); salirSync(); }
+    modoPegar = true;
+    ta.removeAttribute("readonly");
+    ta.value = "";
+    ta.placeholder = "Pega aqui la letra.\nUna linea por verso.\n\nUna linea en blanco donde solo haya musica.";
+    ta.focus();
+    $("tPegar").textContent = "Usar esta letra";
+    $("tPegar").classList.add("fuerte");
+    estado("Pegando letra…");
+  } else {
+    const n = usarTexto(ta.value);
+    modoPegar = false;
+    ta.setAttribute("readonly", "");
+    ta.placeholder = "";
+    $("tPegar").textContent = "Pegar letra";
+    $("tPegar").classList.remove("fuerte");
+    estado(n ? n + " líneas cargadas · ahora sincroniza los tiempos" : "No pegaste nada: la letra sigue igual");
+    if (!n) volcarSalida();
+  }
+}
 
 function estado(txt){ $("tEstado").textContent = txt || ""; }
 
@@ -1005,7 +1064,8 @@ function volcarSalida(){
     const f = e.target.files && e.target.files[0];
     if (f) usarArchivo(f);
   });
-  $("tSync").addEventListener("click", entrarSync);
+  $("tPegar").addEventListener("click", alternarPegar);
+  $("tSync").addEventListener("click", () => { if (modoPegar) alternarPegar(); entrarSync(); });
   $("tSalir").addEventListener("click", () => { pausar(); salirSync(); });
   $("tMarcar").addEventListener("click", marcarAhora);
   $("tDeshacer").addEventListener("click", deshacerMarca);
