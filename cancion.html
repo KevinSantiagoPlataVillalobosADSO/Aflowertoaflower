@@ -35,6 +35,12 @@
   body{
     height:100dvh;
     display:grid;
+    /* Fila explícita y acotada. Con la fila implícita `auto`, el
+       height:100% de la tarjeta era cíclico (dependía de la fila, que
+       dependía del contenido), el navegador lo descartaba y la tarjeta
+       pasaba a medirse por su contenido: una estrofa alta estiraba la
+       fila 1fr y empujaba los controles fuera de pantalla.          */
+    grid-template-rows:minmax(0,1fr);
     place-items:center;
     padding:clamp(12px,2.4vw,34px);
     font-family:var(--serif);
@@ -62,6 +68,7 @@
     position:relative;z-index:2;
     width:min(1060px,100%);
     height:min(720px,100%);
+    min-height:0;
     display:grid;
     grid-template-columns:minmax(0,44%) minmax(0,1fr);
     grid-template-rows:minmax(0,1fr) auto;
@@ -127,7 +134,9 @@
     color:var(--medio);margin-top:8px;
   }
 
-  .centro{flex:1;display:flex;align-items:center;min-height:0}
+  /* overflow:hidden es el cinturón: si una estrofa no cupiera, se
+     recorta antes que mover nada de su sitio.                     */
+  .centro{flex:1;display:flex;align-items:center;min-height:0;overflow:hidden}
 
   .firma{
     flex:0 0 auto;
