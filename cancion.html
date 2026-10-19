@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mil cosas</title>
+<style>
+  /* ═════════════════════════════════════════════
+     TOKENS
+     ═════════════════════════════════════════════ */
+  :root{
+    --fondo-1:#1d0a13;
+    --fondo-2:#110609;
+    --fondo-3:#050305;
+
+    --vino:#5b0f2a;
+    --vino-2:#8e1b3f;
+    --rosa:#e58ba4;
+    --rosa-2:#f6c3cf;
+
+    --texto:#f7eef0;
+    --medio:rgba(247,238,240,.60);
+    --tenue:rgba(247,238,240,.30);
+    --mudo:rgba(247,238,240,.20);
+
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+
+    --barra:104px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{height:100%}
+
+  body{
+    height:100dvh;
+    font-family:var(--serif);
+    color:var(--texto);
+    background:linear-gradient(172deg,var(--fondo-1) 0%,var(--fondo-2) 52%,var(--fondo-3) 100%);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ═════════════════════════════════════════════
+     AMBIENTE — manchas de color que respiran
+     ═════════════════════════════════════════════ */
+  .ambiente{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .mancha{
+    position:absolute;border-radius:50%;
+    filter:blur(90px);opacity:.42;
+    will-change:transform;
+  }
+  .m1{width:52vw;height:52vw;left:-12vw;top:-14vw;background:var(--vino-2);animation:vagar 26s ease-in-out infinite}
+  .m2{width:44vw;height:44vw;right:-10vw;top:18vh;background:#3c0f3a;animation:vagar 34s ease-in-out infinite reverse}
+  .m3{width:38vw;height:38vw;left:28vw;bottom:-16vw;background:#7a2235;opacity:.3;animation:vagar 42s ease-in-out infinite}
+  @keyframes vagar{
+    0%,100%{transform:translate3d(0,0,0) scale(1)}
+    50%    {transform:translate3d(4vw,-5vh,0) scale(1.12)}
+  }
+
+  /* ═════════════════════════════════════════════
+     ESTRUCTURA
+     ═════════════════════════════════════════════ */
+  .reproductor{
+    position:relative;z-index:2;
+    flex:1;min-height:0;
+    display:grid;
+    grid-template-columns:minmax(260px,34%) 1fr;
+    gap:clamp(20px,4vw,64px);
+    padding:clamp(20px,3.4vw,52px) clamp(18px,4vw,60px) 0;
+    align-items:center;
+  }
+
+  /* ───── Carátula y disco ───── */
+  .arte{display:flex;flex-direction:column;gap:24px;min-width:0}
+  .arte__marco{position:relative;width:100%;max-width:340px;aspect-ratio:1}
+
+  .disco{
+    position:absolute;top:50%;right:-26%;
+    width:88%;aspect-ratio:1;border-radius:50%;
+    transform:translateY(-50%);
+    background:
+      repeating-radial-gradient(circle at 50% 50%,
+        rgba(255,255,255,.045) 0 1px, transparent 1px 5px),
+      radial-gradient(circle at 36% 30%, rgba(255,255,255,.10) 0%, transparent 46%),
+      radial-gradient(circle at 50% 50%, #2b0e19 0 17%, #15070d 17.5% 100%);
+    box-shadow:0 24px 60px rgba(0,0,0,.62);
+    animation:girar 8s linear infinite;
+    animation-play-state:paused;
+  }
+  .disco::before{
+    content:'';position:absolute;inset:38%;border-radius:50%;
+    background:radial-gradient(circle at 40% 34%,var(--rosa-2),var(--vino) 78%);
+  }
+  .disco::after{
+    content:'';position:absolute;inset:48.4%;border-radius:50%;
+    background:var(--fondo-3);
+  }
+  body.sonando .disco{animation-play-state:running}
+  @keyframes girar{to{transform:translateY(-50%) rotate(360deg)}}
+
+  .caratula{
+    position:absolute;inset:0;
+    border-radius:10px;overflow:hidden;
+    background:linear-gradient(150deg,#45102a 0%,#2a0a18 56%,#190610 100%);
+    box-shadow:0 26px 64px rgba(0,0,0,.56), 0 0 0 1px rgba(255,255,255,.06) inset;
+  }
+  .caratula svg{display:block;width:100%;height:100%}
+
+  .rotulo{max-width:340px}
+  .rotulo__album{
+    font:400 11px/1 var(--sans);letter-spacing:.24em;text-transform:uppercase;
+    color:var(--tenue);margin-bottom:12px;
+  }
+  .rotulo__titulo{font:400 clamp(26px,3.1vw,38px)/1.1 var(--serif);letter-spacing:.01em}
+  .rotulo__artista{font:400 15px/1.5 var(--sans);color:var(--medio);margin-top:6px}
+
+  /* ───── Letra ───── */
+  .letra{
+    position:relative;height:100%;min-height:0;overflow:hidden;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 76%,transparent 99%);
+            mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 76%,transparent 99%);
+  }
+  .pista{
+    position:absolute;left:0;right:0;top:0;
+    padding:42% 0 58%;
+    transform:translate3d(0,var(--y,0px),0);
+    transition:transform .62s cubic-bezier(.22,.61,.36,1);
+    will-change:transform;
+  }
+
+  .linea{
+    font:700 clamp(19px,2.25vw,29px)/1.34 var(--sans);
+    letter-spacing:-.012em;
+    color:var(--mudo);
+    padding:.44em 0;
+    cursor:pointer;
+    transition:color .4s ease, opacity .4s ease;
+  }
+  .linea:hover{color:var(--tenue)}
+  .linea.pasada{color:rgba(247,238,240,.26)}
+  .linea.activa{color:var(--texto);cursor:default}
+  .linea.activa:hover{color:var(--texto)}
+
+  /* palabra por palabra: en la línea activa se van encendiendo */
+  .linea .p{transition:color .22s ease, opacity .22s ease}
+  .linea.activa .p{color:rgba(247,238,240,.34)}
+  .linea.activa .p.dicha{color:var(--texto)}
+
+  /* tramo sin letra */
+  .linea--hueco{display:flex;gap:9px;align-items:center;padding:.9em 0;cursor:pointer}
+  .linea--hueco i{
+    width:9px;height:9px;border-radius:50%;
+    background:currentColor;opacity:.5;
+  }
+  .linea--hueco.activa i{animation:pulso 1.5s ease-in-out infinite}
+  .linea--hueco.activa i:nth-child(2){animation-delay:.22s}
+  .linea--hueco.activa i:nth-child(3){animation-delay:.44s}
+  @keyframes pulso{
+    0%,100%{opacity:.26;transform:scale(.82)}
+    45%    {opacity:1;transform:scale(1.18)}
+  }
+
+  /* ═════════════════════════════════════════════
+     BARRA DE REPRODUCCIÓN
+     ═════════════════════════════════════════════ */
+  .barra{
+    position:relative;z-index:3;
+    height:var(--barra);flex:0 0 auto;
+    padding:0 clamp(18px,4vw,60px) env(safe-area-inset-bottom);
+    display:flex;flex-direction:column;justify-content:center;gap:12px;
+    border-top:1px solid rgba(255,255,255,.07);
+    background:linear-gradient(to top,rgba(5,3,5,.86),rgba(5,3,5,.18));
+  }
+
+  .tiempos{display:flex;align-items:center;gap:14px}
+  .reloj{
+    font:400 12px/1 var(--sans);color:var(--tenue);
+    font-variant-numeric:tabular-nums;min-width:38px;
+  }
+  .reloj--fin{text-align:right}
+
+  .riel{position:relative;flex:1;height:20px;cursor:pointer;touch-action:none}
+  .riel__via{
+    position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;
+    border-radius:2px;background:rgba(255,255,255,.14);
+  }
+  .riel__lleno{
+    position:absolute;left:0;top:50%;height:4px;margin-top:-2px;width:0;
+    border-radius:2px;background:linear-gradient(90deg,var(--vino-2),var(--rosa));
+  }
+  .riel__perilla{
+    position:absolute;top:50%;left:0;width:12px;height:12px;margin:-6px 0 0 -6px;
+    border-radius:50%;background:var(--texto);
+    opacity:0;transform:scale(.6);transition:opacity .2s,transform .2s;
+    box-shadow:0 2px 8px rgba(0,0,0,.5);
+  }
+  .riel:hover .riel__perilla,.riel.activa .riel__perilla{opacity:1;transform:scale(1)}
+
+  .mandos{display:flex;align-items:center;justify-content:center;gap:clamp(14px,2.4vw,26px);position:relative}
+
+  .btn{
+    display:grid;place-items:center;
+    width:40px;height:40px;border:0;border-radius:50%;
+    background:transparent;color:var(--medio);cursor:pointer;
+    transition:color .2s,transform .14s;
+  }
+  .btn:hover{color:var(--texto)}
+  .btn:active{transform:scale(.9)}
+  .btn svg{width:21px;height:21px;fill:currentColor}
+
+  .btn--play{
+    width:54px;height:54px;
+    background:var(--texto);color:#17070e;
+    box-shadow:0 6px 22px rgba(0,0,0,.45);
+  }
+  .btn--play:hover{background:#fff;transform:scale(1.05)}
+  .btn--play svg{width:24px;height:24px}
+
+  .volumen{position:absolute;right:0;display:flex;align-items:center;gap:8px;width:142px}
+  .volumen .riel{height:18px}
+  .volumen .riel__lleno{background:rgba(247,238,240,.78)}
+
+  .nota{
+    position:absolute;left:0;
+    font:400 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--tenue);
+  }
+
+  /* ═════════════════════════════════════════════
+     INTRO
+     ═════════════════════════════════════════════ */
+  .intro{
+    position:fixed;inset:0;z-index:40;
+    display:grid;place-content:center;justify-items:center;gap:22px;
+    text-align:center;padding:30px;
+    background:linear-gradient(172deg,var(--fondo-1) 0%,var(--fondo-2) 54%,var(--fondo-3) 100%);
+    transition:opacity .9s ease, visibility .9s;
+  }
+  .intro.ida{opacity:0;visibility:hidden;pointer-events:none}
+  .intro__ojo{
+    font:400 11px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:var(--tenue);
+  }
+  .intro__titulo{font:400 clamp(34px,7vw,64px)/1.06 var(--serif)}
+  .intro__artista{font:400 15px/1.5 var(--sans);color:var(--medio);margin-top:-10px}
+  .intro__play{
+    margin-top:14px;
+    display:inline-flex;align-items:center;gap:11px;
+    padding:14px 30px 14px 24px;border:0;border-radius:999px;
+    background:var(--texto);color:#17070e;cursor:pointer;
+    font:600 14px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+    box-shadow:0 10px 34px rgba(0,0,0,.5);
+    transition:transform .16s;
+  }
+  .intro__play:hover{transform:translateY(-2px) scale(1.03)}
+  .intro__play svg{width:17px;height:17px;fill:currentColor}
+
+  /* ═════════════════════════════════════════════
+     TALLER — se abre con la tecla S (solo para ti)
+     ═════════════════════════════════════════════ */
+  .taller{
+    position:fixed;right:16px;bottom:calc(var(--barra) + 16px);z-index:50;
+    width:min(400px,calc(100vw - 32px));
+    max-height:70vh;overflow:auto;
+    padding:18px;border-radius:14px;
+    background:rgba(16,7,12,.96);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 24px 60px rgba(0,0,0,.6);
+    font-family:var(--sans);
+    display:none;
+  }
+  .taller.abierto{display:block}
+  .taller h2{font:600 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--tenue);margin-bottom:14px}
+  .taller p{font:400 12.5px/1.6 var(--sans);color:var(--medio);margin-bottom:12px}
+  .taller__fila{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .taller button{
+    padding:9px 14px;border:1px solid rgba(255,255,255,.18);border-radius:8px;
+    background:rgba(255,255,255,.05);color:var(--texto);cursor:pointer;
+    font:500 12.5px/1 var(--sans);
+  }
+  .taller button:hover{background:rgba(255,255,255,.12)}
+  .taller button.fuerte{background:var(--rosa);color:#17070e;border-color:transparent}
+  .taller textarea{
+    width:100%;height:150px;resize:vertical;
+    background:#0a0407;color:var(--medio);
+    border:1px solid rgba(255,255,255,.12);border-radius:8px;
+    padding:10px;font:400 11.5px/1.5 ui-monospace,Menlo,Consolas,monospace;
+  }
+  .taller__estado{font:500 12px/1.5 var(--sans);color:var(--rosa);margin-bottom:10px}
+  .pendiente{outline:2px dashed rgba(229,139,164,.6);outline-offset:6px;border-radius:6px}
+
+  /* ═════════════════════════════════════════════
+     MÓVIL — mismo diseño, apilado
+     ═════════════════════════════════════════════ */
+  @media (max-width:880px){
+    :root{--barra:96px}
+    .reproductor{
+      grid-template-columns:1fr;
+      grid-template-rows:auto 1fr;
+      gap:16px;
+      padding:calc(14px + env(safe-area-inset-top)) 20px 0;
+      align-items:stretch;
+    }
+    .arte{flex-direction:row;align-items:center;gap:14px}
+    .arte__marco{width:62px;height:62px;flex:0 0 62px;aspect-ratio:auto}
+    .disco{display:none}
+    .caratula{border-radius:7px;box-shadow:0 8px 22px rgba(0,0,0,.5)}
+    .rotulo{min-width:0;flex:1}
+    .rotulo__album{display:none}
+    .rotulo__titulo{font-size:21px}
+    .rotulo__artista{font-size:13px;margin-top:2px}
+    .linea{font-size:clamp(20px,5.4vw,27px);padding:.42em 0}
+    .pista{padding:46% 0 62%}
+    .volumen{display:none}
+    .nota{display:none}
+    .taller{right:10px;left:10px;width:auto;bottom:calc(var(--barra) + 10px)}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .disco,.mancha,.linea--hueco.activa i{animation:none}
+    .pista{transition-duration:.2s}
+  }
+</style>
+</head>
+<body>
+
+<div class="ambiente" aria-hidden="true">
+  <span class="mancha m1"></span>
+  <span class="mancha m2"></span>
+  <span class="mancha m3"></span>
+</div>
+
+<main class="reproductor">
+  <section class="arte">
+    <div class="arte__marco">
+      <div class="disco" aria-hidden="true"></div>
+      <div class="caratula" id="caratula" aria-hidden="true"></div>
+    </div>
+    <div class="rotulo">
+      <p class="rotulo__album" id="rAlbum"></p>
+      <h1 class="rotulo__titulo" id="rTitulo"></h1>
+      <p class="rotulo__artista" id="rArtista"></p>
+    </div>
+  </section>
+
+  <section class="letra" id="caja">
+    <div class="pista" id="pista"></div>
+  </section>
+</main>
+
+<footer class="barra">
+  <div class="tiempos">
+    <span class="reloj" id="relojIni">0:00</span>
+    <div class="riel" id="rielTiempo" role="slider" aria-label="Posición de la canción" tabindex="0">
+      <div class="riel__via"></div>
+      <div class="riel__lleno" id="llenoTiempo"></div>
+      <div class="riel__perilla" id="perillaTiempo"></div>
+    </div>
+    <span class="reloj reloj--fin" id="relojFin">0:00</span>
+  </div>
+
+  <div class="mandos">
+    <span class="nota" id="nota"></span>
+
+    <button class="btn" id="btnAtras" type="button" aria-label="Retroceder diez segundos">
+      <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5.5 5.5 0 1 1-5.5 5.5H4.5A7.5 7.5 0 1 0 12 5z"/><text x="12" y="16.1" font-size="8.4" font-weight="700" text-anchor="middle" fill="currentColor" font-family="sans-serif">10</text></svg>
+    </button>
+
+    <button class="btn btn--play" id="btnPlay" type="button" aria-label="Reproducir">
+      <svg id="icoPlay" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+    </button>
+
+    <button class="btn" id="btnAdelante" type="button" aria-label="Avanzar diez segundos">
+      <svg viewBox="0 0 24 24"><path d="M12 5V2l5 4-5 4V7a5.5 5.5 0 1 0 5.5 5.5h2A7.5 7.5 0 1 1 12 5z"/><text x="12" y="16.1" font-size="8.4" font-weight="700" text-anchor="middle" fill="currentColor" font-family="sans-serif">10</text></svg>
+    </button>
+
+    <div class="volumen">
+      <button class="btn" id="btnMudo" type="button" aria-label="Silenciar">
+        <svg id="icoVol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+      </button>
+      <div class="riel" id="rielVol" role="slider" aria-label="Volumen" tabindex="0">
+        <div class="riel__via"></div>
+        <div class="riel__lleno" id="llenoVol"></div>
+        <div class="riel__perilla" id="perillaVol"></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="intro" id="intro">
+  <p class="intro__ojo" id="iOjo"></p>
+  <h1 class="intro__titulo" id="iTitulo"></h1>
+  <p class="intro__artista" id="iArtista"></p>
+  <button class="intro__play" id="btnEmpezar" type="button">
+    <svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+    escuchar
+  </button>
+</div>
+
+<div class="taller" id="taller">
+  <h2>Taller · solo lo ves tú</h2>
+  <div class="taller__estado" id="tEstado"></div>
+  <p>Deja el audio junto a este archivo con el nombre de <code>CANCION.audio</code>, o cárgalo desde aquí para probarlo sin subirlo.</p>
+  <div class="taller__fila">
+    <button type="button" id="tArchivo">Cargar audio…</button>
+    <button type="button" id="tSync">Sincronizar letra</button>
+    <button type="button" id="tCopiar">Copiar arreglo</button>
+  </div>
+  <p id="tAyuda">Al sincronizar: suena la canción y marcas con <b>Enter</b> (o el botón) justo cuando entra cada línea. Al terminar, copias el arreglo y lo pegas en el bloque <code>LETRA</code>.</p>
+  <div class="taller__fila" id="tBarraSync" style="display:none">
+    <button type="button" class="fuerte" id="tMarcar">Marcar línea (Enter)</button>
+    <button type="button" id="tDeshacer">Deshacer</button>
+    <button type="button" id="tSalir">Terminar</button>
+  </div>
+  <textarea id="tSalida" spellcheck="false" readonly></textarea>
+</div>
+
+<input type="file" id="archivoAudio" accept="audio/*" hidden>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   1. PERSONALIZABLE — edita este bloque y nada más
+   ═══════════════════════════════════════════════════════════════ */
+
+const CANCION = {
+  titulo:  "Mil cosas",
+  artista: "para Sofi",
+  album:   "Jardín · colección",
+  ojo:     "una canción para ti",
+
+  /* Archivo de audio junto a este .html. Si no existe, la página
+     sigue funcionando: la letra corre con un reloj interno.      */
+  audio:   "cancion.mp3",
+
+  /* Duración en segundos. Solo se usa cuando no hay audio;
+     con audio real se toma la del archivo.                       */
+  duracion: 196
+};
+
+/* La letra: [segundo en que entra, texto].
+   Una línea vacía "" es un tramo instrumental (salen tres puntos).
+   ¿Vas a poner otra canción? Pulsa S, "Sincronizar letra",
+   y los segundos los marcas tú escuchándola.                     */
+const LETRA = [
+  [  0, ""],
+  [ 10, "Son las siete y todavía estás contando"],
+  [ 15, "cómo te fue en el turno de hoy,"],
+  [ 20, "y yo tenía algo importante que decirte"],
+  [ 25, "pero se me olvidó."],
+  [ 30, ""],
+  [ 32, "Me hablas de una señora del tercero,"],
+  [ 37, "del profesor que no entendió,"],
+  [ 42, "de una canción que se te quedó pegada"],
+  [ 47, "desde el lunes y no sabes por qué."],
+  [ 52, ""],
+  [ 54, "Y yo aquí, haciendo como que trabajo,"],
+  [ 59, "oyéndote nombrar el mundo entero."],
+  [ 65, ""],
+  [ 68, "Habla de mil cosas,"],
+  [ 72, "que yo tengo toda la noche."],
+  [ 76, "Habla de mil cosas,"],
+  [ 80, "que el día de afuera no me importa."],
+  [ 85, "Si te enojas tantito, igual te veo hermosa;"],
+  [ 91, "si te ríes, ya no hay nada que me salga mal."],
+  [ 97, "Habla de mil cosas."],
+  [102, ""],
+  [106, "Te gustan las flores que no duran nada"],
+  [111, "y yo aprendí a sembrarlas en pantalla,"],
+  [116, "una por una, pétalo por pétalo,"],
+  [121, "pa' que te duren hasta mañana."],
+  [126, ""],
+  [128, "Dicen que uno se enamora de a poquitos,"],
+  [133, "de un ojo café, de un pelo suelto,"],
+  [138, "pero a mí me pasó de un solo golpe"],
+  [143, "un miércoles cualquiera, sin aviso."],
+  [148, ""],
+  [151, "Y le pido a Dios, que tú lo cargas siempre,"],
+  [156, "que te alcance el tiempo pa' graduarte,"],
+  [161, "que te alcance el tiempo pa' quererme,"],
+  [166, "que te alcance el tiempo pa' contarme"],
+  [171, "todas esas mil cosas otra vez."],
+  [176, ""],
+  [179, "Habla de mil cosas."],
+  [184, "Yo me quedo."],
+  [189, ""]
+];
+
+const CONFIG = {
+  volumen:  0.85,   // 0 a 1
+  repetir:  false,  // vuelve a empezar al terminar
+  palabras: true,   // encender la línea activa palabra por palabra
+  saltar:   10      // segundos de los botones de avance/retroceso
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   2. MOTOR — de aquí para abajo no hace falta tocar nada
+   ═══════════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+const audio = $("audio");
+const pista = $("pista"), caja = $("caja");
+const movil = matchMedia("(max-width:880px)").matches;
+
+let hayAudio   = false;   // el archivo cargó de verdad
+let sonando    = false;
+let posVirtual = 0;       // reloj interno cuando no hay audio
+let t0Virtual  = 0;
+let raf        = 0;
+let iActiva    = -1;
+let nDichas    = 0;
+let lineas     = [];      // [{el, palabras:[{el,k}]}]
+
+/* ───────── carátula: una flor dibujada, nada de imágenes ───────── */
+function dibujarCaratula(){
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 200 200");
+  svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+
+  const defs = document.createElementNS(NS, "defs");
+  defs.innerHTML =
+    '<radialGradient id="gPetalo" cx="50%" cy="78%" r="78%">' +
+      '<stop offset="0%"  stop-color="#f8d4dd"/>' +
+      '<stop offset="52%" stop-color="#e58ba4"/>' +
+      '<stop offset="100%" stop-color="#a62650"/>' +
+    '</radialGradient>' +
+    '<radialGradient id="gCorazon" cx="42%" cy="36%" r="72%">' +
+      '<stop offset="0%"  stop-color="#7a1734"/>' +
+      '<stop offset="100%" stop-color="#2d0712"/>' +
+    '</radialGradient>' +
+    '<radialGradient id="gLuz" cx="28%" cy="22%" r="74%">' +
+      '<stop offset="0%"  stop-color="rgba(255,255,255,.17)"/>' +
+      '<stop offset="100%" stop-color="rgba(255,255,255,0)"/>' +
+    '</radialGradient>';
+  svg.appendChild(defs);
+
+  const luz = document.createElementNS(NS, "rect");
+  luz.setAttribute("width", "200"); luz.setAttribute("height", "200");
+  luz.setAttribute("fill", "url(#gLuz)");
+  svg.appendChild(luz);
+
+  /* un pétalo: base angosta en r0, punta redondeada en r1 */
+  const petalo = (r0, r1, w) => {
+    const L = r1 - r0, y = k => (100 - (r0 + L * k)).toFixed(2);
+    return "M100 " + (100 - r0).toFixed(2) +
+      " C" + (100 - w * .46).toFixed(2) + " " + y(.14) +
+       " " + (100 - w).toFixed(2)       + " " + y(.52) +
+       " " + (100 - w * .78).toFixed(2) + " " + y(.86) +
+      " C" + (100 - w * .46).toFixed(2) + " " + y(1.04) +
+       " " + (100 + w * .46).toFixed(2) + " " + y(1.04) +
+       " " + (100 + w * .78).toFixed(2) + " " + y(.86) +
+      " C" + (100 + w).toFixed(2)       + " " + y(.52) +
+       " " + (100 + w * .46).toFixed(2) + " " + y(.14) +
+       " 100 " + (100 - r0).toFixed(2) + "Z";
+  };
+
+  const anillos = [
+    { n:24, r0:26, r1:96, w:8.2, op:.96, giro:0  },
+    { n:22, r0:22, r1:74, w:7.0, op:.82, giro:8  },
+    { n:18, r0:17, r1:52, w:5.8, op:.66, giro:14 }
+  ];
+
+  anillos.forEach(a => {
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("opacity", a.op);
+    for (let i = 0; i < a.n; i++){
+      const ang = (360 / a.n) * i + a.giro;
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", petalo(a.r0, a.r1 * (0.93 + Math.random() * 0.14), a.w));
+      p.setAttribute("fill", "url(#gPetalo)");
+      p.setAttribute("transform", "rotate(" + ang.toFixed(2) + " 100 100)");
+      g.appendChild(p);
+    }
+    svg.appendChild(g);
+  });
+
+  const centro = document.createElementNS(NS, "circle");
+  centro.setAttribute("cx", "100"); centro.setAttribute("cy", "100");
+  centro.setAttribute("r", "19"); centro.setAttribute("fill", "url(#gCorazon)");
+  svg.appendChild(centro);
+
+  for (let i = 0; i < 34; i++){
+    const ang = Math.random() * Math.PI * 2;
+    const rad = 4 + Math.sqrt(Math.random()) * 14;
+    const d = document.createElementNS(NS, "circle");
+    d.setAttribute("cx", (100 + Math.cos(ang) * rad).toFixed(2));
+    d.setAttribute("cy", (100 + Math.sin(ang) * rad).toFixed(2));
+    d.setAttribute("r", (0.7 + Math.random() * 1.1).toFixed(2));
+    d.setAttribute("fill", "rgba(246,195,207,.55)");
+    svg.appendChild(d);
+  }
+
+  $("caratula").appendChild(svg);
+}
+
+/* ───────── letra ───────── */
+function pintarLetra(){
+  pista.innerHTML = "";
+  lineas = [];
+
+  LETRA.forEach((fila, i) => {
+    const texto = fila[1];
+    const el = document.createElement("p");
+    el.className = "linea" + (texto ? "" : " linea--hueco");
+    const palabras = [];
+
+    if (texto){
+      const trozos = texto.split(" ");
+      const total = trozos.reduce((s, p) => s + p.length, 0) || 1;
+      let acc = 0;
+      trozos.forEach((t, j) => {
+        const s = document.createElement("span");
+        s.className = "p";
+        s.textContent = t;
+        acc += t.length;
+        palabras.push({ el: s, k: acc / total });
+        el.appendChild(s);
+        if (j < trozos.length - 1) el.appendChild(document.createTextNode(" "));
+      });
+    } else {
+      el.innerHTML = "<i></i><i></i><i></i>";
+    }
+
+    el.addEventListener("click", () => {
+      if (sync.activo) return;
+      irA(fila[0] + 0.05);
+    });
+
+    pista.appendChild(el);
+    lineas.push({ el, palabras });
+  });
+}
+
+function indiceEn(p){
+  let i = -1;
+  for (let k = 0; k < LETRA.length; k++){
+    if (LETRA[k][0] <= p) i = k; else break;
+  }
+  return i;
+}
+
+function centrar(i){
+  const el = lineas[i] ? lineas[i].el : null;
+  if (!el) return;
+  const y = -(el.offsetTop + el.offsetHeight / 2 - caja.clientHeight * 0.42);
+  pista.style.setProperty("--y", Math.round(y) + "px");
+}
+
+function cambiarLinea(i){
+  if (iActiva >= 0 && lineas[iActiva]){
+    lineas[iActiva].el.classList.remove("activa");
+    lineas[iActiva].palabras.forEach(w => w.el.classList.remove("dicha"));
+  }
+  /* todo lo anterior a la línea actual queda apagado (vale también al saltar atrás) */
+  lineas.forEach((l, k) => l.el.classList.toggle("pasada", k < i));
+
+  iActiva = i;
+  nDichas = 0;
+  if (i >= 0 && lineas[i]){
+    lineas[i].el.classList.add("activa");
+    if (!sync.activo) centrar(i);   // marcando tiempos manda la línea pendiente
+  }
+}
+
+/* ───────── tiempo ───────── */
+function pos(){
+  if (hayAudio) return audio.currentTime || 0;
+  if (sonando)  return Math.min(duracion(), (performance.now() - t0Virtual) / 1000);
+  return posVirtual;
+}
+function duracion(){
+  if (hayAudio && isFinite(audio.duration) && audio.duration > 0) return audio.duration;
+  return CANCION.duracion;
+}
+function reloj(s){
+  s = Math.max(0, Math.floor(s || 0));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+
+function irA(t){
+  const d = duracion();
+  t = Math.min(d - 0.05, Math.max(0, t));
+  if (hayAudio) audio.currentTime = t;
+  else { posVirtual = t; t0Virtual = performance.now() - t * 1000; }
+  marco();
+}
+
+/* un fotograma: barra, línea y palabras */
+function marco(){
+  const p = pos(), d = duracion();
+  const pc = d ? Math.min(1, p / d) : 0;
+  $("llenoTiempo").style.width = (pc * 100) + "%";
+  $("perillaTiempo").style.left = (pc * 100) + "%";
+  $("relojIni").textContent = reloj(p);
+  $("relojFin").textContent = reloj(d);
+
+  const i = indiceEn(p);
+  if (i !== iActiva) cambiarLinea(i);
+
+  if (CONFIG.palabras && iActiva >= 0 && lineas[iActiva] && lineas[iActiva].palabras.length){
+    const t0 = LETRA[iActiva][0];
+    const t1 = (iActiva + 1 < LETRA.length) ? LETRA[iActiva + 1][0] : d;
+    const tramo = Math.max(0.5, (t1 - t0) * 0.86);
+    const k = Math.min(1, Math.max(0, (p - t0) / tramo));
+    const ws = lineas[iActiva].palabras;
+    let n = 0;
+    while (n < ws.length && ws[n].k <= k) n++;
+    if (n > nDichas) for (let j = nDichas; j < n; j++) ws[j].el.classList.add("dicha");
+    else if (n < nDichas) for (let j = n; j < nDichas; j++) ws[j].el.classList.remove("dicha");
+    nDichas = n;
+  }
+
+  if (!hayAudio && sonando && p >= d - 0.05) terminar();
+}
+
+function latir(){
+  marco();
+  if (sonando) raf = requestAnimationFrame(latir);
+}
+
+/* ───────── mandos ───────── */
+function tocar(){
+  if (sonando) return;
+  sonando = true;
+  document.body.classList.add("sonando");
+  $("icoPlay").innerHTML = '<path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/>';
+  $("btnPlay").setAttribute("aria-label", "Pausar");
+  if (hayAudio) audio.play().catch(() => {});
+  else t0Virtual = performance.now() - posVirtual * 1000;
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(latir);
+}
+function pausar(){
+  if (!sonando) return;
+  posVirtual = pos();
+  sonando = false;
+  document.body.classList.remove("sonando");
+  $("icoPlay").innerHTML = '<path d="M7 4.5v15l13-7.5z"/>';
+  $("btnPlay").setAttribute("aria-label", "Reproducir");
+  if (hayAudio) audio.pause();
+  cancelAnimationFrame(raf);
+  marco();
+}
+function alternar(){ sonando ? pausar() : tocar(); }
+function terminar(){
+  if (CONFIG.repetir){ irA(0); return; }
+  pausar();
+  irA(0);
+}
+
+/* ───────── rieles (arrastre) ───────── */
+function riel(elRiel, alMover){
+  let agarrado = false;
+  const leer = e => {
+    const r = elRiel.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  };
+  elRiel.addEventListener("pointerdown", e => {
+    agarrado = true;
+    elRiel.classList.add("activa");
+    elRiel.setPointerCapture(e.pointerId);
+    alMover(leer(e));
+  });
+  elRiel.addEventListener("pointermove", e => { if (agarrado) alMover(leer(e)); });
+  const soltar = e => {
+    if (!agarrado) return;
+    agarrado = false;
+    elRiel.classList.remove("activa");
+    try { elRiel.releasePointerCapture(e.pointerId); } catch (_){}
+  };
+  elRiel.addEventListener("pointerup", soltar);
+  elRiel.addEventListener("pointercancel", soltar);
+}
+
+function ponerVolumen(v){
+  v = Math.min(1, Math.max(0, v));
+  audio.volume = v;
+  audio.muted = v === 0;
+  $("llenoVol").style.width = (v * 100) + "%";
+  $("perillaVol").style.left = (v * 100) + "%";
+  $("icoVol").innerHTML = v === 0
+    ? '<path d="M4 9v6h4l5 4V5L8 9H4zm15.1 3 2.4-2.4-1.1-1.1-2.4 2.4-2.4-2.4-1.1 1.1 2.4 2.4-2.4 2.4 1.1 1.1 2.4-2.4 2.4 2.4 1.1-1.1z"/>'
+    : v < .5
+      ? '<path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/>'
+      : '<path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM16 2.3v2.1a7.6 7.6 0 0 1 0 15.2v2.1a9.7 9.7 0 0 0 0-19.4z"/>';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. TALLER — cargar audio y sincronizar (tecla S)
+   ═══════════════════════════════════════════════════════════════ */
+const sync = { activo:false, n:0, marcas:[] };
+
+function estado(txt){ $("tEstado").textContent = txt || ""; }
+
+function abrirTaller(v){
+  const t = $("taller");
+  const abierto = v === undefined ? !t.classList.contains("abierto") : v;
+  t.classList.toggle("abierto", abierto);
+  if (abierto) estado(hayAudio ? "Audio cargado · " + reloj(duracion()) : "Sin audio · la letra corre con reloj interno");
+}
+
+function entrarSync(){
+  sync.activo = true;
+  sync.n = 0;
+  sync.marcas = [];
+  $("tBarraSync").style.display = "flex";
+  $("tSync").textContent = "Reiniciar marcas";
+  irA(0);
+  marcarPendiente();
+  estado("Marcando… pulsa Enter cuando entre cada línea");
+  tocar();
+}
+function salirSync(){
+  sync.activo = false;
+  $("tBarraSync").style.display = "none";
+  $("tSync").textContent = "Sincronizar letra";
+  lineas.forEach(l => l.el.classList.remove("pendiente"));
+  estado("Listo · " + sync.marcas.length + " de " + LETRA.length + " líneas marcadas");
+}
+function marcarPendiente(){
+  lineas.forEach(l => l.el.classList.remove("pendiente"));
+  const l = lineas[sync.n];
+  if (l){
+    l.el.classList.add("pendiente");
+    const y = -(l.el.offsetTop + l.el.offsetHeight / 2 - caja.clientHeight * 0.42);
+    pista.style.setProperty("--y", Math.round(y) + "px");
+  }
+}
+function marcarAhora(){
+  if (!sync.activo || sync.n >= LETRA.length) return;
+  sync.marcas[sync.n] = +pos().toFixed(2);
+  sync.n++;
+  volcarSalida();
+  if (sync.n >= LETRA.length){ pausar(); salirSync(); }
+  else marcarPendiente();
+}
+function deshacerMarca(){
+  if (sync.n > 0){ sync.n--; sync.marcas.length = sync.n; volcarSalida(); marcarPendiente(); }
+}
+function volcarSalida(){
+  const filas = LETRA.map((f, i) => {
+    const t = sync.marcas[i] !== undefined ? sync.marcas[i] : f[0];
+    return "  [" + String(t).padStart(6, " ") + ", " + JSON.stringify(f[1]) + "]";
+  });
+  $("tSalida").value = "const LETRA = [\n" + filas.join(",\n") + "\n];";
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. ARRANQUE
+   ═══════════════════════════════════════════════════════════════ */
+(function inicio(){
+  $("rAlbum").textContent  = CANCION.album;
+  $("rTitulo").textContent = CANCION.titulo;
+  $("rArtista").textContent = CANCION.artista;
+  $("iOjo").textContent     = CANCION.ojo;
+  $("iTitulo").textContent  = CANCION.titulo;
+  $("iArtista").textContent = CANCION.artista;
+  document.title = CANCION.titulo;
+
+  dibujarCaratula();
+  pintarLetra();
+  volcarSalida();
+
+  /* audio: si el archivo no está, seguimos con reloj interno */
+  if (CANCION.audio){
+    audio.src = CANCION.audio;
+    audio.addEventListener("canplay", () => {
+      hayAudio = true;
+      $("nota").textContent = "";
+      marco();
+    }, { once:true });
+    audio.addEventListener("error", () => {
+      hayAudio = false;
+      $("nota").textContent = "solo letra";
+    });
+  } else {
+    $("nota").textContent = "solo letra";
+  }
+  audio.addEventListener("loadedmetadata", marco);
+  audio.addEventListener("ended", terminar);
+  audio.addEventListener("timeupdate", marco);   // respaldo si el rAF se frena
+
+  /* al volver a la pestaña, el rAF se reanuda y la letra se pone al día sola */
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && sonando){ cancelAnimationFrame(raf); raf = requestAnimationFrame(latir); }
+  });
+
+  ponerVolumen(CONFIG.volumen);
+  marco();
+
+  /* mandos */
+  $("btnPlay").addEventListener("click", alternar);
+  $("btnAtras").addEventListener("click", () => irA(pos() - CONFIG.saltar));
+  $("btnAdelante").addEventListener("click", () => irA(pos() + CONFIG.saltar));
+  $("btnMudo").addEventListener("click", () => ponerVolumen(audio.volume > 0 ? 0 : (CONFIG.volumen || .8)));
+
+  riel($("rielTiempo"), k => irA(k * duracion()));
+  riel($("rielVol"),    k => ponerVolumen(k));
+
+  /* intro */
+  $("btnEmpezar").addEventListener("click", () => {
+    $("intro").classList.add("ida");
+    centrar(Math.max(0, iActiva));
+    tocar();
+  });
+
+  /* teclado */
+  addEventListener("keydown", e => {
+    if (e.target.tagName === "TEXTAREA") return;
+    const k = e.key.toLowerCase();
+    if (sync.activo && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); marcarAhora(); return; }
+    if (e.key === " " || k === "k"){ e.preventDefault(); alternar(); }
+    else if (e.key === "ArrowRight"){ e.preventDefault(); irA(pos() + 5); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); irA(pos() - 5); }
+    else if (e.key === "ArrowUp")   { e.preventDefault(); ponerVolumen(audio.volume + .08); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); ponerVolumen(audio.volume - .08); }
+    else if (k === "s"){ abrirTaller(); }
+    else if (e.key === "Escape"){ abrirTaller(false); }
+  });
+
+  /* taller */
+  $("tArchivo").addEventListener("click", () => $("archivoAudio").click());
+  $("archivoAudio").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) usarArchivo(f);
+  });
+  $("tSync").addEventListener("click", entrarSync);
+  $("tSalir").addEventListener("click", () => { pausar(); salirSync(); });
+  $("tMarcar").addEventListener("click", marcarAhora);
+  $("tDeshacer").addEventListener("click", deshacerMarca);
+  $("tCopiar").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("tSalida").value); estado("Arreglo copiado"); }
+    catch (_){ $("tSalida").removeAttribute("readonly"); $("tSalida").select(); estado("Selecciónalo y copia con Ctrl+C"); }
+  });
+
+  /* arrastrar un audio sobre la página */
+  addEventListener("dragover", e => { e.preventDefault(); });
+  addEventListener("drop", e => {
+    e.preventDefault();
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && /^audio\//.test(f.type)) usarArchivo(f);
+  });
+
+  function usarArchivo(f){
+    pausar();
+    audio.src = URL.createObjectURL(f);
+    audio.load();
+    audio.addEventListener("canplay", () => {
+      hayAudio = true;
+      $("nota").textContent = "";
+      marco();
+      estado("Audio cargado · " + f.name);
+    }, { once:true });
+  }
+
+  /* al cambiar el tamaño hay que recentrar la línea */
+  let ajuste;
+  addEventListener("resize", () => {
+    clearTimeout(ajuste);
+    ajuste = setTimeout(() => centrar(Math.max(0, iActiva)), 120);
+  });
+})();
+</script>
+</body>
+</html>
