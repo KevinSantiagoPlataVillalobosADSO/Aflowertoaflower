@@ -82,6 +82,37 @@
       0 0 0 1px rgba(255,255,255,.07) inset;
   }
 
+  /* ───── el cielo ─────
+     Las estrellas se siembran más arriba que abajo y se desvanecen
+     hacia el centro, para que no compitan con la letra.          */
+  .cielo{
+    position:absolute;inset:0;z-index:0;
+    overflow:hidden;
+    border-radius:inherit;
+    pointer-events:none;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 34%,transparent 78%);
+            mask-image:linear-gradient(to bottom,#000 0%,#000 34%,transparent 78%);
+  }
+  .cielo i{
+    position:absolute;
+    width:var(--d);height:var(--d);
+    border-radius:50%;
+    background:#fff6f8;
+    opacity:var(--o);
+    box-shadow:0 0 var(--d) rgba(255,228,236,.7);
+  }
+  .cielo i.titila{animation:titilar var(--t) ease-in-out var(--r) infinite}
+  @keyframes titilar{
+    0%,100%{opacity:var(--o)}
+    50%    {opacity:calc(var(--o) * .22)}
+  }
+  /* unos pocos destellos de cuatro puntas, para que no sean solo puntos */
+  .cielo svg{position:absolute;fill:#fff1f4;opacity:var(--o)}
+  .cielo svg.titila{animation:titilar var(--t) ease-in-out var(--r) infinite}
+
+  /* el contenido va por encima del cielo */
+  .instax,.lienzo,.pie{z-index:1}
+
   /* ───── la foto: una copia instantánea ─────
      Medidas reales de la película Instax Mini: el papel mide 54 x 86 mm
      y la ventana 46 x 62 mm, con 4 mm de borde a los lados, 5 arriba y
@@ -170,17 +201,24 @@
     min-width:0;min-height:0;
   }
 
-  /* la cabecera hace de portadilla: dice qué es esto sin estorbar */
-  .cabecera{flex:0 0 auto;padding-bottom:clamp(14px,2vw,26px)}
+  /* la cabecera dice qué es esto en un solo renglón, para no robarle
+     altura a la estrofa */
+  .cabecera{
+    flex:0 0 auto;
+    display:flex;align-items:baseline;flex-wrap:wrap;
+    gap:0 .62em;
+    padding-bottom:clamp(12px,1.6vw,20px);
+  }
   .cabecera__ojo{
-    font:400 10px/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;
-    color:var(--tenue);margin-bottom:10px;
+    font:400 10px/1 var(--sans);letter-spacing:.28em;text-transform:uppercase;
+    color:var(--tenue);
   }
-  .cabecera__titulo{font:400 clamp(21px,2.2vw,28px)/1.1 var(--serif);letter-spacing:.01em}
+  .cabecera__titulo{font:400 clamp(19px,1.9vw,24px)/1.2 var(--serif);letter-spacing:.01em}
   .cabecera__artista{
-    font:400 10px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;
-    color:var(--medio);margin-top:8px;
+    font:400 10px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;
+    color:var(--medio);
   }
+  .cabecera__punto{color:var(--tenue);font-size:12px;line-height:1}
 
   /* overflow:hidden es el cinturón: si una estrofa no cupiera, se
      recorta antes que mover nada de su sitio.                     */
@@ -346,9 +384,7 @@
       height:min(44dvh,400px);
       transform:rotate(-1.6deg);
     }
-    .cabecera{padding-bottom:14px}
-    .cabecera__ojo{margin-bottom:7px}
-    .cabecera__artista{margin-top:5px}
+    .cabecera{padding-bottom:12px;gap:0 .5em}
     .reloj{display:none}
   }
 
@@ -359,7 +395,7 @@
   }
 
   @media (prefers-reduced-motion:reduce){
-    .halo span,.puntos i{animation:none}
+    .halo span,.puntos i,.cielo i,.cielo svg{animation:none}
     .l,.estrofa{transition:none}
   }
 </style>
@@ -369,6 +405,8 @@
 <div class="halo" aria-hidden="true"><span></span><span></span></div>
 
 <main class="tarjeta">
+  <div class="cielo" id="cielo" aria-hidden="true"></div>
+
   <figure class="instax" aria-hidden="true">
     <div class="instax__ventana" id="marco"></div>
     <figcaption class="instax__franja"><span id="rFirma"></span></figcaption>
@@ -376,9 +414,11 @@
 
   <div class="lienzo">
     <header class="cabecera">
-      <p class="cabecera__ojo"     id="rOjo"></p>
-      <h1 class="cabecera__titulo" id="rTitulo"></h1>
-      <p class="cabecera__artista" id="rArtista"></p>
+      <span class="cabecera__ojo"     id="rOjo"></span>
+      <span class="cabecera__punto">·</span>
+      <h1 class="cabecera__titulo"    id="rTitulo"></h1>
+      <span class="cabecera__punto">·</span>
+      <span class="cabecera__artista" id="rArtista"></span>
     </header>
 
     <div class="centro" id="centro">
@@ -490,6 +530,14 @@ const CONFIG = {
   pesoMin:   0.55,
   pesoMax:   1.65,
 
+  /* Estrellas del fondo. `estrellas` es la cantidad para una tarjeta
+     de referencia de 1060x720; en tarjetas más chicas se siembran
+     menos, en proporción a la raíz del área, que es como se percibe
+     la densidad. Se agrupan arriba y se desvanecen hacia el centro. */
+  estrellas: 72,
+  destellos: 5,
+  titilan:   0.5,
+
   /* Tope duro del trozo más grande, en píxeles: una fracción del ancho
      disponible, acotada. Es lo que impide que la letra se desmadre en
      pantallas anchas y lo que la mantiene por debajo de la foto.     */
@@ -593,6 +641,60 @@ function dibujarFlor(destino){
 
   destino.innerHTML = "";
   destino.appendChild(svg);
+}
+
+/* ───────── el cielo ───────── */
+/* La cantidad sale del tamaño que tiene la tarjeta al sembrar, una sola
+   vez. Nada de escuchar cambios de ancho: ni el aviso de matchMedia ni
+   el resize son de fiar en todos los navegadores, y resembrar de más
+   haría saltar el cielo cada vez que el móvil esconde su barra. Si se
+   gira el teléfono la densidad queda algo corrida, y no se nota.    */
+function sembrarEstrellas(){
+  const cielo = $("cielo");
+  if (!cielo) return;
+  cielo.innerHTML = "";
+
+  const area = Math.max(1, cielo.clientWidth * cielo.clientHeight);
+  const n = Math.round(CONFIG.estrellas * Math.min(1.1, Math.sqrt(area / (1060 * 720))));
+  const trozos = [];
+
+  const coloca = (el, d) => {
+    /* El exponente concentra las estrellas arriba: elevar un número
+       entre 0 y 1 a 1.9 lo empuja hacia el 0.                      */
+    el.style.left = (Math.random() * 100).toFixed(2) + "%";
+    el.style.top  = (Math.pow(Math.random(), 1.9) * 76).toFixed(2) + "%";
+    el.style.setProperty("--d", d);
+    el.style.setProperty("--o", (0.22 + Math.random() * 0.68).toFixed(2));
+    if (Math.random() < CONFIG.titilan){
+      el.classList.add("titila");
+      el.style.setProperty("--t", (3.2 + Math.random() * 4.6).toFixed(2) + "s");
+      el.style.setProperty("--r", (Math.random() * 6).toFixed(2) + "s");
+    }
+  };
+
+  for (let i = 0; i < n; i++){
+    const e = document.createElement("i");
+    coloca(e, (0.9 + Math.random() * 1.7).toFixed(2) + "px");
+    trozos.push(e);
+  }
+
+  /* Cuatro puntas, dibujadas: cuatro curvas que se encuentran en el
+     centro. Nada de archivos. */
+  const punta = "M50 0C54 36 64 46 100 50C64 54 54 64 50 100C46 64 36 54 0 50C36 46 46 36 50 0Z";
+  for (let i = 0; i < CONFIG.destellos; i++){
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 100 100");
+    const lado = (7 + Math.random() * 7).toFixed(1) + "px";
+    svg.setAttribute("width", lado);
+    svg.setAttribute("height", lado);
+    svg.innerHTML = '<path d="' + punta + '"/>';
+    coloca(svg, lado);
+    svg.style.width = lado;
+    svg.style.height = lado;
+    trozos.push(svg);
+  }
+
+  trozos.forEach(t => cielo.appendChild(t));
 }
 
 /* ───────── leer un .lrc ─────────
@@ -998,6 +1100,7 @@ function reagrupar(delta){
   $("iArtista").textContent = CANCION.artista;
   document.title = CANCION.titulo;
 
+  sembrarEstrellas();
   if (CANCION.foto) ponerFoto(CANCION.foto); else dibujarFlor($("marco"));
 
   armarEstrofas();
